@@ -36,6 +36,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -157,10 +159,10 @@ fun CustomTextField(
                     Icon(
                         imageVector = leadingIcon,
                         contentDescription = placeholder,
-                        tint = Color.White,
+                        tint = Color(0xFFCC4A1A),
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .background(Color(0xFFCC4A1A).copy(alpha = 0.1f))
                             .padding(6.dp)
                     )
                 }
@@ -168,10 +170,10 @@ fun CustomTextField(
                     Icon(
                         painter = leadingIconPainter,
                         contentDescription = placeholder,
-                        tint = Color.White,
+                        tint = Color(0xFFCC4A1A),
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
+                            .background(Color(0xFFCC4A1A).copy(alpha = 0.1f))
                             .padding(6.dp)
                     )
                 }
@@ -186,7 +188,7 @@ fun CustomTextField(
                     Icon(
                         painter = painterResource(id = visibilityIcon),
                         contentDescription = description,
-                        tint = Color.White
+                        tint = Color(0xFFCC4A1A)
                     )
                 }
             }
@@ -197,36 +199,30 @@ fun CustomTextField(
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.White.copy(alpha = 0.6f),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-            cursorColor = Color.White,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedContainerColor = Color.White.copy(alpha = 0.1f),
-            unfocusedContainerColor = Color.White.copy(alpha = 0.05f)
+            focusedBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.6f),
+            unfocusedBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.3f),
+            cursorColor = Color(0xFFCC4A1A),
+            focusedTextColor = Color(0xFFCC4A1A),
+            unfocusedTextColor = Color(0xFFCC4A1A),
+            focusedContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.1f),
+            unfocusedContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.05f)
         ),
         visualTransformation = if (isPassword && !passwordVisible)
             PasswordVisualTransformation() else VisualTransformation.None,
         textStyle = LocalTextStyle.current.copy(
-            color = Color.White,
+            color = Color(0xFFCC4A1A),
             fontSize = fontSize
         )
     )
 }
 
-
-
-
 @Composable
-fun CustomSocialButton(
+fun CustomSocialIconButton(
     icon: Int,
-    label: String,
     onClick: () -> Unit,
-    height: Dp = LocalResponsiveSizes.current.buttonHeight,
-    width: Dp = LocalResponsiveSizes.current.buttonWidth,
-    fontSize: TextUnit = LocalResponsiveSizes.current.buttonFontSize,
-    backgroundColor: Color = Color.White.copy(alpha = 0.08f),
-    pressedBackgroundColor: Color = Color(0xFF2E7D32)  // Dark green on press
+    size: Dp = 48.dp, // square size
+    backgroundColor: Color = Color(0xFFCC4A1A).copy(alpha = 0.08f),
+    pressedBackgroundColor: Color = Color(0xFFB23C0F)
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     var isPressed by remember { mutableStateOf(false) }
@@ -240,43 +236,36 @@ fun CustomSocialButton(
 
     val animatedBackgroundColor by animateColorAsState(
         targetValue = if (isPressed) pressedBackgroundColor else backgroundColor,
-        label = "ButtonBackgroundAnimation"
+        label = "IconButtonBg"
     )
 
     val animatedBorderColor by animateColorAsState(
-        targetValue = if (isPressed) pressedBackgroundColor else Color.White.copy(alpha = 0.4f),
-        label = "ButtonBorderAnimation"
+        targetValue = if (isPressed) pressedBackgroundColor else Color(0xFFCC4A1A).copy(alpha = 0.4f),
+        label = "IconButtonBorder"
     )
 
     OutlinedButton(
         onClick = onClick,
         interactionSource = interactionSource,
-        shape = RoundedCornerShape(50),
+        shape = RoundedCornerShape(8.dp), // less round for square look
         border = BorderStroke(1.5.dp, animatedBorderColor),
         modifier = Modifier
-            .width(width)
-            .height(height),
+            .size(size), // square shape
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = animatedBackgroundColor,
-            contentColor = Color.White
-        )
+            contentColor = Color(0xFFCC4A1A)
+        ),
+        contentPadding = PaddingValues(0.dp) // center icon tightly
     ) {
         Icon(
             painter = painterResource(id = icon),
-            contentDescription = label,
+            contentDescription = null,
             tint = Color.Unspecified,
-            modifier = Modifier
-                .size(20.dp)
-                .padding(end = 4.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = label,
-            fontSize = fontSize,
-            color = Color.White
+            modifier = Modifier.size(24.dp)
         )
     }
 }
+
 
 @Composable
 fun CustomDynamicButton(
@@ -786,5 +775,30 @@ fun CustomDynamicInfoCard(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Composable
+fun CustomCheckBox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: String = "Remember me"
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = CheckboxDefaults.colors(
+                checkedColor = Color(0xFFB23C0F),
+                uncheckedColor = Color.Gray,
+                checkmarkColor = Color(0xFFCC4A1A)
+            )
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = label,
+            color = Color(0xFFCC4A1A))
     }
 }

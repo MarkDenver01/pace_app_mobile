@@ -1,17 +1,24 @@
-package io.dev.pace_app_mobile.presentation.ui.compose.start
+package io.dev.pace_app_mobile.presentation.ui.compose.title
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,29 +29,27 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
-import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
-import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartScreen(
+fun TitleScreen(
     navController: NavController,
-    viewModel: StartViewModel = hiltViewModel()
+    viewModel: TitleViewModel = hiltViewModel()
 ) {
-    // Navigation observer
-    LaunchedEffect(Unit) {
-        viewModel.navigateTo.collect {
-            navController.navigate(Routes.TITLE_ROUTE) {
-                popUpTo(Routes.START_ROUTE) { inclusive = true }
-            }
+    val navigateTo by viewModel.navigateTo.collectAsState()
+    val spacing = LocalAppSpacing.current
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    LaunchedEffect(navigateTo) {
+        navigateTo?.let { route ->
+            navController.navigate(route)
+            viewModel.resetNavigation()
         }
     }
-
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
         modifier = Modifier
@@ -81,11 +86,22 @@ fun StartScreen(
                 )
             }
 
-            // --- Get Started Button ---
+            // --- login ---
             CustomDynamicButton(
-                onClick = { viewModel.onStartClick() },
-                content = stringResource(id = R.string.button_get_started)
+                onClick = { viewModel.onLoginClick() },
+                content = stringResource(id = R.string.button_login)
             )
+
+            Spacer(modifier = Modifier.height(spacing.sm))
+
+            // --- register ---
+            CustomDynamicButton(
+                onClick = { viewModel.onSignUpClick() },
+                content = stringResource(id = R.string.button_sign_up),
+                backgroundColor = Color(0xFF0170C1),
+                pressedBackgroundColor = Color(0xFF4D9DDA)
+            )
+
         }
     }
 }

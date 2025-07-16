@@ -10,11 +10,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StartViewModel @Inject constructor() : ViewModel() {
-    private val _navigateToTitle = MutableSharedFlow<Unit>()
+    private val _navigateTo = MutableSharedFlow<Unit>()
 
-    val navigateToTitle = _navigateToTitle.asSharedFlow()
+    val navigateTo = _navigateTo.asSharedFlow()
 
     fun onStartClick() {
-        viewModelScope.launch { _navigateToTitle.emit(Unit) }
+        viewModelScope.launch { _navigateTo.emit(Unit) }
     }
 }

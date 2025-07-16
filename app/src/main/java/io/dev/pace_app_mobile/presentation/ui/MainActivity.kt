@@ -16,7 +16,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.dev.pace_app_mobile.navigation.Routes
+import io.dev.pace_app_mobile.navigation.loginGraph
 import io.dev.pace_app_mobile.navigation.startGraph
+import io.dev.pace_app_mobile.navigation.titleGraph
 import io.dev.pace_app_mobile.presentation.theme.Pace_app_mobileTheme
 
 @AndroidEntryPoint
@@ -33,6 +35,8 @@ class MainActivity : ComponentActivity() {
                     startDestination = Routes.START_ROUTE
                 ) {
                     startGraph(navController)
+                    titleGraph(navController)
+                    loginGraph(navController)
                 }
             }
         }

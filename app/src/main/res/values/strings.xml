@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">pace_app_mobile</string>
+    <string name="app_name">Pace App</string>
+    <string name="button_get_started">Get Started</string>
+    <string name="button_login">Login</string>
+    <string name="button_sign_up">Sign up</string>
+    <string name="login_title">LOG IN</string>
 </resources>
