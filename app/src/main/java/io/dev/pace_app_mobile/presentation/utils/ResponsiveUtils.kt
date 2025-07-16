@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -782,10 +783,11 @@ fun CustomDynamicInfoCard(
 fun CustomCheckBox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    label: String = "Remember me"
+    label: String? = null,
+    annotatedLabel: AnnotatedString? = null
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
             checked = checked,
@@ -797,8 +799,21 @@ fun CustomCheckBox(
             )
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = label,
-            color = Color(0xFFCC4A1A))
+        when {
+            annotatedLabel != null -> {
+                Text(
+                    text = annotatedLabel,
+                    color = Color(0xFFCC4A1A)
+                )
+            }
+
+            label != null -> {
+                Text(
+                    text = label,
+                    color = Color(0xFFCC4A1A)
+                )
+            }
+        }
     }
 }
+

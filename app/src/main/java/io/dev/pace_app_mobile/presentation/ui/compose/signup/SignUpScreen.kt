@@ -1,4 +1,4 @@
-package io.dev.pace_app_mobile.presentation.ui.compose.login
+package io.dev.pace_app_mobile.presentation.ui.compose.signup
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +37,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
@@ -51,9 +51,9 @@ import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
+fun SignUpScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val navigateTo by viewModel.navigateTo.collectAsState()
     val sizes = LocalResponsiveSizes.current
@@ -62,7 +62,11 @@ fun LoginScreen(
 
     var mailAddress by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var isRememberMe by remember { mutableStateOf(false) }
+    var confirmPassword by remember { mutableStateOf("") }
+    var isAgree by remember { mutableStateOf(false) }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -100,11 +104,27 @@ fun LoginScreen(
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = stringResource(id = R.string.login_title),
+                    text = stringResource(id = R.string.signup_title),
                     fontSize = sizes.titleFontSize,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFCC4A1A),
                     modifier = Modifier.padding(bottom = spacing.md)
+                )
+
+                CustomTextField(
+                    value = firstName,
+                    onValueChange = { firstName = it },
+                    placeholder = "First Name",
+                    leadingIcon = Icons.Default.AccountCircle,
+                    fontSize = sizes.buttonFontSize,
+                )
+
+                CustomTextField(
+                    value = lastName,
+                    onValueChange = { lastName = it },
+                    placeholder = "Last Name",
+                    leadingIcon = Icons.Default.AccountCircle,
+                    fontSize = sizes.buttonFontSize,
                 )
 
                 CustomTextField(
@@ -124,82 +144,41 @@ fun LoginScreen(
                     fontSize = sizes.buttonFontSize
                 )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CustomCheckBox(
-                        checked = isRememberMe,
-                        onCheckedChange = {
-                            isRememberMe = it
-                            viewModel.setRemember(it)
-                        },
-                        label = "Remember me"
-                    )
+                CustomTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    placeholder = "Confirm Password",
+                    isPassword = true,
+                    leadingIcon = Icons.Default.Lock,
+                    fontSize = sizes.buttonFontSize
+                )
 
-                    Text(
-                        text = "Forgot password?",
-                        color = Color(0xFFCC4A1A),
-                        modifier = Modifier.clickable {
-                            // TODO: navigate to forgot password screen
-                        }
-                    )
-                }
 
                 Spacer(modifier = Modifier.height(spacing.sm))
 
-                CustomDynamicButton(
-                    onClick = { viewModel.onLoginClick() },
-                    content = stringResource(id = R.string.button_login)
-                )
-
-                Spacer(modifier = Modifier.height(spacing.md))
-
-                Text(
-                    text = buildAnnotatedString {
-                        append("Don't you have an account? ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
-                            append("Create here.")
-                        }
-
+                CustomCheckBox(
+                    checked = isAgree,
+                    onCheckedChange = {
+                        isAgree = it
+                        viewModel.setAgree(it)
                     },
-                    color = Color(0xFFCC4A1A),
-                    modifier = Modifier.clickable {
-                        viewModel.onSignupClick()
+                    annotatedLabel = buildAnnotatedString {
+                        append("I agree with ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
+                            append("privacy")
+                        }
+                        append(" and ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
+                            append("policy")
+                        }
                     }
                 )
 
-                Spacer(modifier = Modifier.height(spacing.md))
 
-                Text(
-                    text = "Or Sign in with ",
-                    fontSize = sizes.titleFontSize,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFCC4A1A),
-                    modifier = Modifier.padding(bottom = spacing.md)
+                CustomDynamicButton(
+                    onClick = { viewModel.onSignUpClick() },
+                    content = stringResource(id = R.string.button_sign_up)
                 )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CustomSocialIconButton(
-                        icon = R.drawable.ic_google,
-                        onClick = { viewModel.onAuthGoogleClick()}
-                    )
-                    CustomSocialIconButton(
-                        icon = R.drawable.ic_facebook,
-                        onClick = { viewModel.onAuthFacebookClick()}
-                    )
-                    CustomSocialIconButton(
-                        icon = R.drawable.ic_twitter,
-                        onClick = { viewModel.onAuthTwitterClick()}
-                    )
-                    CustomSocialIconButton(
-                        icon = R.drawable.ic_instagram,
-                        onClick = { viewModel.onAuthInstagramClick()}
-                    )
-                }
 
             }
         }

@@ -2,6 +2,7 @@ package io.dev.pace_app_mobile.presentation.ui.compose.login
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import androidx.lifecycle.ViewModel
+import io.dev.pace_app_mobile.navigation.Routes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +30,9 @@ class LoginViewModel @Inject constructor() : ViewModel() {
 
     fun onLoginClick() {}
 
-    fun onSignupClick() {}
+    fun onSignupClick() {
+        _navigateTo.value = Routes.SIGN_UP_ROUTE
+    }
 
     fun onAuthGoogleClick() {}
 
