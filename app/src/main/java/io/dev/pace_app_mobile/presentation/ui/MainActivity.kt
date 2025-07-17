@@ -11,11 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavHost
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.dev.pace_app_mobile.navigation.Routes
+import io.dev.pace_app_mobile.navigation.assessmentGraph
 import io.dev.pace_app_mobile.navigation.loginGraph
 import io.dev.pace_app_mobile.navigation.signUpGraph
 import io.dev.pace_app_mobile.navigation.startGraph
@@ -26,7 +28,8 @@ import io.dev.pace_app_mobile.presentation.theme.Pace_app_mobileTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             Pace_app_mobileTheme {
                 val navController = rememberNavController()
@@ -39,6 +42,7 @@ class MainActivity : ComponentActivity() {
                     titleGraph(navController)
                     loginGraph(navController)
                     signUpGraph(navController)
+                    assessmentGraph(navController)
                 }
             }
         }

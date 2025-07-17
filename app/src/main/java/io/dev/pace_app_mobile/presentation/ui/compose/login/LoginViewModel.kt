@@ -28,7 +28,9 @@ class LoginViewModel @Inject constructor() : ViewModel() {
 
     fun onForgotPasswordClick() {}
 
-    fun onLoginClick() {}
+    fun onLoginClick() {
+        _navigateTo.value = Routes.START_ASSESSMENT_ROUTE
+    }
 
     fun onSignupClick() {
         _navigateTo.value = Routes.SIGN_UP_ROUTE

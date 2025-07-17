@@ -3,6 +3,8 @@ package io.dev.pace_app_mobile.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import io.dev.pace_app_mobile.presentation.ui.compose.assessment.questions.MainQuestionScreen
+import io.dev.pace_app_mobile.presentation.ui.compose.assessment.start.StartExamScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.signup.SignUpScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.start.StartScreen
@@ -29,5 +31,15 @@ fun NavGraphBuilder.loginGraph(navController: NavController) {
 fun NavGraphBuilder.signUpGraph(navController: NavController) {
     composable(Routes.SIGN_UP_ROUTE) {
         SignUpScreen(navController)
+    }
+}
+
+fun NavGraphBuilder.assessmentGraph(navController: NavController) {
+    composable(Routes.START_ASSESSMENT_ROUTE) {
+        StartExamScreen(navController)
+    }
+
+    composable(Routes.QUESTION_ROUTE) {
+        MainQuestionScreen(navController)
     }
 }
