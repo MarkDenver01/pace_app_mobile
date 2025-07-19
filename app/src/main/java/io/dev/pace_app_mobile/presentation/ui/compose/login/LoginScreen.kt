@@ -46,7 +46,7 @@ import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
-import io.dev.pace_app_mobile.presentation.utils.CustomSocialIconButton
+import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -183,19 +183,19 @@ fun LoginScreen(
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CustomSocialIconButton(
+                    CustomIconButton(
                         icon = R.drawable.ic_google,
                         onClick = { viewModel.onAuthGoogleClick()}
                     )
-                    CustomSocialIconButton(
+                    CustomIconButton(
                         icon = R.drawable.ic_facebook,
                         onClick = { viewModel.onAuthFacebookClick()}
                     )
-                    CustomSocialIconButton(
+                    CustomIconButton(
                         icon = R.drawable.ic_twitter,
                         onClick = { viewModel.onAuthTwitterClick()}
                     )
-                    CustomSocialIconButton(
+                    CustomIconButton(
                         icon = R.drawable.ic_instagram,
                         onClick = { viewModel.onAuthInstagramClick()}
                     )

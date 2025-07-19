@@ -2,13 +2,15 @@ package io.dev.pace_app_mobile.presentation.utils
 
 import android.app.DatePickerDialog
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,10 +44,12 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -67,7 +72,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import io.dev.pace_app_mobile.R
-import io.dev.pace_app_mobile.domain.enums.ButtonVariants
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
@@ -218,52 +222,73 @@ fun CustomTextField(
 }
 
 @Composable
-fun CustomSocialIconButton(
+fun CustomIconButton(
     icon: Int,
+    text: String? = null, // null = icon-only
     onClick: () -> Unit,
-    size: Dp = 48.dp, // square size
+    width: Dp? = null,
+    height: Dp = 48.dp,
+    fontSize: TextUnit = 14.sp,
     backgroundColor: Color = Color(0xFFCC4A1A).copy(alpha = 0.08f),
-    pressedBackgroundColor: Color = Color(0xFFB23C0F)
+    pressedBackgroundColor: Color = Color(0xFFB23C0F),
+    contentColor: Color = Color(0xFFCC4A1A),
+    borderColor: Color = Color(0xFFCC4A1A).copy(alpha = 0.4f),
+    cornerRadius: Dp = 8.dp,
+    iconTint: Color? = null,
+    iconSize: Dp = 24.dp,
+    enabled: Boolean = true // <-- Added this
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    var isPressed by remember { mutableStateOf(false) }
+    val isPressed by interactionSource.collectIsPressedAsState()
 
-    LaunchedEffect(interactionSource) {
-        interactionSource.interactions.collectLatest { interaction ->
-            isPressed =
-                interaction is PressInteraction.Press || interaction is HoverInteraction.Enter
-        }
-    }
-
-    val animatedBackgroundColor by animateColorAsState(
-        targetValue = if (isPressed) pressedBackgroundColor else backgroundColor,
-        label = "IconButtonBg"
+    val animatedBg by animateColorAsState(
+        if (isPressed) pressedBackgroundColor else backgroundColor,
+        label = "IconBtnBg"
     )
 
     val animatedBorderColor by animateColorAsState(
-        targetValue = if (isPressed) pressedBackgroundColor else Color(0xFFCC4A1A).copy(alpha = 0.4f),
-        label = "IconButtonBorder"
+        if (isPressed) pressedBackgroundColor else borderColor,
+        label = "IconBtnBorder"
     )
 
     OutlinedButton(
         onClick = onClick,
+        enabled = enabled, // <-- Use it here
         interactionSource = interactionSource,
-        shape = RoundedCornerShape(8.dp), // less round for square look
+        shape = RoundedCornerShape(cornerRadius),
         border = BorderStroke(1.5.dp, animatedBorderColor),
-        modifier = Modifier
-            .size(size), // square shape
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = animatedBackgroundColor,
-            contentColor = Color(0xFFCC4A1A)
+            containerColor = animatedBg,
+            contentColor = contentColor,
+            disabledContainerColor = Color.Gray.copy(alpha = 0.1f), // Optional disabled state
+            disabledContentColor = Color.Gray.copy(alpha = 0.5f)
         ),
-        contentPadding = PaddingValues(0.dp) // center icon tightly
+        modifier = Modifier
+            .testTag("hello world")
+            .then(
+                if (width != null) Modifier.width(width).height(height)
+                else Modifier.height(height)
+            ),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier.size(24.dp)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = if (enabled) iconTint ?: Color.Unspecified else Color.Gray,
+                modifier = Modifier.size(iconSize)
+            )
+            text?.let {
+                Text(
+                    text = it,
+                    fontSize = fontSize,
+                    color = if (enabled) contentColor else Color.Gray
+                )
+            }
+        }
     }
 }
 
@@ -275,9 +300,10 @@ fun CustomDynamicButton(
     height: Dp = 48.dp,
     fontSize: TextUnit = 16.sp,
     backgroundColor: Color = Color(0xFFCC4A1A),
-    pressedBackgroundColor: Color = Color(0xFFB23C0F), // darker on press
+    pressedBackgroundColor: Color = Color(0xFFB23C0F),
     cornerRadius: Dp = 24.dp,
     elevation: Dp = 8.dp,
+    borderColor: Color = Color.Transparent, // New parameter
     content: String
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -290,7 +316,13 @@ fun CustomDynamicButton(
 
     Button(
         onClick = onClick,
-        modifier = modifier.height(height),
+        modifier = modifier
+            .height(height)
+            .border(
+                width = 1.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(cornerRadius)
+            ), // Border applied here
         shape = RoundedCornerShape(cornerRadius),
         colors = ButtonDefaults.buttonColors(
             containerColor = animatedBackgroundColor,
@@ -314,191 +346,6 @@ fun CustomDynamicButton(
         )
     }
 }
-
-
-@Composable
-fun CustomIconButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    height: Dp = LocalResponsiveSizes.current.buttonHeight,
-    fontSize: TextUnit = LocalResponsiveSizes.current.buttonFontSize,
-    variant: ButtonVariants = ButtonVariants.Filled,
-    icon: ImageVector? = null,
-    content: String? = null,
-    backgroundColor: Color = Color(0xFF2E7D32), // default for Filled
-    outlinedBorderColor: Color = Color.White.copy(alpha = 0.4f),
-    contentColor: Color = Color.White
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-
-    // Dynamic background based on variant
-    val containerColor by animateColorAsState(
-        when (variant) {
-            ButtonVariants.Filled -> if (isPressed) backgroundColor.darken() else backgroundColor
-            ButtonVariants.Outlined -> Color.Transparent
-            ButtonVariants.Tonal -> Color.White.copy(alpha = if (isPressed) 0.16f else 0.08f)
-        },
-        label = "ButtonColorAnimation"
-    )
-
-    val borderColor by animateColorAsState(
-        when (variant) {
-            ButtonVariants.Outlined -> if (isPressed) backgroundColor else outlinedBorderColor
-            else -> Color.Transparent
-        },
-        label = "BorderColorAnimation"
-    )
-
-    Button(
-        onClick = onClick,
-        modifier = modifier.height(height),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = contentColor
-        ),
-        border = if (variant == ButtonVariants.Outlined) BorderStroke(
-            1.5.dp,
-            borderColor
-        ) else null,
-        interactionSource = interactionSource,
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = contentColor,
-                    modifier = Modifier.size(fontSize.value.dp + 4.dp)
-                )
-            }
-
-            if (!content.isNullOrEmpty()) {
-                Text(
-                    text = content,
-                    fontSize = fontSize,
-                    color = contentColor
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CustomIconButtonDescription(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    height: Dp = LocalResponsiveSizes.current.buttonHeight,
-    fontSize: TextUnit = LocalResponsiveSizes.current.buttonFontSize,
-    variant: ButtonVariants = ButtonVariants.Filled,
-    imageVector: ImageVector? = null,
-    painter: Painter? = null,
-    title: String? = null,
-    description: String? = null,
-    backgroundColor: Color = Color(0xFF2E7D32),
-    outlinedBorderColor: Color = Color.White.copy(alpha = 0.4f),
-    contentColor: Color = Color.White,
-    enabled: Boolean = true
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val isHovered by interactionSource.collectIsHoveredAsState()
-
-    val isOutlined = variant == ButtonVariants.Outlined
-    val isFilled = variant == ButtonVariants.Filled
-    val isTonal = variant == ButtonVariants.Tonal
-
-    // Background color animation
-    val containerColor by animateColorAsState(
-        targetValue = when {
-            !enabled -> Color.Gray.copy(alpha = 0.2f)
-            isPressed -> backgroundColor.darken()
-            isHovered && isOutlined -> backgroundColor.copy(alpha = 0.08f)
-            isHovered && isFilled -> backgroundColor.copy(alpha = 0.85f)
-            isFilled -> backgroundColor
-            isTonal -> Color.White.copy(alpha = if (isPressed) 0.16f else 0.08f)
-            isOutlined -> Color.Transparent
-            else -> Color.Transparent
-        },
-        label = "ContainerColor"
-    )
-
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            !enabled -> Color.LightGray
-            isHovered && isOutlined -> backgroundColor
-            isPressed && isOutlined -> backgroundColor
-            isOutlined -> outlinedBorderColor
-            else -> Color.Transparent
-        },
-        label = "BorderColor"
-    )
-
-    val iconTint = if (!enabled) Color.LightGray else contentColor
-    val textColor = if (!enabled) Color.LightGray else contentColor
-
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.height(height),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = textColor,
-            disabledContainerColor = containerColor,
-            disabledContentColor = textColor
-        ),
-        border = if (isOutlined) BorderStroke(1.5.dp, borderColor) else null,
-        interactionSource = interactionSource,
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                title?.let {
-                    Text(
-                        text = it,
-                        fontSize = fontSize,
-                        fontWeight = FontWeight.SemiBold,
-                        color = textColor
-                    )
-                }
-                description?.let {
-                    Text(
-                        text = it,
-                        fontSize = fontSize * 0.8f,
-                        color = textColor.copy(alpha = 0.8f)
-                    )
-                }
-            }
-
-            if (imageVector != null) {
-                Icon(
-                    imageVector = imageVector,
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier.size(fontSize.value.dp + 4.dp)
-                )
-            } else if (painter != null) {
-                Icon(
-                    painter = painter,
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier.size(fontSize.value.dp + 4.dp)
-                )
-            }
-        }
-    }
-}
-
 
 
 @Composable
@@ -816,4 +663,84 @@ fun CustomCheckBox(
         }
     }
 }
+
+@Composable
+fun YesNoButtonGroup(
+    selected: String?,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        CustomDynamicButton(
+            onClick = { onSelect("YES") },
+            modifier = Modifier
+                .height(48.dp)
+                .weight(1f),
+            fontSize = 14.sp,
+            backgroundColor = if (selected == "YES") Color(0xFFCC4A1A) else Color( 0xFFCACACA),
+            pressedBackgroundColor = if (selected == "YES") Color(0xFFB23C0F) else Color(0xFFD9D9D9),
+            cornerRadius = 80.dp, // pill shape (height = 48.dp, radius = height)
+            borderColor = if (selected == "YES") Color(0xFFCC4A1A) else Color(0xFF999999),
+            content = "YES"
+        )
+
+        CustomDynamicButton(
+            onClick = { onSelect("NO") },
+            modifier = Modifier
+                .height(48.dp)
+                .weight(1f),
+            fontSize = 14.sp,
+            backgroundColor = if (selected == "NO") Color(0xFFCC4A1A) else Color( 0xFFCACACA),
+            pressedBackgroundColor = if (selected == "NO") Color(0xFFB23C0F) else Color(0xFFD9D9D9),
+            cornerRadius = 80.dp,
+            borderColor = if (selected == "NO") Color(0xFFCC4A1A) else Color(0xFF999999),
+            content = "NO"
+        )
+    }
+}
+
+@Composable
+fun ProgressHeader(
+    currentIndex: Int,
+    totalQuestions: Int,
+    modifier: Modifier = Modifier
+) {
+    val progress by animateFloatAsState(
+        targetValue = if (totalQuestions > 0) currentIndex / totalQuestions.toFloat() else 0f,
+        animationSpec = tween(durationMillis = 500),
+        label = "AnimatedProgress"
+    )
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = "Question ${currentIndex.coerceAtLeast(1)} of $totalQuestions",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF888888), // Subtle gray
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            textAlign = TextAlign.Start
+        )
+
+        LinearProgressIndicator(
+        progress = { progress.coerceIn(0f, 1f) },
+        modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+        color = Color(0xFFCC4A1A),
+        trackColor = Color(0xFFEFEFEF),
+        strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+        )
+    }
+}
+
+
+
+
 

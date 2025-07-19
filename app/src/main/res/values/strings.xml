@@ -5,4 +5,8 @@
     <string name="button_sign_up">Sign up</string>
     <string name="login_title">LOG IN</string>
     <string name="signup_title">SIGN UP</string>
+    <string name="general_interest">General Interest</string>
+    <string name="personal_qualities">Personal Qualities</string>
+    <string name="button_yes">YES</string>
+    <string name="button_no">NO</string>
 </resources>

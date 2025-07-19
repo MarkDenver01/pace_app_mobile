@@ -46,7 +46,6 @@ import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
-import io.dev.pace_app_mobile.presentation.utils.CustomSocialIconButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
