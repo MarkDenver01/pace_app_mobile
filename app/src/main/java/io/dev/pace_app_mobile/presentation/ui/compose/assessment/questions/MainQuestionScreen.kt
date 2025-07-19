@@ -95,6 +95,7 @@ fun MainQuestionScreen(
                 onConfirm = {
                     showRetryDialog = false
                     // Handle retry logic
+                    viewModel.resetAssessment()
                 },
                 onCancel = {
                     showRetryDialog = false
@@ -187,7 +188,7 @@ fun MainQuestionScreen(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = currentQuestion.text,
-                    textAlign = TextAlign.Justify,
+                    textAlign = TextAlign.Center,
                     fontSize = sizes.titleFontSize,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFFCC4A1A),
@@ -202,7 +203,7 @@ fun MainQuestionScreen(
 
                 Spacer(modifier = Modifier.height(spacing.xxl))
 
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                     val isLastQuestion = currentIndex == totalQuestions - 1
                     CustomIconButton(
                         icon = if (isLastQuestion) R.drawable.ic_check else R.drawable.ic_next,

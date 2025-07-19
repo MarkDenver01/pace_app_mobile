@@ -79,6 +79,13 @@ class AssessmentViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    fun resetAssessment() {
+        _currentQuestionIndex.value = 0                    // Go back to first question
+        _answers.value = emptyMap()                        // Clear answers
+        _navigateTo.value = null                           // Reset navigation state
+        _questions.value = allQuestions                    // (Optional) Reload original questions
+    }
+
     fun goToNextQuestion() {
         if (_currentQuestionIndex.value < totalQuestions - 1) {
             _currentQuestionIndex.value++
