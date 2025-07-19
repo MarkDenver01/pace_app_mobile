@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.dev.pace_app_mobile.presentation.utils.responsiveHeightFraction
@@ -76,12 +77,13 @@ data class ResponsiveSizes(
     val logoSize: Dp,
     val buttonHeight: Dp,
     val buttonWidth: Dp,
-    val titleFontSize: androidx.compose.ui.unit.TextUnit,
-    val buttonFontSize: androidx.compose.ui.unit.TextUnit,
+    val titleFontSize: TextUnit,
+    val buttonFontSize: TextUnit,
     val paddingHorizontal: Dp,
     val paddingVertical: Dp,
     val iconSize: Dp,
-    val labelFontSize: androidx.compose.ui.unit.TextUnit,
+    val labelFontSize: TextUnit,
+    val fontLargeSizeLarge: TextUnit,
 )
 
 val LocalResponsiveSizes = staticCompositionLocalOf {
@@ -94,7 +96,8 @@ val LocalResponsiveSizes = staticCompositionLocalOf {
         paddingHorizontal = 24.dp,
         paddingVertical = 32.dp,
         iconSize = 20.dp,
-        labelFontSize = 16.sp
+        labelFontSize = 16.sp,
+        fontLargeSizeLarge = 32.sp
     )
 }
 
@@ -125,6 +128,7 @@ fun Pace_app_mobileTheme(
         paddingVertical = responsiveHeightFraction(0.05f, min = 16.dp, max = 40.dp),
         iconSize = responsiveWidthFraction(0.07f, min = 18.dp, max = 32.dp),
         labelFontSize = responsiveTextSp(base = 18f, scaleFactor = 0.03f, min = 14f, max = 28f),
+        fontLargeSizeLarge = responsiveTextSp(base = 24f, scaleFactor = 0.03f, min = 20f, max = 32f)
     )
 
     CompositionLocalProvider(

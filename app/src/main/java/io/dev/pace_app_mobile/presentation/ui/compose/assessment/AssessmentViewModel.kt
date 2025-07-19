@@ -66,6 +66,10 @@ class AssessmentViewModel @Inject constructor() : ViewModel() {
         _navigateTo.value = Routes.QUESTION_ROUTE // <- go to result later
     }
 
+    fun onCompletedClick() {
+        _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
+    }
+
     fun onAnswerClick(answer: String) {
         val question = _questions.value[_currentQuestionIndex.value]
         _answers.update { current ->

@@ -7,4 +7,6 @@ object Routes {
     const val SIGN_UP_ROUTE = "sign_up_route"
     const val START_ASSESSMENT_ROUTE = "start_assessment_route"
     const val QUESTION_ROUTE = "question_route"
+
+    const val QUESTION_COMPLETED_ROUTE = "question_completed_route"
 }

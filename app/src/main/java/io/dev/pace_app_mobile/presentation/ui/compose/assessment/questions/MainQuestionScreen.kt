@@ -29,6 +29,7 @@ import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
+import io.dev.pace_app_mobile.presentation.utils.AlertConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.ProgressHeader
 import io.dev.pace_app_mobile.presentation.utils.YesNoButtonGroup
@@ -56,6 +57,9 @@ fun MainQuestionScreen(
     val sizes = LocalResponsiveSizes.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    var showRetryDialog by remember { mutableStateOf(false) }
+    var showExitDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
             navController.navigate(route)
@@ -73,11 +77,46 @@ fun MainQuestionScreen(
                 navController = navController,
                 title = "",
                 showLeftButton = true,
-                showRightButton = true
+                showRightButton = true,
+                onLeftClick = {
+                    showRetryDialog = true
+                },
+                onRightClick = {
+                    showExitDialog = true
+                }
             )
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
+        // Retry Dialog
+        if (showRetryDialog) {
+            AlertConfirmationDialog(
+                message = "Are you sure you want to retry?",
+                onConfirm = {
+                    showRetryDialog = false
+                    // Handle retry logic
+                },
+                onCancel = {
+                    showRetryDialog = false
+                }
+            )
+        }
+
+
+        if (showExitDialog) {
+            AlertConfirmationDialog(
+                message = "Are you sure you want to exit?",
+                onConfirm = {
+                    showExitDialog = false
+                    // Handle exit logic
+                },
+                onCancel = {
+                    showExitDialog = false
+                }
+            )
+        }
+
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -170,7 +209,7 @@ fun MainQuestionScreen(
                         iconTint = if (isLastQuestion) Color(0xFF2E7D32) else Color.DarkGray,
                         iconSize = 32.dp,
                         onClick = {
-                            if (isLastQuestion) viewModel.onBeginClick()
+                            if (isLastQuestion) viewModel.onCompletedClick()
                             else viewModel.goToNextQuestion()
                         },
                         text = if (isLastQuestion) "Submit" else null,
