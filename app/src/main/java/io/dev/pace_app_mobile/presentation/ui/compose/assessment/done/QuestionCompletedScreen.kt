@@ -1,5 +1,6 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.assessment.done
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +41,7 @@ import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
+import io.dev.pace_app_mobile.presentation.utils.AssessmentResultDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +54,10 @@ fun QuestionCompletedScreen(
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    val showDialog = remember { mutableStateOf(false) }
+    val topCourses = remember { mutableStateOf(emptyList<String>()) }
+
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -118,11 +126,23 @@ fun QuestionCompletedScreen(
 
             // --- let's begin ---
             CustomDynamicButton(
-                onClick = { viewModel.onBeginClick() },
+                onClick = {
+                    val results = viewModel.getTop3RecommendedCourses()
+                    Log.d("TopCourses", results.toString())
+                    topCourses.value = viewModel.getTop3RecommendedCourses().map { it.first }
+                    showDialog.value = true
+                },
                 content = "See Results",
                 backgroundColor = Color(0xFF0170C1),
                 pressedBackgroundColor = Color(0xFF4D9DDA)
             )
         }
+    }
+
+    if (showDialog.value) {
+        AssessmentResultDialog(
+            topCourses = topCourses.value,
+            onDismiss = { showDialog.value = false }
+        )
     }
 }

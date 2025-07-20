@@ -4,7 +4,8 @@ data class Question(
     val id: Int,
     val category: QuestionCategory,
     val text: String,
-    val imageResId: Int
+    val imageResId: Int,
+    val courseName: String
 )
 
 enum class QuestionCategory(val displayName: String) {

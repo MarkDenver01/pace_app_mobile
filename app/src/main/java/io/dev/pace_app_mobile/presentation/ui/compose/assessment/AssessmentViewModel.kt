@@ -31,6 +31,7 @@ class AssessmentViewModel @Inject constructor(
     private val _answers = MutableStateFlow<Map<Int, String>>(emptyMap())
     val answers = _answers.asStateFlow()
 
+
 //    private val allQuestions = listOf(
 //        // General Interest
 //        Question(1, QuestionCategory.GENERAL, "Are you interested in how businesses operate?", R.drawable.ic_figure_1),
@@ -52,8 +53,8 @@ class AssessmentViewModel @Inject constructor(
         get() = _questions.value.size
 
     val currentQuestion: StateFlow<Question> = combine(_questions, _currentQuestionIndex) { questions, index ->
-        questions.getOrNull(index) ?: Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder))
+        questions.getOrNull(index) ?: Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder, "")
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder, ""))
 
     val selectedAnswer: StateFlow<String?> = combine(_currentQuestionIndex, _answers, _questions) { index, answers, questions ->
         val questionId = questions.getOrNull(index)?.id
@@ -74,7 +75,8 @@ class AssessmentViewModel @Inject constructor(
                             id = it.questionId,
                             category = QuestionCategory.fromString(it.category),
                             text = it.question,
-                            imageResId = R.drawable.ic_figure_1 // Update if category-based image mapping needed
+                            imageResId = R.drawable.ic_figure_1, // Update if category-based image mapping needed,
+                            courseName = it.courseName
                         )
                     }
                 },
@@ -125,7 +127,7 @@ class AssessmentViewModel @Inject constructor(
 
     fun getCurrentQuestion(): Question {
         return _questions.value.getOrNull(_currentQuestionIndex.value)
-            ?: Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder)
+            ?: Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder, "")
     }
 
     fun getCurrentCategoryProgress(): Pair<Int, Int> {
@@ -136,6 +138,33 @@ class AssessmentViewModel @Inject constructor(
         val indexInCategory = questionsInCategory.indexOfFirst { it.id == currentQuestionId }
 
         return Pair(indexInCategory + 1, questionsInCategory.size)
+    }
+
+    fun setAnswer(questionId: Int, answer: String) {
+        _answers.value = _answers.value.toMutableMap().apply {
+            put(questionId, answer)
+        }
+    }
+
+    fun getAnswer(questionId: Int): String? {
+        return _answers.value[questionId]
+    }
+
+    fun getTop3RecommendedCourses(): List<Pair<String, Int>> {
+        val yesAnswers = _answers.value.filterValues { it.equals("Yes", ignoreCase = true) }.keys
+        val questionMap = _questions.value.associateBy { it.id }
+
+        val courseScoreMap = mutableMapOf<String, Int>()
+
+        for (questionId in yesAnswers) {
+            val course = questionMap[questionId]?.courseName ?: continue
+            courseScoreMap[course] = courseScoreMap.getOrDefault(course, 0) + 1
+        }
+
+        return courseScoreMap.entries
+            .sortedByDescending { it.value }
+            .take(3)
+            .map { it.toPair() }
     }
 
 }
