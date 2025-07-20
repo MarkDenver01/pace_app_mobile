@@ -75,6 +75,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
@@ -804,6 +805,61 @@ fun AlertConfirmationDialog(
         }
     }
 }
+
+@Composable
+fun AlertDynamicConfirmationDialog(
+    message: String,
+    alertType: AlertType = AlertType.ERROR,
+    onClose: () -> Unit
+) {
+    val (backgroundColor, pressedColor) = when (alertType) {
+        AlertType.SUCCESS -> Pair(Color(0xFF4CAF50), Color(0xFF388E3C)) // Green
+        AlertType.WARNING -> Pair(Color(0xFFFFA000), Color(0xFFF57C00)) // Orange
+        AlertType.ERROR -> Pair(Color(0xFFD32F2F), Color(0xFFC62828))   // Red
+    }
+
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(dismissOnClickOutside = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+                .shadow(elevation = 12.dp, shape = RoundedCornerShape(20.dp))
+                .background(color = Color.White, shape = RoundedCornerShape(20.dp))
+                .padding(24.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = message,
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                CustomDynamicButton(
+                    onClick = onClose,
+                    modifier = Modifier.fillMaxWidth(0.6f),
+                    content = "Close",
+                    backgroundColor = backgroundColor,
+                    pressedBackgroundColor = pressedColor,
+                    borderColor = Color.Transparent,
+                    fontSize = 16.sp
+                )
+            }
+        }
+    }
+}
+
+
+
+
+
 
 
 

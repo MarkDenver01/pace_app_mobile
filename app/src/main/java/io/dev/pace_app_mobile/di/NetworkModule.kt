@@ -50,11 +50,19 @@ object NetworkModule {
     @Singleton
     fun provideHeaderInterceptor(tokenManager: TokenManager): Interceptor =
         Interceptor { chain ->
-            val requestBuilder = chain.request().newBuilder()
+            val request = chain.request()
+            val requestBuilder = request.newBuilder()
                 .addHeader("Content-Type", "application/json")
 
-            val token = tokenManager.getToken()
-            if (!token.isNullOrEmpty()) {
+            val path = request.url.encodedPath
+
+            // Skip Authorization only for this specific endpoint
+            val shouldSkipAuth = path == "/user/public"
+
+            // updated token
+            val token = tokenManager.getToken() // TODO changed soon
+
+            if (!shouldSkipAuth && !token.isNullOrEmpty()) {
                 requestBuilder.addHeader("Authorization", "Bearer $token")
             }
 

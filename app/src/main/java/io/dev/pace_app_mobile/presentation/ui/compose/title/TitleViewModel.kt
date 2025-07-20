@@ -21,6 +21,8 @@ class TitleViewModel @Inject constructor() : ViewModel() {
         _navigateTo.value = Routes.LOGIN_ROUTE
     }
 
-    fun onSignUpClick() {}
+    fun onSignUpClick() {
+        _navigateTo.value = Routes.SIGN_UP_ROUTE
+    }
 
 }

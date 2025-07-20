@@ -40,10 +40,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
+import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
@@ -54,7 +56,6 @@ fun SignUpScreen(
     navController: NavController,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
-    val navigateTo by viewModel.navigateTo.collectAsState()
     val sizes = LocalResponsiveSizes.current
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -62,10 +63,16 @@ fun SignUpScreen(
     var mailAddress by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var isAgree by remember { mutableStateOf(false) }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
 
+    val navigateTo by viewModel.navigateTo.collectAsState()
+    val showAgreeDialog by viewModel.showAgreeWarningDialog.collectAsState()
+    val showSuccessDialog by viewModel.showSuccessDialog.collectAsState()
+    val showErrorDialog by viewModel.showErrorDialog.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    var agree by remember { mutableStateOf(false) }
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -156,11 +163,8 @@ fun SignUpScreen(
                 Spacer(modifier = Modifier.height(spacing.sm))
 
                 CustomCheckBox(
-                    checked = isAgree,
-                    onCheckedChange = {
-                        isAgree = it
-                        viewModel.setAgree(it)
-                    },
+                    checked = agree,
+                    onCheckedChange = { agree = it },
                     annotatedLabel = buildAnnotatedString {
                         append("I agree with ")
                         withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
@@ -173,13 +177,55 @@ fun SignUpScreen(
                     }
                 )
 
-
                 CustomDynamicButton(
-                    onClick = { viewModel.onSignUpClick() },
+                    onClick = {
+                       viewModel.onSignupClick(
+                           agreed = agree,
+                           username = "$firstName $lastName",
+                           email = mailAddress,
+                           password = password,
+                           onSuccess = {
+                               viewModel.showSuccessDialog()
+                           }
+                       )
+                    },
                     content = stringResource(id = R.string.button_sign_up)
                 )
 
             }
         }
     }
+
+    if (showAgreeDialog) {
+        AlertDynamicConfirmationDialog(
+            message = "You must agree to the terms.",
+            alertType = AlertType.WARNING,
+            onClose = {
+                viewModel.dismissDialogs()
+            }
+        )
+    }
+
+    if (showSuccessDialog) {
+        AlertDynamicConfirmationDialog(
+            message = "Register successful!",
+            alertType = AlertType.SUCCESS,
+            onClose = {
+                viewModel.dismissDialogs()
+                viewModel.onSuccessTransition()
+            }
+        )
+    }
+
+    // Error Dialog
+    if (showErrorDialog && errorMessage != null) {
+        AlertDynamicConfirmationDialog(
+            message = errorMessage!!,
+            alertType = AlertType.ERROR,
+            onClose = {
+                viewModel.dismissDialogs()
+            }
+        )
+    }
+
 }

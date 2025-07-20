@@ -15,9 +15,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,14 +39,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
+import io.dev.pace_app_mobile.presentation.utils.AlertConfirmationDialog
+import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
@@ -55,7 +60,6 @@ fun LoginScreen(
     navController: NavController,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
-    val navigateTo by viewModel.navigateTo.collectAsState()
     val sizes = LocalResponsiveSizes.current
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -64,10 +68,16 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var isRememberMe by remember { mutableStateOf(false) }
 
+    val showDialog by viewModel.showDialog.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+    val navigateTo by viewModel.navigateTo.collectAsState()
+
+
+    // observe navigation state
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
             navController.navigate(route)
-            viewModel.resetNavigation()
+            viewModel.onNavigationHandled()
         }
     }
 
@@ -200,8 +210,28 @@ fun LoginScreen(
                         onClick = { viewModel.onAuthInstagramClick()}
                     )
                 }
-
             }
         }
+    }
+
+    if (showDialog) {
+        AlertDynamicConfirmationDialog(
+            message = "Login successful!",
+            alertType = AlertType.SUCCESS,
+            onClose = {
+                viewModel.onDialogDismissed()
+            }
+        )
+    }
+
+    // Error Dialog
+    errorMessage?.let { error ->
+        AlertDynamicConfirmationDialog(
+            message = error,
+            alertType = AlertType.ERROR,
+            onClose = {
+                viewModel.onErrorShown()
+            }
+        )
     }
 }
