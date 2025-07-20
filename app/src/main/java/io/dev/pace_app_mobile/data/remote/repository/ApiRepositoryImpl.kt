@@ -6,20 +6,21 @@ import io.dev.pace_app_mobile.data.local.room.dao.LoginDao
 import io.dev.pace_app_mobile.data.local.room.entity.LoginEntity
 import io.dev.pace_app_mobile.data.remote.api.ApiService
 import io.dev.pace_app_mobile.domain.model.LoginRequest
+import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
-import io.dev.pace_app_mobile.domain.repository.AuthRepository
+import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import javax.inject.Inject
 
-class AuthRepositoryImpl @Inject constructor(
+class ApiRepositoryImpl @Inject constructor(
     private val api: ApiService,
     private val loginDao: LoginDao,
     private val tokenManager: TokenManager
-) : AuthRepository {
+) : ApiRepository {
 
     override suspend fun login(email: String, password: String): Result<Unit> {
         return try {
             if (email.isEmpty() || password.isEmpty()) {
-                return  Result.failure(Exception("Login failed: Email address or password cannot be empty"))
+                return Result.failure(Exception("Login failed: Email address or password cannot be empty"))
             }
 
             // get the response from api login
@@ -55,21 +56,23 @@ class AuthRepositoryImpl @Inject constructor(
     ): Result<String> {
         return try {
             if (email.isEmpty() || password.isEmpty() || password.isEmpty()) {
-                return  Result.failure(Exception("Register failed: Please input the data field"))
+                return Result.failure(Exception("Register failed: Please input the data field"))
             }
 
             // get the response from register API
-            val response = api.register(RegisterRequest(
-                userName,
-                email,
-                roles,
-                password
-            ))
+            val response = api.register(
+                RegisterRequest(
+                    userName,
+                    email,
+                    roles,
+                    password
+                )
+            )
 
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    Result.success(body.message )
+                    Result.success(body.message)
                 } else {
                     Result.failure(Exception("Register failed: API issue - request body is empty."))
                 }
@@ -81,5 +84,25 @@ class AuthRepositoryImpl @Inject constructor(
             Result.failure(Exception("Register failed: Unexpected error occur"))
         }
     }
+
+    override suspend fun getQuestions(): Result<List<QuestionResponse>> {
+        return try {
+            val response = api.getAllQuestions()
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    Result.success(body)
+                } else {
+                    Result.failure(Exception("No questions found."))
+                }
+            } else {
+                Result.failure(Exception("Error: ${response.code()} - ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Log.e("getQuestions", "Exception: ${e.message}", e)
+            Result.failure(Exception("Failed to load questions: ${e.localizedMessage}"))
+        }
+    }
+
 
 }

@@ -2,10 +2,12 @@ package io.dev.pace_app_mobile.data.remote.api
 
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.LoginResponse
+import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
@@ -18,4 +20,7 @@ interface ApiService {
     suspend fun register(
         @Body request: RegisterRequest
     ): Response<RegisterResponse>
+
+    @GET("user/api/questions")
+    suspend fun getAllQuestions(): Response<List<QuestionResponse>>
 }
