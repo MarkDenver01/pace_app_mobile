@@ -152,7 +152,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(spacing.sm))
 
                 CustomDynamicButton(
-                    onClick = { viewModel.onLoginClick() },
+                    onClick = { viewModel.onLoginClick(mailAddress, password) },
                     content = stringResource(id = R.string.button_login)
                 )
 
