@@ -49,6 +49,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -885,6 +886,99 @@ fun AssessmentResultDialog(
             }
         }
     )
+}
+
+@Composable
+fun CustomDropDownPicker(
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
+    options: List<String>,
+    placeholder: String,
+    leadingIcon: ImageVector,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    fontSize: TextUnit = LocalResponsiveSizes.current.buttonFontSize
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value = selectedOption,
+            onValueChange = {},
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    color = Color.LightGray,
+                    fontSize = fontSize
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = leadingIcon,
+                    contentDescription = placeholder,
+                    tint = Color(0xFFCC4A1A),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color(0xFFCC4A1A).copy(alpha = 0.1f))
+                        .padding(6.dp)
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = "Dropdown Arrow",
+                    tint = Color(0xFFCC4A1A)
+                )
+            },
+            singleLine = true,
+            readOnly = true,
+            enabled = false, // Keep this to use the disabled color scheme for the outline
+            shape = RoundedCornerShape(50),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }, // The clickable modifier must be outside the TextField
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.3f),
+                disabledTextColor = Color(0xFFCC4A1A),
+                disabledPlaceholderColor = Color.LightGray,
+                disabledLeadingIconColor = Color(0xFFCC4A1A),
+                disabledTrailingIconColor = Color(0xFFCC4A1A),
+                disabledContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.05f)
+            ),
+            textStyle = LocalTextStyle.current.copy(
+                color = Color(0xFFCC4A1A),
+                fontSize = fontSize
+            )
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .fillMaxWidth(0.95f) // Adjust width to be similar to the text field
+                .background(Color(0xFFCC4A1A).copy(alpha = 0.05f))
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = option,
+                            color = Color(0xFFCC4A1A),
+                            fontSize = fontSize
+                        )
+                    },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+//                    colors = MenuDefaults.dropdownMenuItemColors(
+//                        textColor = Color(0xFFCC4A1A),
+//                        trailingIconColor = Color(0xFFCC4A1A)
+//                    )
+                )
+            }
+        }
+    }
 }
 
 

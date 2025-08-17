@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,7 @@ import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
+import io.dev.pace_app_mobile.presentation.utils.CustomDropDownPicker
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 
@@ -65,6 +67,7 @@ fun SignUpScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var selectedUniversity by remember { mutableStateOf("") }
 
     val navigateTo by viewModel.navigateTo.collectAsState()
     val showAgreeDialog by viewModel.showAgreeWarningDialog.collectAsState()
@@ -73,6 +76,14 @@ fun SignUpScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
 
     var agree by remember { mutableStateOf(false) }
+
+    val universities = listOf(
+        "University of the Philippines Diliman",
+        "Ateneo de Manila University",
+        "De La Salle University",
+        "University of Santo Tomas",
+        "Mapúa University"
+    )
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -131,6 +142,15 @@ fun SignUpScreen(
                     placeholder = "Last Name",
                     leadingIcon = Icons.Default.AccountCircle,
                     fontSize = sizes.buttonFontSize,
+                )
+
+                CustomDropDownPicker(
+                    selectedOption = selectedUniversity,
+                    onOptionSelected = { selectedUniversity = it },
+                    options = universities,
+                    placeholder = "Select your university",
+                    leadingIcon = Icons.Default.Edit, // Using a generic icon for now
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 CustomTextField(
