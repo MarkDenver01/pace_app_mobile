@@ -4,7 +4,10 @@ import android.util.Log
 import io.dev.pace_app_mobile.data.local.prefs.TokenManager
 import io.dev.pace_app_mobile.data.local.room.dao.LoginDao
 import io.dev.pace_app_mobile.data.local.room.entity.LoginEntity
-import io.dev.pace_app_mobile.data.remote.api.ApiService
+import io.dev.pace_app_mobile.data.remote.datasource.RemoteDataSource
+import io.dev.pace_app_mobile.data.remote.network.ApiService
+import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
+import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
@@ -12,7 +15,7 @@ import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import javax.inject.Inject
 
 class ApiRepositoryImpl @Inject constructor(
-    private val api: ApiService,
+    private val remoteDataSource: RemoteDataSource,
     private val loginDao: LoginDao,
     private val tokenManager: TokenManager
 ) : ApiRepository {
@@ -23,28 +26,22 @@ class ApiRepositoryImpl @Inject constructor(
                 return Result.failure(Exception("Login failed: Email address or password cannot be empty"))
             }
 
-            // get the response from api login
-            val response = api.login(LoginRequest(email, password))
-            if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    val entity = LoginEntity(
-                        userName = body.username,
-                        jwtToken = body.jwtToken,
-                        role = body.role
-                    )
-                    tokenManager.saveToken(entity.jwtToken)
-                    loginDao.insertLoginResponse(entity)
-                    Result.success(Unit)
-                } else {
-                    Result.failure(Exception("Login failed: Cannot find the username or password."))
-                }
-            } else {
-                Result.failure(Exception("Login failed: Account not valid."))
+            val result = remoteDataSource.login(LoginRequest(email, password))
+
+            run {
+                val entity = LoginEntity(
+                    userName = result.username,
+                    jwtToken = result.jwtToken,
+                    role = result.role
+                )
+
+                tokenManager.saveToken(entity.jwtToken) // TODO maybe modify soon
+                loginDao.insertLoginResponse(entity)
+                Result.success(Unit)
             }
         } catch (e: Exception) {
             Log.e("error", "$e")
-            Result.failure(Exception("Login failed: Unexpected error occur"))
+            Result.failure(Exception("Login failed: $e"))
         }
     }
 
@@ -59,49 +56,39 @@ class ApiRepositoryImpl @Inject constructor(
                 return Result.failure(Exception("Register failed: Please input the data field"))
             }
 
-            // get the response from register API
-            val response = api.register(
+            val result = remoteDataSource.register(
                 RegisterRequest(
-                    userName,
-                    email,
-                    roles,
-                    password
+                    username = userName,
+                    email = email,
+                    roles = roles,
+                    password = password
                 )
             )
-
-            if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    Result.success(body.message)
-                } else {
-                    Result.failure(Exception("Register failed: API issue - request body is empty."))
-                }
-            } else {
-                Result.failure(Exception("Register failed: Registration not successful"))
-            }
+            Result.success(result.message)
         } catch (e: Exception) {
             Log.e("error", "$e")
-            Result.failure(Exception("Register failed: Unexpected error occur"))
+            Result.failure(Exception("Register failed: $e"))
         }
     }
 
     override suspend fun getQuestions(): Result<List<QuestionResponse>> {
         return try {
-            val response = api.getAllQuestions()
-            if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    Result.success(body)
-                } else {
-                    Result.failure(Exception("No questions found."))
-                }
-            } else {
-                Result.failure(Exception("Error: ${response.code()} - ${response.message()}"))
-            }
+            val result = remoteDataSource.getQuestions()
+            Result.success(result)
         } catch (e: Exception) {
             Log.e("getQuestions", "Exception: ${e.message}", e)
-            Result.failure(Exception("Failed to load questions: ${e.localizedMessage}"))
+            Result.failure(Exception("Failed to load questions: $e"))
         }
+    }
+
+    override suspend fun getCourseRecommendation(answers: List<AnsweredQuestionRequest>): Result<List<CourseRecommendationResponse>> {
+       return try {
+           val result = remoteDataSource.fetchCourseRecommendation(answers)
+           Result.success(result)
+       } catch (e: Exception) {
+           Log.e("getQuestions", "Exception: ${e.message}", e)
+           Result.failure(Exception("Failed to get recommendation: $e"))
+       }
     }
 
 

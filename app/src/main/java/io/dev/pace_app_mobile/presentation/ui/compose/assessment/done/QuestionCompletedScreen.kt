@@ -55,9 +55,6 @@ fun QuestionCompletedScreen(
     val sizes = LocalResponsiveSizes.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    val showDialog = remember { mutableStateOf(false) }
-    val topCourses = remember { mutableStateOf(emptyList<String>()) }
-
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -127,22 +124,12 @@ fun QuestionCompletedScreen(
             // --- let's begin ---
             CustomDynamicButton(
                 onClick = {
-                    val results = viewModel.getTop3RecommendedCourses()
-                    Log.d("TopCourses", results.toString())
-                    topCourses.value = viewModel.getTop3RecommendedCourses().map { it.first }
-                    showDialog.value = true
+                    viewModel.onViewResultsClick()
                 },
                 content = "See Results",
                 backgroundColor = Color(0xFF0170C1),
                 pressedBackgroundColor = Color(0xFF4D9DDA)
             )
         }
-    }
-
-    if (showDialog.value) {
-        AssessmentResultDialog(
-            topCourses = topCourses.value,
-            onDismiss = { showDialog.value = false }
-        )
     }
 }

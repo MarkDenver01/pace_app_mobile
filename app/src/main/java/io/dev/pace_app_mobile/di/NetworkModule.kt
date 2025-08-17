@@ -7,7 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.dev.pace_app_mobile.data.local.prefs.TokenManager
-import io.dev.pace_app_mobile.data.remote.api.ApiService
+import io.dev.pace_app_mobile.data.remote.network.ApiService
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

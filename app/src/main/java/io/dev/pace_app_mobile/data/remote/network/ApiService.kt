@@ -1,5 +1,7 @@
-package io.dev.pace_app_mobile.data.remote.api
+package io.dev.pace_app_mobile.data.remote.network
 
+import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
+import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
@@ -23,4 +25,9 @@ interface ApiService {
 
     @GET("user/api/questions")
     suspend fun getAllQuestions(): Response<List<QuestionResponse>>
+
+    @POST("user/api/course_recommended/top3")
+    suspend fun getCourseRecommendation(
+        @Body request: List<AnsweredQuestionRequest>
+    ): Response<List<CourseRecommendationResponse>>
 }

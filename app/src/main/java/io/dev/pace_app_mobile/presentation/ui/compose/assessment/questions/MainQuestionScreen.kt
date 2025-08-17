@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
@@ -45,6 +46,7 @@ fun MainQuestionScreen(
     val currentIndex by viewModel.currentQuestionIndex.collectAsState()
     val currentQuestion by viewModel.currentQuestion.collectAsState()
     val selectedAnswer by viewModel.selectedAnswer.collectAsState()
+    val answeredList by viewModel.answers.collectAsState()
 
     val totalQuestions = viewModel.totalQuestions
 
@@ -59,6 +61,7 @@ fun MainQuestionScreen(
 
     var showRetryDialog by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
+    var userAnswers: List<AnsweredQuestionRequest>
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -210,7 +213,7 @@ fun MainQuestionScreen(
                         iconTint = if (isLastQuestion) Color(0xFF2E7D32) else Color.DarkGray,
                         iconSize = 32.dp,
                         onClick = {
-                            if (isLastQuestion) viewModel.onCompletedClick()
+                            if (isLastQuestion) viewModel.onCompletedAssessment()
                             else viewModel.goToNextQuestion()
                         },
                         text = if (isLastQuestion) "Submit" else null,
