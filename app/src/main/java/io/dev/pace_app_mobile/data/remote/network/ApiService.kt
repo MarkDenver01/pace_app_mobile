@@ -7,6 +7,7 @@ import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
+import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -30,4 +31,7 @@ interface ApiService {
     suspend fun getCourseRecommendation(
         @Body request: List<AnsweredQuestionRequest>
     ): Response<List<CourseRecommendationResponse>>
+
+    @GET("user/public/university/all")
+    suspend fun getAllUniversity(): Response<List<UniversityResponse>>
 }

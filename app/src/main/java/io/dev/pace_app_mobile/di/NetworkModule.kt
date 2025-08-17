@@ -19,7 +19,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val BASE_URL = "http://10.67.121.216:8080/"
+    private const val BASE_URL = "http://192.168.238.248:8080/"
 
     @Provides
     @Singleton
@@ -57,7 +57,7 @@ object NetworkModule {
             val path = request.url.encodedPath
 
             // Skip Authorization only for this specific endpoint
-            val shouldSkipAuth = path == "/user/public"
+            val shouldSkipAuth = path.startsWith("/user/public/")
 
             // updated token
             val token = tokenManager.getToken() // TODO changed soon

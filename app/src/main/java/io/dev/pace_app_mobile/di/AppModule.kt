@@ -15,6 +15,7 @@ import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
 import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
+import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import javax.inject.Singleton
 
 @Module
@@ -54,5 +55,10 @@ object AppModule {
     @Singleton
     fun provideCourseRecommendation(repository: ApiRepository): CourseRecommendationUseCase =
         CourseRecommendationUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideUniversityUseCase(repository: ApiRepository): UniversityUseCase =
+        UniversityUseCase(repository)
 
 }

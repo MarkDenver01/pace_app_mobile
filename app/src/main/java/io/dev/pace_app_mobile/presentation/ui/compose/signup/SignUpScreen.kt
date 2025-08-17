@@ -67,7 +67,6 @@ fun SignUpScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var selectedUniversity by remember { mutableStateOf("") }
 
     val navigateTo by viewModel.navigateTo.collectAsState()
     val showAgreeDialog by viewModel.showAgreeWarningDialog.collectAsState()
@@ -77,13 +76,10 @@ fun SignUpScreen(
 
     var agree by remember { mutableStateOf(false) }
 
-    val universities = listOf(
-        "University of the Philippines Diliman",
-        "Ateneo de Manila University",
-        "De La Salle University",
-        "University of Santo Tomas",
-        "Mapúa University"
-    )
+    var selectedUniversityName by remember { mutableStateOf("") }
+
+    val universities by viewModel.universities.collectAsState()
+    val universityNames = universities.map { it.universityName }
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -145,9 +141,9 @@ fun SignUpScreen(
                 )
 
                 CustomDropDownPicker(
-                    selectedOption = selectedUniversity,
-                    onOptionSelected = { selectedUniversity = it },
-                    options = universities,
+                    selectedOption = selectedUniversityName,
+                    onOptionSelected = { selectedUniversityName = it },
+                    options = universityNames,
                     placeholder = "Select your university",
                     leadingIcon = Icons.Default.Edit, // Using a generic icon for now
                     modifier = Modifier.fillMaxWidth()
@@ -199,15 +195,23 @@ fun SignUpScreen(
 
                 CustomDynamicButton(
                     onClick = {
-                       viewModel.onSignupClick(
-                           agreed = agree,
-                           username = "$firstName $lastName",
-                           email = mailAddress,
-                           password = password,
-                           onSuccess = {
-                               viewModel.showSuccessDialog()
-                           }
-                       )
+                        val universityId = viewModel.getUniversityId(selectedUniversityName)
+
+                        if (universityId != null) {
+                            viewModel.onSignupClick(
+                                agreed = agree,
+                                username = "$firstName $lastName",
+                                email = mailAddress,
+                                password = password,
+                                universityId = universityId,
+                                onSuccess = {
+                                    viewModel.showSuccessDialog()
+                                }
+                            )
+                        } else {
+                            // Handle the case where a university wasn't selected
+                            viewModel.showErrorDialog("Please select a university.")
+                        }
                     },
                     content = stringResource(id = R.string.button_sign_up)
                 )

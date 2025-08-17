@@ -9,13 +9,15 @@ class RegisterUseCase @Inject constructor(
     suspend operator fun invoke(
         username: String,
         email: String,
-        password: String
+        password: String,
+        universityId: Long
     ): Result<String> {
         return repository.register(
             username,
             email,
             setOf("USER"),
-            password
+            password,
+            universityId
         )
     }
 }

@@ -11,6 +11,7 @@ import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
+import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import javax.inject.Inject
 
@@ -49,11 +50,16 @@ class ApiRepositoryImpl @Inject constructor(
         userName: String,
         email: String,
         roles: Set<String>,
-        password: String
+        password: String,
+        universityId: Long
     ): Result<String> {
         return try {
             if (email.isEmpty() || password.isEmpty() || password.isEmpty()) {
                 return Result.failure(Exception("Register failed: Please input the data field"))
+            }
+
+            if (universityId == 0L) {
+                return Result.failure(Exception("Registration failed: Please select a university"))
             }
 
             val result = remoteDataSource.register(
@@ -61,7 +67,8 @@ class ApiRepositoryImpl @Inject constructor(
                     username = userName,
                     email = email,
                     roles = roles,
-                    password = password
+                    password = password,
+                    universityId = universityId
                 )
             )
             Result.success(result.message)
@@ -78,6 +85,15 @@ class ApiRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("getQuestions", "Exception: ${e.message}", e)
             Result.failure(Exception("Failed to load questions: $e"))
+        }
+    }
+
+    override suspend fun getUniversities(): Result<List<UniversityResponse>> {
+        return  try {
+            val result = remoteDataSource.getUniversities()
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(Exception("Failed to load universities: $e"))
         }
     }
 

@@ -8,6 +8,7 @@ import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
+import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(
@@ -61,6 +62,19 @@ class RemoteDataSource @Inject constructor(
 
     suspend fun getQuestions(): List<QuestionResponse> {
         val response = api.getAllQuestions()
+        if (response.isSuccessful) {
+            return response.body().orEmpty()
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun getUniversities(): List<UniversityResponse> {
+        val response = api.getAllUniversity()
         if (response.isSuccessful) {
             return response.body().orEmpty()
         } else {
