@@ -80,6 +80,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.AlertType
+import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
@@ -980,6 +981,70 @@ fun CustomDropDownPicker(
         }
     }
 }
+
+
+@Composable
+fun UniversityDialog(
+    showDialog: Boolean,
+    universities: List<UniversityResponse>,
+    selectedUniversityId: Long?,
+    onSelect: (Long) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            title = { Text("Select University") },
+            text = {
+                var expanded by remember { mutableStateOf(false) }
+                var selectedText by remember { mutableStateOf(
+                    universities.firstOrNull { it.universityId == selectedUniversityId }?.universityName ?: ""
+                ) }
+
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { expanded = true }
+                            .background(Color.LightGray)
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = if (selectedText.isEmpty()) "Choose University" else selectedText
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        universities.forEach { uni ->
+                            DropdownMenuItem(
+                                text = { Text(uni.universityName) },
+                                onClick = {
+                                    selectedText = uni.universityName
+                                    expanded = false
+                                    onSelect(uni.universityId)
+                                }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onConfirm() }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onDismiss() }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
 
 
 

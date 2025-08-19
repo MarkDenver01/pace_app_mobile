@@ -1,5 +1,12 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.login
 
+import android.app.Activity
+import android.content.Context
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +20,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -41,6 +51,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.presentation.theme.BgApp
@@ -50,6 +63,7 @@ import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBa
 import io.dev.pace_app_mobile.presentation.utils.AlertConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
+import io.dev.pace_app_mobile.presentation.utils.CustomDropDownPicker
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
@@ -72,6 +86,31 @@ fun LoginScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val navigateTo by viewModel.navigateTo.collectAsState()
 
+    var googleIdToken by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+    val oneTapClient = remember { Identity.getSignInClient(context) }
+
+    // Google sign-in launcher
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            try {
+                val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+                googleIdToken = credential.googleIdToken
+                if (googleIdToken != null) {
+                    viewModel.showUniversitySelector()
+                } else {
+                    Log.e("GoogleLogin", "ID Token is null")
+                    viewModel.onErrorShown()
+                }
+            } catch (e: Exception) {
+                Log.e("GoogleLogin", "Credential retrieval failed", e)
+                viewModel.onErrorShown()
+            }
+        }
+    }
 
     // observe navigation state
     LaunchedEffect(navigateTo) {
@@ -195,7 +234,10 @@ fun LoginScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CustomIconButton(
                         icon = R.drawable.ic_google,
-                        onClick = { viewModel.onAuthGoogleClick()}
+                        onClick = {
+                            viewModel.fetchUniversities()
+                            startGoogleLogin(oneTapClient, launcher, context)
+                        }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_facebook,
@@ -234,4 +276,69 @@ fun LoginScreen(
             }
         )
     }
+
+    if (viewModel.showUniversityDialog.collectAsState().value) {
+        AlertDialog(
+            onDismissRequest = { viewModel.confirmUniversitySelection() },
+            title = { Text("Select University") },
+            text = {
+                var selectedName by remember { mutableStateOf("") }
+                val universities by viewModel.universities.collectAsState()
+
+                CustomDropDownPicker(
+                    selectedOption = selectedName,
+                    onOptionSelected = { option ->
+                        selectedName = option
+                        val uniId = universities.find { it.universityName == option }?.universityId
+                        uniId?.let { viewModel.setSelectedUniversity(it) }
+                    },
+                    options = universities.map { it.universityName },
+                    placeholder = "Choose your university",
+                    leadingIcon = Icons.Default.Edit
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.confirmUniversitySelection()
+                        // Pass the stored token and the selected university ID
+                        val universityId = viewModel.selectedUniversityId.value
+                        if (googleIdToken != null && universityId != null) {
+                            viewModel.onAuthGoogleClick(googleIdToken!!)
+                        } else {
+                            viewModel.onErrorShown() // Show an error if data is missing
+                        }
+                    },
+                    enabled = viewModel.selectedUniversityId.collectAsState().value != null
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { viewModel.confirmUniversitySelection() }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+private fun startGoogleLogin(
+    oneTapClient: SignInClient,
+    launcher: ActivityResultLauncher<IntentSenderRequest>,
+    context: Context
+) {
+    val request = GetSignInIntentRequest.builder()
+        // Use your Web Client ID here
+        .setServerClientId("13172730276-np8mp31qu0gun6of0qch2gvder08hlaq.apps.googleusercontent.com")
+        .build()
+
+    oneTapClient.getSignInIntent(request)
+        .addOnSuccessListener { pendingIntent ->
+            val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+            launcher.launch(intentSenderRequest)
+        }
+        .addOnFailureListener { e ->
+            Log.e("GoogleLogin", "getSignInIntent failed", e)
+        }
 }

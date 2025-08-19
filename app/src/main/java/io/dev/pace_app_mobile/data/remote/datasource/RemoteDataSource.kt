@@ -9,6 +9,7 @@ import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
+import retrofit2.Response
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(
@@ -44,6 +45,19 @@ class RemoteDataSource @Inject constructor(
                         "${response.code()} : " +
                         "${response.message()}"
             )
+        }
+    }
+
+    suspend fun googleLogin(idToken: String, universityId: Long): Result<LoginResponse> {
+        return try {
+            val response = api.googleLogin(idToken, universityId)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception(response.errorBody()?.string() ?: "Google login failed"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
@@ -85,6 +99,4 @@ class RemoteDataSource @Inject constructor(
             )
         }
     }
-
-
 }

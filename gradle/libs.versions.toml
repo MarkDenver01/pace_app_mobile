@@ -22,6 +22,8 @@ retrofit = "3.0.0"
 okhttp = "5.1.0"
 datastore = "1.1.7"
 room = "2.7.2"
+credentials = "1.2.2"
+google-auth = "21.2.0"
 
 
 
@@ -58,6 +60,9 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+google-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "google-auth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

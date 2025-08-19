@@ -9,6 +9,7 @@ import io.dev.pace_app_mobile.data.remote.network.ApiService
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
+import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
@@ -44,6 +45,13 @@ class ApiRepositoryImpl @Inject constructor(
             Log.e("error", "$e")
             Result.failure(Exception("Login failed: $e"))
         }
+    }
+
+    override suspend fun googleLogin(
+        idToken: String,
+        universityId: Long
+    ): Result<LoginResponse> {
+        return remoteDataSource.googleLogin(idToken, universityId)
     }
 
     override suspend fun register(
@@ -89,7 +97,7 @@ class ApiRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUniversities(): Result<List<UniversityResponse>> {
-        return  try {
+        return try {
             val result = remoteDataSource.getUniversities()
             Result.success(result)
         } catch (e: Exception) {
@@ -98,13 +106,13 @@ class ApiRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCourseRecommendation(answers: List<AnsweredQuestionRequest>): Result<List<CourseRecommendationResponse>> {
-       return try {
-           val result = remoteDataSource.fetchCourseRecommendation(answers)
-           Result.success(result)
-       } catch (e: Exception) {
-           Log.e("getQuestions", "Exception: ${e.message}", e)
-           Result.failure(Exception("Failed to get recommendation: $e"))
-       }
+        return try {
+            val result = remoteDataSource.fetchCourseRecommendation(answers)
+            Result.success(result)
+        } catch (e: Exception) {
+            Log.e("getQuestions", "Exception: ${e.message}", e)
+            Result.failure(Exception("Failed to get recommendation: $e"))
+        }
     }
 
 

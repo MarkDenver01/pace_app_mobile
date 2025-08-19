@@ -12,6 +12,7 @@ import io.dev.pace_app_mobile.data.remote.network.ApiService
 import io.dev.pace_app_mobile.data.remote.repository.ApiRepositoryImpl
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
+import io.dev.pace_app_mobile.domain.usecase.GoogleLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
@@ -60,5 +61,10 @@ object AppModule {
     @Singleton
     fun provideUniversityUseCase(repository: ApiRepository): UniversityUseCase =
         UniversityUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGoogleLoginUseCase(repository: ApiRepository): GoogleLoginUseCase =
+        GoogleLoginUseCase(repository)
 
 }

@@ -10,6 +10,8 @@ import io.dev.pace_app_mobile.domain.model.RegisterResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 
@@ -34,4 +36,9 @@ interface ApiService {
 
     @GET("user/public/university/all")
     suspend fun getAllUniversity(): Response<List<UniversityResponse>>
+
+    @FormUrlEncoded
+    @POST("user/public/google_login")
+    suspend fun googleLogin(@Field("idToken") idToken: String,
+                            @Field("universityId") universityId: Long) : Response<LoginResponse>
 }
