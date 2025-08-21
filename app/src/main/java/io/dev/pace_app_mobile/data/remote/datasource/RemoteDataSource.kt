@@ -5,12 +5,14 @@ import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.LoginResponse
+import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import retrofit2.Response
 import javax.inject.Inject
+import kotlin.math.log
 
 class RemoteDataSource @Inject constructor(
     private val api: ApiService
@@ -48,16 +50,17 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun googleLogin(idToken: String, universityId: Long): Result<LoginResponse> {
-        return try {
-            val response = api.googleLogin(idToken, universityId)
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception(response.errorBody()?.string() ?: "Google login failed"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun googleLogin(idToken: String, universityId: Long): LoginResult {
+        val response = api.googleLogin(idToken, universityId)
+        if (response.isSuccessful) {
+            val loginResult = LoginResult(response.body(), response.code())
+            return loginResult
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
         }
     }
 
@@ -91,6 +94,19 @@ class RemoteDataSource @Inject constructor(
         val response = api.getAllUniversity()
         if (response.isSuccessful) {
             return response.body().orEmpty()
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun isGoogleAccountExist(email: String) : Boolean {
+        val response = api.isGoogleAccountExist(email)
+        if (response.isSuccessful) {
+            return response.body() ?: false
         } else {
             throw Exception(
                 "error: " +

@@ -88,6 +88,15 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+
+/**
+ * Responsive height fraction
+ *
+ * @param fraction
+ * @param min
+ * @param max
+ * @return
+ */
 @Composable
 fun responsiveHeightFraction(
     fraction: Float,
@@ -99,6 +108,14 @@ fun responsiveHeightFraction(
     return calculated.coerceIn(min, max)
 }
 
+/**
+ * Responsive width fraction
+ *
+ * @param fraction
+ * @param min
+ * @param max
+ * @return
+ */
 @Composable
 fun responsiveWidthFraction(
     fraction: Float,
@@ -110,6 +127,15 @@ fun responsiveWidthFraction(
     return calculated.coerceIn(min, max)
 }
 
+/**
+ * Responsive text sp
+ *
+ * @param base
+ * @param scaleFactor
+ * @param min
+ * @param max
+ * @return
+ */
 @Composable
 fun responsiveTextSp(
     base: Float = 16f,
@@ -122,6 +148,13 @@ fun responsiveTextSp(
     return calculated.sp
 }
 
+/**
+ * Responsive dp
+ *
+ * @param base
+ * @param designWidthDp
+ * @return
+ */
 @Composable
 fun responsiveDp(
     base: Float,
@@ -132,6 +165,13 @@ fun responsiveDp(
     return (base * scale).dp
 }
 
+/**
+ * Responsive sp
+ *
+ * @param base
+ * @param designWidthDp
+ * @return
+ */
 @Composable
 fun responsiveSp(
     base: Float,
@@ -143,6 +183,19 @@ fun responsiveSp(
 }
 
 
+/**
+ * Custom text field
+ *
+ * @param value
+ * @param onValueChange
+ * @param placeholder
+ * @param isPassword
+ * @param leadingIcon
+ * @param leadingIconPainter
+ * @param fontSize
+ * @param modifier
+ * @receiver
+ */
 @Composable
 fun CustomTextField(
     value: String,
@@ -229,6 +282,25 @@ fun CustomTextField(
     )
 }
 
+/**
+ * Custom icon button
+ *
+ * @param icon
+ * @param text
+ * @param onClick
+ * @param width
+ * @param height
+ * @param fontSize
+ * @param backgroundColor
+ * @param pressedBackgroundColor
+ * @param contentColor
+ * @param borderColor
+ * @param cornerRadius
+ * @param iconTint
+ * @param iconSize
+ * @param enabled
+ * @receiver
+ */
 @Composable
 fun CustomIconButton(
     icon: Int,
@@ -301,6 +373,21 @@ fun CustomIconButton(
 }
 
 
+/**
+ * Custom dynamic button
+ *
+ * @param onClick
+ * @param modifier
+ * @param height
+ * @param fontSize
+ * @param backgroundColor
+ * @param pressedBackgroundColor
+ * @param cornerRadius
+ * @param elevation
+ * @param borderColor
+ * @param content
+ * @receiver
+ */
 @Composable
 fun CustomDynamicButton(
     onClick: () -> Unit,
@@ -356,6 +443,20 @@ fun CustomDynamicButton(
 }
 
 
+/**
+ * Custom date time picker
+ *
+ * @param date
+ * @param onDateSelected
+ * @param placeholder
+ * @param leadingIcon
+ * @param fontSize
+ * @param modifier
+ * @param containerColor
+ * @param borderColor
+ * @param textColor
+ * @receiver
+ */
 @Composable
 fun CustomDateTimePicker(
     date: String,
@@ -426,6 +527,14 @@ fun CustomDateTimePicker(
 }
 
 
+/**
+ * Custom date picker
+ *
+ * @param onDateSelected
+ * @param onDismissRequest
+ * @receiver
+ * @receiver
+ */
 @Composable
 fun CustomDatePicker(
     onDateSelected: (String) -> Unit,
@@ -454,6 +563,21 @@ fun CustomDatePicker(
     }.show()
 }
 
+/**
+ * Custom drop down picker
+ *
+ * @param selectedOption
+ * @param onOptionSelected
+ * @param options
+ * @param placeholder
+ * @param leadingIcon
+ * @param fontSize
+ * @param modifier
+ * @param containerColor
+ * @param borderColor
+ * @param textColor
+ * @receiver
+ */
 @Composable
 fun CustomDropDownPicker(
     selectedOption: String,
@@ -557,6 +681,21 @@ fun CustomDropDownPicker(
 
 }
 
+/**
+ * Custom dynamic info card
+ *
+ * @param title
+ * @param content
+ * @param footerReminder
+ * @param modifier
+ * @param height
+ * @param backgroundColor
+ * @param titleFontSize
+ * @param bodyFontSize
+ * @param footerFontSize
+ * @param icon
+ * @param iconColor
+ */
 @Composable
 fun CustomDynamicInfoCard(
     title: String,
@@ -634,6 +773,15 @@ fun CustomDynamicInfoCard(
     }
 }
 
+/**
+ * Custom check box
+ *
+ * @param checked
+ * @param onCheckedChange
+ * @param label
+ * @param annotatedLabel
+ * @receiver
+ */
 @Composable
 fun CustomCheckBox(
     checked: Boolean,
@@ -672,6 +820,14 @@ fun CustomCheckBox(
     }
 }
 
+/**
+ * Yes no button group
+ *
+ * @param selected
+ * @param onSelect
+ * @param modifier
+ * @receiver
+ */
 @Composable
 fun YesNoButtonGroup(
     selected: String?,
@@ -711,6 +867,13 @@ fun YesNoButtonGroup(
     }
 }
 
+/**
+ * Progress header
+ *
+ * @param currentIndex
+ * @param totalQuestions
+ * @param modifier
+ */
 @Composable
 fun ProgressHeader(
     currentIndex: Int,
@@ -749,6 +912,15 @@ fun ProgressHeader(
 }
 
 
+/**
+ * Alert confirmation dialog
+ *
+ * @param message
+ * @param onConfirm
+ * @param onCancel
+ * @receiver
+ * @receiver
+ */
 @Composable
 fun AlertConfirmationDialog(
     message: String,
@@ -811,6 +983,14 @@ fun AlertConfirmationDialog(
     }
 }
 
+/**
+ * Alert dynamic confirmation dialog
+ *
+ * @param message
+ * @param alertType
+ * @param onClose
+ * @receiver
+ */
 @Composable
 fun AlertDynamicConfirmationDialog(
     message: String,
@@ -862,7 +1042,13 @@ fun AlertDynamicConfirmationDialog(
 }
 
 
-// dummy
+/**
+ * Assessment result dialog
+ *
+ * @param topCourses
+ * @param onDismiss
+ * @receiver
+ */// dummy
 @Composable
 fun AssessmentResultDialog(
     topCourses: List<String>,
@@ -889,6 +1075,18 @@ fun AssessmentResultDialog(
     )
 }
 
+/**
+ * Custom drop down picker
+ *
+ * @param selectedOption
+ * @param onOptionSelected
+ * @param options
+ * @param placeholder
+ * @param leadingIcon
+ * @param modifier
+ * @param fontSize
+ * @receiver
+ */
 @Composable
 fun CustomDropDownPicker(
     selectedOption: String,
@@ -983,6 +1181,19 @@ fun CustomDropDownPicker(
 }
 
 
+/**
+ * University dialog
+ *
+ * @param showDialog
+ * @param universities
+ * @param selectedUniversityId
+ * @param onSelect
+ * @param onConfirm
+ * @param onDismiss
+ * @receiver
+ * @receiver
+ * @receiver
+ */
 @Composable
 fun UniversityDialog(
     showDialog: Boolean,

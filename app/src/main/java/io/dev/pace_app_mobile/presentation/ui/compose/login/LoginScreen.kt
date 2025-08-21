@@ -26,10 +26,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,18 +53,21 @@ import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.enums.AlertType
+import io.dev.pace_app_mobile.navigation.Routes.START_ASSESSMENT_ROUTE
+import io.dev.pace_app_mobile.navigation.Routes.START_ROUTE
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
-import io.dev.pace_app_mobile.presentation.utils.AlertConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDropDownPicker
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
+import io.dev.pace_app_mobile.presentation.utils.ProgressDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,15 +79,21 @@ fun LoginScreen(
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    // UI state
     var mailAddress by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isRememberMe by remember { mutableStateOf(false) }
 
-    val showDialog by viewModel.showDialog.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val navigateTo by viewModel.navigateTo.collectAsState()
-
+    // Dialog and navigation states
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogTitle by remember { mutableStateOf("") }
+    var dialogMessage by remember { mutableStateOf("") }
+    var isSuccessDialog by remember { mutableStateOf(false) }
+    var showProgressDialog by remember { mutableStateOf(false) }
+    var showUniversityDialog by remember { mutableStateOf(false) }
+    var universityList by remember { mutableStateOf<List<UniversityResponse>>(emptyList()) }
     var googleIdToken by remember { mutableStateOf<String?>(null) }
+    var selectedUniversity by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val oneTapClient = remember { Identity.getSignInClient(context) }
@@ -100,23 +107,48 @@ fun LoginScreen(
                 val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
                 googleIdToken = credential.googleIdToken
                 if (googleIdToken != null) {
-                    viewModel.showUniversitySelector()
+                    viewModel.checkGoogleAccount(credential.id, googleIdToken!!)
                 } else {
                     Log.e("GoogleLogin", "ID Token is null")
-                    viewModel.onErrorShown()
+                    showDialog = true
+                    dialogTitle = "Error"
+                    dialogMessage = "Failed to retrieve Google ID Token."
+                    isSuccessDialog = false
                 }
             } catch (e: Exception) {
                 Log.e("GoogleLogin", "Credential retrieval failed", e)
-                viewModel.onErrorShown()
+                showDialog = true
+                dialogTitle = "Error"
+                dialogMessage = "Credential retrieval failed. Please try again."
+                isSuccessDialog = false
             }
         }
     }
 
-    // observe navigation state
-    LaunchedEffect(navigateTo) {
-        navigateTo?.let { route ->
-            navController.navigate(route)
-            viewModel.onNavigationHandled()
+    // Collect one-time events from the ViewModel
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collect { event ->
+            when (event) {
+                is LoginEvent.ShowProgressDialog -> showProgressDialog = event.isVisible
+                is LoginEvent.ShowSuccessDialog -> {
+                    dialogTitle = "Success"
+                    dialogMessage = event.message
+                    isSuccessDialog = true
+                    showDialog = true
+                }
+                is LoginEvent.ShowErrorDialog -> {
+                    dialogTitle = "Error"
+                    dialogMessage = event.message
+                    isSuccessDialog = false
+                    showDialog = true
+                }
+                is LoginEvent.NavigateTo -> navController.navigate(event.route)
+                is LoginEvent.ShowUniversityDialog -> {
+                    universityList = event.universities
+                    googleIdToken = event.googleIdToken
+                    showUniversityDialog = true
+                }
+            }
         }
     }
 
@@ -138,15 +170,13 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp) // apply where needed
+                .padding(horizontal = 24.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-
             Spacer(modifier = Modifier.height(spacing.lg))
-
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = stringResource(id = R.string.login_title),
@@ -182,13 +212,9 @@ fun LoginScreen(
                 ) {
                     CustomCheckBox(
                         checked = isRememberMe,
-                        onCheckedChange = {
-                            isRememberMe = it
-                            viewModel.setRemember(it)
-                        },
+                        onCheckedChange = { isRememberMe = it },
                         label = "Remember me"
                     )
-
                     Text(
                         text = "Forgot password?",
                         color = Color(0xFFCC4A1A),
@@ -213,7 +239,6 @@ fun LoginScreen(
                         withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
                             append("Create here.")
                         }
-
                     },
                     color = Color(0xFFCC4A1A),
                     modifier = Modifier.clickable {
@@ -234,65 +259,58 @@ fun LoginScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CustomIconButton(
                         icon = R.drawable.ic_google,
-                        onClick = {
-                            viewModel.fetchUniversities()
-                            startGoogleLogin(oneTapClient, launcher, context)
-                        }
+                        onClick = { startGoogleLogin(oneTapClient, launcher, context) }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_facebook,
-                        onClick = { viewModel.onAuthFacebookClick()}
+                        onClick = { viewModel.onAuthFacebookClick() }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_twitter,
-                        onClick = { viewModel.onAuthTwitterClick()}
+                        onClick = { viewModel.onAuthTwitterClick() }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_instagram,
-                        onClick = { viewModel.onAuthInstagramClick()}
+                        onClick = { viewModel.onAuthInstagramClick() }
                     )
                 }
             }
         }
     }
 
+    // Displays a progress dialog when the state is loading
+    if (showProgressDialog) {
+        ProgressDialog()
+    }
+
+    // Displays a dynamic alert dialog based on the event
     if (showDialog) {
         AlertDynamicConfirmationDialog(
-            message = "Login successful!",
-            alertType = AlertType.SUCCESS,
+            message = dialogMessage,
+            alertType = if (isSuccessDialog) AlertType.SUCCESS else AlertType.ERROR,
             onClose = {
-                viewModel.onDialogDismissed()
+                showDialog = false
+                if (isSuccessDialog) {
+                    navController.navigate(START_ASSESSMENT_ROUTE)
+                }
             }
         )
     }
 
-    // Error Dialog
-    errorMessage?.let { error ->
-        AlertDynamicConfirmationDialog(
-            message = error,
-            alertType = AlertType.ERROR,
-            onClose = {
-                viewModel.onErrorShown()
-            }
-        )
-    }
-
-    if (viewModel.showUniversityDialog.collectAsState().value) {
+    // University Selection Dialog
+    if (showUniversityDialog) {
         AlertDialog(
-            onDismissRequest = { viewModel.confirmUniversitySelection() },
+            onDismissRequest = { showUniversityDialog = false },
             title = { Text("Select University") },
             text = {
-                var selectedName by remember { mutableStateOf("") }
-                val universities by viewModel.universities.collectAsState()
-
                 CustomDropDownPicker(
-                    selectedOption = selectedName,
+                    selectedOption = selectedUniversity,
                     onOptionSelected = { option ->
-                        selectedName = option
-                        val uniId = universities.find { it.universityName == option }?.universityId
+                        selectedUniversity = option
+                        val uniId = universityList.find { it.universityName == option }?.universityId
                         uniId?.let { viewModel.setSelectedUniversity(it) }
                     },
-                    options = universities.map { it.universityName },
+                    options = universityList.map { it.universityName },
                     placeholder = "Choose your university",
                     leadingIcon = Icons.Default.Edit
                 )
@@ -300,14 +318,8 @@ fun LoginScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.confirmUniversitySelection()
-                        // Pass the stored token and the selected university ID
-                        val universityId = viewModel.selectedUniversityId.value
-                        if (googleIdToken != null && universityId != null) {
-                            viewModel.onAuthGoogleClick(googleIdToken!!)
-                        } else {
-                            viewModel.onErrorShown() // Show an error if data is missing
-                        }
+                        showUniversityDialog = false
+                        viewModel.onAuthGoogleClick(googleIdToken!!)
                     },
                     enabled = viewModel.selectedUniversityId.collectAsState().value != null
                 ) {
@@ -315,7 +327,7 @@ fun LoginScreen(
                 }
             },
             dismissButton = {
-                Button(onClick = { viewModel.confirmUniversitySelection() }) {
+                Button(onClick = { showUniversityDialog = false }) {
                     Text("Cancel")
                 }
             }

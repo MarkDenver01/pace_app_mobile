@@ -1,5 +1,16 @@
 package io.dev.pace_app_mobile.domain.model
 
+
+/**
+ * Question
+ *
+ * @property id
+ * @property category
+ * @property text
+ * @property imageResId
+ * @property courseName
+ * @constructor Create empty Question
+ */
 data class Question(
     val id: Int,
     val category: QuestionCategory,
@@ -8,9 +19,32 @@ data class Question(
     val courseName: String
 )
 
+/**
+ * Question category
+ *
+ * @property displayName
+ * @constructor Create empty Question category
+ */
 enum class QuestionCategory(val displayName: String) {
+    /**
+     * General
+     *
+     * @constructor Create empty General
+     */
     GENERAL("General Interest"),
+
+    /**
+     * Career
+     *
+     * @constructor Create empty Career
+     */
     CAREER("Career Interest"),
+
+    /**
+     * Personal
+     *
+     * @constructor Create empty Personal
+     */
     PERSONAL("Personal Qualities");
 
     companion object {
@@ -25,6 +59,15 @@ enum class QuestionCategory(val displayName: String) {
     }
 }
 
+/**
+ * Question response
+ *
+ * @property questionId
+ * @property question
+ * @property category
+ * @property courseName
+ * @constructor Create empty Question response
+ */
 data class QuestionResponse(
     val questionId: Int,
     val question: String,

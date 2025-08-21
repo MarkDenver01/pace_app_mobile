@@ -14,6 +14,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("user/public/login")
@@ -39,6 +40,11 @@ interface ApiService {
 
     @FormUrlEncoded
     @POST("user/public/google_login")
-    suspend fun googleLogin(@Field("idToken") idToken: String,
-                            @Field("universityId") universityId: Long) : Response<LoginResponse>
+    suspend fun googleLogin(
+        @Field("idToken") idToken: String,
+        @Field("universityId") universityId: Long
+    ): Response<LoginResponse>
+
+    @GET("user/public/google_account")
+    suspend fun isGoogleAccountExist(@Query("email") email: String): Response<Boolean>
 }

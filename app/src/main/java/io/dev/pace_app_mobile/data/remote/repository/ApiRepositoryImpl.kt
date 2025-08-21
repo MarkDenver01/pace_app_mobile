@@ -5,15 +5,17 @@ import io.dev.pace_app_mobile.data.local.prefs.TokenManager
 import io.dev.pace_app_mobile.data.local.room.dao.LoginDao
 import io.dev.pace_app_mobile.data.local.room.entity.LoginEntity
 import io.dev.pace_app_mobile.data.remote.datasource.RemoteDataSource
-import io.dev.pace_app_mobile.data.remote.network.ApiService
+import io.dev.pace_app_mobile.domain.enums.HttpStatus
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.LoginResponse
+import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
+import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import javax.inject.Inject
 
 class ApiRepositoryImpl @Inject constructor(
@@ -22,36 +24,51 @@ class ApiRepositoryImpl @Inject constructor(
     private val tokenManager: TokenManager
 ) : ApiRepository {
 
-    override suspend fun login(email: String, password: String): Result<Unit> {
+    override suspend fun isExistingGoogleAccount(email: String): Boolean {
+        return remoteDataSource.isGoogleAccountExist(email)
+    }
+
+    override suspend fun login(email: String, password: String): NetworkResult<LoginResponse> {
+        if (email.isEmpty() || password.isEmpty()) {
+            return NetworkResult.Error(HttpStatus.BAD_REQUEST, "Email or password cannot be empty")
+        }
+
         return try {
-            if (email.isEmpty() || password.isEmpty()) {
-                return Result.failure(Exception("Login failed: Email address or password cannot be empty"))
-            }
+            val loginResponse = remoteDataSource.login(LoginRequest(email, password))
 
-            val result = remoteDataSource.login(LoginRequest(email, password))
+            // gather data
+            val loginEntity = LoginEntity(
+                userName = loginResponse.username,
+                jwtToken = loginResponse.jwtToken,
+                role = loginResponse.role
+            )
 
-            run {
-                val entity = LoginEntity(
-                    userName = result.username,
-                    jwtToken = result.jwtToken,
-                    role = result.role
-                )
-
-                tokenManager.saveToken(entity.jwtToken) // TODO maybe modify soon
-                loginDao.insertLoginResponse(entity)
-                Result.success(Unit)
-            }
+            // save jwt token for API access
+            tokenManager.saveToken(loginEntity.jwtToken)
+            // insert to db
+            loginDao.insertLoginResponse(loginEntity)
+            NetworkResult.Success(HttpStatus.OK, loginResponse)
         } catch (e: Exception) {
-            Log.e("error", "$e")
-            Result.failure(Exception("Login failed: $e"))
+            NetworkResult.Error(HttpStatus.INTERNAL_SERVER_ERROR, "${e.message}")
         }
     }
 
-    override suspend fun googleLogin(
-        idToken: String,
-        universityId: Long
-    ): Result<LoginResponse> {
-        return remoteDataSource.googleLogin(idToken, universityId)
+    override suspend fun googleLogin(idToken: String, universityId: Long): Result<LoginResult> {
+        return try {
+            val loginResult = remoteDataSource.googleLogin(idToken, universityId)
+
+            val loginEntity = LoginEntity(
+                userName = loginResult.loginResponse?.username ?: "",
+                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                role = loginResult.loginResponse?.role ?: ""
+            )
+
+            tokenManager.saveToken(loginEntity.jwtToken)
+            loginDao.insertLoginResponse(loginEntity)
+            Result.success(loginResult)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun register(
