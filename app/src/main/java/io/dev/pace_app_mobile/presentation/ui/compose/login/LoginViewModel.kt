@@ -3,6 +3,8 @@ package io.dev.pace_app_mobile.presentation.ui.compose.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.dev.pace_app_mobile.domain.enums.HttpStatus
+import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.usecase.GoogleAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleLoginUseCase
@@ -10,6 +12,7 @@ import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
+import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.log
 
 // UI state for the main login screen
 sealed class LoginUiState {
@@ -31,7 +35,10 @@ sealed class LoginEvent {
     data class ShowErrorDialog(val message: String) : LoginEvent()
     data class ShowProgressDialog(val isVisible: Boolean) : LoginEvent()
     data class NavigateTo(val route: String) : LoginEvent()
-    data class ShowUniversityDialog(val universities: List<UniversityResponse>, val googleIdToken: String) : LoginEvent()
+    data class ShowUniversityDialog(
+        val universities: List<UniversityResponse>,
+        val googleIdToken: String
+    ) : LoginEvent()
 }
 
 @HiltViewModel
@@ -71,6 +78,7 @@ class LoginViewModel @Inject constructor(
                 is NetworkResult.Error -> {
                     _eventFlow.emit(LoginEvent.ShowErrorDialog(result.message!!))
                 }
+
                 else -> {
                     // This state should not be handled here
                 }
@@ -84,40 +92,48 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onAuthGoogleClick(idToken: String) {
-        val universityId = _selectedUniversityId.value
-        if (universityId == null) {
-            viewModelScope.launch {
-                _eventFlow.emit(LoginEvent.ShowErrorDialog("Please select a university."))
+    fun onAuthGoogleClick(idToken: String, exists: Boolean) {
+        if (exists) {
+            loginWithGoogle(idToken, null)
+        } else {
+            val universityId = _selectedUniversityId.value
+            if (universityId != null) {
+                loginWithGoogle(idToken, universityId)
+            } else {
+                viewModelScope.launch {
+                    _eventFlow.emit(LoginEvent.ShowErrorDialog("Please select a university"))
+                }
             }
-            return
         }
+    }
 
+    private fun loginWithGoogle(idToken: String, universityId: Long?) {
         viewModelScope.launch {
             _eventFlow.emit(LoginEvent.ShowProgressDialog(true))
-
             val result = googleLoginUseCase(idToken, universityId)
             _eventFlow.emit(LoginEvent.ShowProgressDialog(false))
+            handleLoginResult(result)
+        }
+    }
 
-            result
-                .onSuccess { loginResult ->
-                    when (loginResult.statusCode) {
-                        201 -> {
-                            _eventFlow.emit(LoginEvent.ShowErrorDialog("Google account exists, but no user found."))
-                        }
-
-                        200 -> {
-                            _eventFlow.emit(LoginEvent.NavigateTo(Routes.START_ASSESSMENT_ROUTE))
-                        }
-
-                        else -> {
-                            _eventFlow.emit(LoginEvent.ShowErrorDialog("Unexpected success status: ${loginResult.statusCode}"))
-                        }
-                    }
+    private suspend fun handleLoginResult(result: NetworkResult<LoginResult>) {
+        when (result) {
+            is NetworkResult.Success -> {
+                val loginResult = result.data
+                when (getHttpStatus(loginResult?.statusCode ?: 0)) {
+                    HttpStatus.OK -> _eventFlow.emit(LoginEvent.NavigateTo(Routes.START_ASSESSMENT_ROUTE))
+                    HttpStatus.CREATED -> _eventFlow.emit(LoginEvent.ShowErrorDialog("Google account exists, but no user found."))
+                    HttpStatus.BAD_REQUEST -> _eventFlow.emit(LoginEvent.ShowErrorDialog("University is required for new users."))
+                    else -> _eventFlow.emit(LoginEvent.ShowErrorDialog("Unexpected status: ${loginResult?.statusCode}"))
                 }
-                .onFailure {
-                    _eventFlow.emit(LoginEvent.ShowErrorDialog(it.message ?: "Google login failed."))
-                }
+            }
+
+            is NetworkResult.Error -> {
+                _eventFlow.emit(LoginEvent.ShowErrorDialog(result.message
+                    ?: "Google login failed."))
+            }
+
+            else -> {}
         }
     }
 
@@ -135,7 +151,7 @@ class LoginViewModel @Inject constructor(
                 _eventFlow.emit(LoginEvent.ShowProgressDialog(false))
 
                 if (exists) {
-                    onAuthGoogleClick(idToken)
+                    onAuthGoogleClick(idToken, true)
                 } else {
                     fetchUniversities(idToken)
                 }

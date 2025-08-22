@@ -42,9 +42,9 @@ interface ApiService {
     @POST("user/public/google_login")
     suspend fun googleLogin(
         @Field("idToken") idToken: String,
-        @Field("universityId") universityId: Long
+        @Field("universityId") universityId: Long?
     ): Response<LoginResponse>
 
-    @GET("user/public/google_account")
+    @GET("user/public/check/google_account")
     suspend fun isGoogleAccountExist(@Query("email") email: String): Response<Boolean>
 }

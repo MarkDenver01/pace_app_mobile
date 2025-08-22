@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.dev.pace_app_mobile.domain.enums.HttpStatus
 
 
 /**
@@ -29,6 +30,10 @@ fun Color.darken(factor: Float = 0.85f): Color {
         blue = blue * factor,
         alpha = alpha
     )
+}
+
+fun getHttpStatus(statusCode: Int): HttpStatus {
+    return HttpStatus.fromCode(statusCode)
 }
 
 @Composable

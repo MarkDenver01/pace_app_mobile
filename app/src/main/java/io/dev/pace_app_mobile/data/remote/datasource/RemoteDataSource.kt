@@ -50,7 +50,7 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun googleLogin(idToken: String, universityId: Long): LoginResult {
+    suspend fun googleLogin(idToken: String, universityId: Long?): LoginResult {
         val response = api.googleLogin(idToken, universityId)
         if (response.isSuccessful) {
             val loginResult = LoginResult(response.body(), response.code())

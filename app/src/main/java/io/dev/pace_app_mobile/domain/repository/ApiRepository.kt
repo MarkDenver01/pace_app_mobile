@@ -39,7 +39,7 @@ interface ApiRepository {
      * @param universityId
      * @return
      */
-    suspend fun googleLogin(idToken: String, universityId: Long): Result<LoginResult>
+    suspend fun googleLogin(idToken: String, universityId: Long? = null): NetworkResult<LoginResult>
 
     /**
      * Register

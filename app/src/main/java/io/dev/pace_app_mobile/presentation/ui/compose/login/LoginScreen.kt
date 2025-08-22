@@ -136,12 +136,14 @@ fun LoginScreen(
                     isSuccessDialog = true
                     showDialog = true
                 }
+
                 is LoginEvent.ShowErrorDialog -> {
                     dialogTitle = "Error"
                     dialogMessage = event.message
                     isSuccessDialog = false
                     showDialog = true
                 }
+
                 is LoginEvent.NavigateTo -> navController.navigate(event.route)
                 is LoginEvent.ShowUniversityDialog -> {
                     universityList = event.universities
@@ -259,7 +261,7 @@ fun LoginScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CustomIconButton(
                         icon = R.drawable.ic_google,
-                        onClick = { startGoogleLogin(oneTapClient, launcher, context) }
+                        onClick = { startGoogleLogin(oneTapClient, launcher) }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_facebook,
@@ -307,7 +309,9 @@ fun LoginScreen(
                     selectedOption = selectedUniversity,
                     onOptionSelected = { option ->
                         selectedUniversity = option
-                        val uniId = universityList.find { it.universityName == option }?.universityId
+                        val uniId =
+                            universityList.find { it.universityName == option }?.universityId
+                        uniId?.let { viewModel.setSelectedUniversity(it) }
                         uniId?.let { viewModel.setSelectedUniversity(it) }
                     },
                     options = universityList.map { it.universityName },
@@ -319,7 +323,7 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         showUniversityDialog = false
-                        viewModel.onAuthGoogleClick(googleIdToken!!)
+                        viewModel.onAuthGoogleClick(googleIdToken!!, false)
                     },
                     enabled = viewModel.selectedUniversityId.collectAsState().value != null
                 ) {
@@ -337,8 +341,7 @@ fun LoginScreen(
 
 private fun startGoogleLogin(
     oneTapClient: SignInClient,
-    launcher: ActivityResultLauncher<IntentSenderRequest>,
-    context: Context
+    launcher: ActivityResultLauncher<IntentSenderRequest>
 ) {
     val request = GetSignInIntentRequest.builder()
         // Use your Web Client ID here
@@ -347,7 +350,8 @@ private fun startGoogleLogin(
 
     oneTapClient.getSignInIntent(request)
         .addOnSuccessListener { pendingIntent ->
-            val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+            val intentSenderRequest =
+                IntentSenderRequest.Builder(pendingIntent.intentSender).build()
             launcher.launch(intentSenderRequest)
         }
         .addOnFailureListener { e ->

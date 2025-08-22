@@ -83,5 +83,11 @@ enum class HttpStatus(val code: Int) {
      *
      * @constructor Create empty Unknown Error
      */
-    UNKNOWN_ERROR(0)
+    UNKNOWN_ERROR(0);
+
+    companion object  {
+        fun fromCode(code: Int): HttpStatus {
+            return entries.find { it.code == code } ?: UNKNOWN_ERROR
+        }
+    }
 }

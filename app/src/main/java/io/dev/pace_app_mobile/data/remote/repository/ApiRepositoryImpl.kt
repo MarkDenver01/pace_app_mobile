@@ -16,6 +16,7 @@ import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
+import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
 import javax.inject.Inject
 
 class ApiRepositoryImpl @Inject constructor(
@@ -53,21 +54,21 @@ class ApiRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun googleLogin(idToken: String, universityId: Long): Result<LoginResult> {
+    override suspend fun googleLogin(idToken: String, universityId: Long?): NetworkResult<LoginResult> {
         return try {
             val loginResult = remoteDataSource.googleLogin(idToken, universityId)
 
             val loginEntity = LoginEntity(
                 userName = loginResult.loginResponse?.username ?: "",
                 jwtToken = loginResult.loginResponse?.jwtToken ?: "",
-                role = loginResult.loginResponse?.role ?: ""
+                role = loginResult.loginResponse?.role.orEmpty()
             )
 
             tokenManager.saveToken(loginEntity.jwtToken)
             loginDao.insertLoginResponse(loginEntity)
-            Result.success(loginResult)
+            NetworkResult.Success(getHttpStatus(loginResult.statusCode), loginResult)
         } catch (e: Exception) {
-            Result.failure(e)
+            NetworkResult.Error(getHttpStatus(401), e.message.toString())
         }
     }
 
@@ -131,6 +132,4 @@ class ApiRepositoryImpl @Inject constructor(
             Result.failure(Exception("Failed to get recommendation: $e"))
         }
     }
-
-
 }
