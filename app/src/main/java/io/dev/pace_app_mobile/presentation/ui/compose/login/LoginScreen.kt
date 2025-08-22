@@ -89,6 +89,7 @@ fun LoginScreen(
     var dialogTitle by remember { mutableStateOf("") }
     var dialogMessage by remember { mutableStateOf("") }
     var isSuccessDialog by remember { mutableStateOf(false) }
+    var isWarningDialog by remember { mutableStateOf(false) }
     var showProgressDialog by remember { mutableStateOf(false) }
     var showUniversityDialog by remember { mutableStateOf(false) }
     var universityList by remember { mutableStateOf<List<UniversityResponse>>(emptyList()) }
@@ -114,6 +115,7 @@ fun LoginScreen(
                     dialogTitle = "Error"
                     dialogMessage = "Failed to retrieve Google ID Token."
                     isSuccessDialog = false
+                    isWarningDialog = false
                 }
             } catch (e: Exception) {
                 Log.e("GoogleLogin", "Credential retrieval failed", e)
@@ -121,6 +123,7 @@ fun LoginScreen(
                 dialogTitle = "Error"
                 dialogMessage = "Credential retrieval failed. Please try again."
                 isSuccessDialog = false
+                isWarningDialog = false
             }
         }
     }
@@ -133,7 +136,16 @@ fun LoginScreen(
                 is LoginEvent.ShowSuccessDialog -> {
                     dialogTitle = "Success"
                     dialogMessage = event.message
+                    isWarningDialog = false
                     isSuccessDialog = true
+                    showDialog = true
+                }
+
+                is LoginEvent.ShowWarningDialog -> {
+                    dialogTitle = "Warning"
+                    dialogMessage = event.message
+                    isWarningDialog = true
+                    isSuccessDialog = false
                     showDialog = true
                 }
 
@@ -141,6 +153,7 @@ fun LoginScreen(
                     dialogTitle = "Error"
                     dialogMessage = event.message
                     isSuccessDialog = false
+                    isWarningDialog = false
                     showDialog = true
                 }
 
@@ -289,7 +302,11 @@ fun LoginScreen(
     if (showDialog) {
         AlertDynamicConfirmationDialog(
             message = dialogMessage,
-            alertType = if (isSuccessDialog) AlertType.SUCCESS else AlertType.ERROR,
+            alertType = when {
+                isWarningDialog -> AlertType.WARNING
+                isSuccessDialog -> AlertType.SUCCESS
+                else -> AlertType.ERROR
+            },
             onClose = {
                 showDialog = false
                 if (isSuccessDialog) {

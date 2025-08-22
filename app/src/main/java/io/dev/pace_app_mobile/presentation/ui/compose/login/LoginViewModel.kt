@@ -33,6 +33,7 @@ sealed class LoginUiState {
 sealed class LoginEvent {
     data class ShowSuccessDialog(val message: String) : LoginEvent()
     data class ShowErrorDialog(val message: String) : LoginEvent()
+    data class ShowWarningDialog(val message: String) : LoginEvent()
     data class ShowProgressDialog(val isVisible: Boolean) : LoginEvent()
     data class NavigateTo(val route: String) : LoginEvent()
     data class ShowUniversityDialog(
@@ -121,16 +122,28 @@ class LoginViewModel @Inject constructor(
             is NetworkResult.Success -> {
                 val loginResult = result.data
                 when (getHttpStatus(loginResult?.statusCode ?: 0)) {
-                    HttpStatus.OK -> _eventFlow.emit(LoginEvent.NavigateTo(Routes.START_ASSESSMENT_ROUTE))
-                    HttpStatus.CREATED -> _eventFlow.emit(LoginEvent.ShowErrorDialog("Google account exists, but no user found."))
+                    HttpStatus.OK -> {
+                        val status = loginResult?.loginResponse?.studentResponse?.userAccountStatus
+                        if (status.equals("PENDING")) {
+                            _eventFlow.emit(LoginEvent.ShowWarningDialog("Please wait to approved your account by the admin. Thank you."))
+                        } else {
+                            _eventFlow.emit(LoginEvent.ShowSuccessDialog("Login successful"))
+                        }
+                    }
+
+                    HttpStatus.CREATED -> _eventFlow.emit(LoginEvent.ShowWarningDialog("Please wait to approved your account by the admin. Thank you."))
                     HttpStatus.BAD_REQUEST -> _eventFlow.emit(LoginEvent.ShowErrorDialog("University is required for new users."))
                     else -> _eventFlow.emit(LoginEvent.ShowErrorDialog("Unexpected status: ${loginResult?.statusCode}"))
                 }
             }
 
             is NetworkResult.Error -> {
-                _eventFlow.emit(LoginEvent.ShowErrorDialog(result.message
-                    ?: "Google login failed."))
+                _eventFlow.emit(
+                    LoginEvent.ShowErrorDialog(
+                        result.message
+                            ?: "Google login failed."
+                    )
+                )
             }
 
             else -> {}
