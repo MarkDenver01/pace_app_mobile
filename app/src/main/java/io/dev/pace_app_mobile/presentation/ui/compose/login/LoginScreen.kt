@@ -1,12 +1,14 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.login
 
 import android.app.Activity
-import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,6 +52,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult as FacebookLoginResult
 import com.google.android.gms.auth.api.identity.GetSignInIntentRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -56,7 +64,6 @@ import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.navigation.Routes.START_ASSESSMENT_ROUTE
-import io.dev.pace_app_mobile.navigation.Routes.START_ROUTE
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
@@ -67,7 +74,15 @@ import io.dev.pace_app_mobile.presentation.utils.CustomDropDownPicker
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
+import io.dev.pace_app_mobile.presentation.utils.OAuthProviders
 import io.dev.pace_app_mobile.presentation.utils.ProgressDialog
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.AuthorizationService
+import net.openid.appauth.AuthorizationServiceConfiguration
+import net.openid.appauth.CodeVerifierUtil
+import net.openid.appauth.ResponseTypeValues
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,12 +109,102 @@ fun LoginScreen(
     var showUniversityDialog by remember { mutableStateOf(false) }
     var universityList by remember { mutableStateOf<List<UniversityResponse>>(emptyList()) }
     var googleIdToken by remember { mutableStateOf<String?>(null) }
+    var facebookAccessToken by remember { mutableStateOf<String?>(null) }
     var selectedUniversity by remember { mutableStateOf("") }
 
     val context = LocalContext.current
+    val activity = context as Activity
     val oneTapClient = remember { Identity.getSignInClient(context) }
+    val authService = remember { AuthorizationService(context) }
+    val callbackManager = remember { CallbackManager.Factory.create() }
+    var twitterAccessToken by remember { mutableStateOf<String?>(null) }
+    var instagramAuthCode by remember { mutableStateOf<String?>(null) }
 
-    // Google sign-in launcher
+    val instagramAuthLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.data?.data != null) {
+                val redirect =
+                    result.data!!.data!! // io.dev.pace://oauth2redirect/instagram?code=...
+                val code = redirect.getQueryParameter("code")
+                if (code != null) {
+                    // New flow: send CODE to backend (backend should exchange for access_token securely)
+                    // If the backend returns BAD_REQUEST for missing university, we will open the picker
+                    viewModel.onAuthInstagramClick(code, exists = true)
+                } else {
+                    Log.e("InstagramAuth", "No authorization code in redirect")
+                }
+            }
+        }
+
+    val twitterAuthLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val resp = AuthorizationResponse.fromIntent(result.data!!)
+                val ex = AuthorizationException.fromIntent(result.data!!)
+                if (resp != null) {
+                    // Exchange code for tokens (handled by AppAuth; no client secret when using PKCE)
+                    val tokenReq = resp.createTokenExchangeRequest()
+                    authService.performTokenRequest(tokenReq) { tokenResp, tokenEx ->
+                        if (tokenResp != null) {
+                            val accessToken = tokenResp.accessToken
+                            if (accessToken != null) {
+                                // Try backend login immediately; if backend needs university, trigger viewModel.startTwitterNewUser()
+                                viewModel.onAuthTwitterClick(accessToken, exists = true)
+                            }
+                        } else {
+                            Log.e(
+                                "TwitterAuth",
+                                "Token exchange failed: ${tokenEx?.errorDescription}"
+                            )
+                        }
+                    }
+                } else {
+                    Log.e("TwitterAuth", "Authorization error: ${ex?.errorDescription}")
+                }
+            }
+        }
+
+    DisposableEffect(Unit) {
+        val loginManager = LoginManager.getInstance()
+        val callback = object : FacebookCallback<FacebookLoginResult> {
+            override fun onSuccess(result: FacebookLoginResult) {
+                val token = result.accessToken.token
+                if (token != null) {
+                    // Try login immediately; if backend needs university, VM will emit dialog event
+                    viewModel.checkFacebookAccount(token, true)
+                    // keep token for potential follow-up new-user flow
+                    facebookAccessToken = token
+                } else {
+                    showDialog = true
+                    dialogTitle = "Error"
+                    dialogMessage = "Failed to retrieve Facebook access token."
+                    isSuccessDialog = false
+                    isWarningDialog = false
+                }
+            }
+
+            override fun onCancel() {
+                showDialog = true
+                dialogTitle = "Canceled"
+                dialogMessage = "Facebook login canceled."
+                isSuccessDialog = false
+                isWarningDialog = true
+            }
+
+            override fun onError(error: FacebookException) {
+                showDialog = true
+                dialogTitle = "Error"
+                dialogMessage = error.localizedMessage ?: "Facebook login failed."
+                isSuccessDialog = false
+                isWarningDialog = false
+            }
+        }
+
+        loginManager.registerCallback(callbackManager, callback)
+        onDispose { loginManager.unregisterCallback(callbackManager) }
+    }
+
+    // --- Google sign-in launcher ---
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
@@ -133,6 +238,7 @@ fun LoginScreen(
         viewModel.eventFlow.collect { event ->
             when (event) {
                 is LoginEvent.ShowProgressDialog -> showProgressDialog = event.isVisible
+
                 is LoginEvent.ShowSuccessDialog -> {
                     dialogTitle = "Success"
                     dialogMessage = event.message
@@ -158,9 +264,34 @@ fun LoginScreen(
                 }
 
                 is LoginEvent.NavigateTo -> navController.navigate(event.route)
+
                 is LoginEvent.ShowUniversityDialog -> {
+                    // Google flow
                     universityList = event.universities
                     googleIdToken = event.googleIdToken
+                    facebookAccessToken = null; instagramAuthCode = null; twitterAccessToken = null
+                    showUniversityDialog = true
+                }
+
+                is LoginEvent.ShowUniversityDialogFacebook -> {
+                    // Facebook flow
+                    universityList = event.universities
+                    facebookAccessToken = event.facebookAccessToken
+                    googleIdToken = null; twitterAccessToken = null; instagramAuthCode = null
+                    showUniversityDialog = true
+                }
+
+                is LoginEvent.ShowUniversityDialogTwitter -> {
+                    universityList = event.universities
+                    twitterAccessToken = event.twitterAccessToken
+                    googleIdToken = null; facebookAccessToken = null; instagramAuthCode = null
+                    showUniversityDialog = true
+                }
+
+                is LoginEvent.ShowUniversityDialogInstagram -> {
+                    universityList = event.universities
+                    instagramAuthCode = event.authorizationCode
+                    googleIdToken = null; facebookAccessToken = null; twitterAccessToken = null
                     showUniversityDialog = true
                 }
             }
@@ -278,27 +409,67 @@ fun LoginScreen(
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_facebook,
-                        onClick = { viewModel.onAuthFacebookClick() }
+                        onClick = {
+                            val registryOwner = activity as ActivityResultRegistryOwner
+                            LoginManager.getInstance().logIn(
+                                registryOwner,
+                                callbackManager,
+                                listOf("email", "public_profile")
+                            )
+                        }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_twitter,
-                        onClick = { viewModel.onAuthTwitterClick() }
+                        onClick = {
+                            val serviceConfig = AuthorizationServiceConfiguration(
+                                Uri.parse(OAuthProviders.TW_AUTH_URI),
+                                Uri.parse(OAuthProviders.TW_TOKEN_URI)
+                            )
+                            val req = AuthorizationRequest.Builder(
+                                serviceConfig,
+                                OAuthProviders.TW_CLIENT_ID,
+                                ResponseTypeValues.CODE,
+                                Uri.parse(OAuthProviders.TW_REDIRECT_URI)
+                            ).setScopes(OAuthProviders.TW_SCOPES)
+                                .setCodeVerifier(CodeVerifierUtil.generateRandomCodeVerifier())
+                                .build()
+
+
+                            val authIntent = authService.getAuthorizationRequestIntent(req)
+                            twitterAuthLauncher.launch(authIntent)
+                        }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_instagram,
-                        onClick = { viewModel.onAuthInstagramClick() }
+                        onClick = {
+                            // Instagram Basic Display authorization (response_type=code)
+                            val authUri = Uri.parse(OAuthProviders.IG_AUTH_URI).buildUpon()
+                                .appendQueryParameter("client_id", OAuthProviders.IG_CLIENT_ID)
+                                .appendQueryParameter(
+                                    "redirect_uri",
+                                    OAuthProviders.IG_REDIRECT_URI
+                                )
+                                .appendQueryParameter(
+                                    "scope",
+                                    "user_profile"
+                                ) // 'user_media' optional
+                                .appendQueryParameter("response_type", "code")
+                                .build()
+
+
+                            val intent = Intent(Intent.ACTION_VIEW, authUri)
+                            instagramAuthLauncher.launch(intent)
+                        }
                     )
                 }
             }
         }
     }
 
-    // Displays a progress dialog when the state is loading
     if (showProgressDialog) {
         ProgressDialog()
     }
 
-    // Displays a dynamic alert dialog based on the event
     if (showDialog) {
         AlertDynamicConfirmationDialog(
             message = dialogMessage,
@@ -316,7 +487,7 @@ fun LoginScreen(
         )
     }
 
-    // University Selection Dialog
+    // University Selection Dialog (reused for Google & Facebook)
     if (showUniversityDialog) {
         AlertDialog(
             onDismissRequest = { showUniversityDialog = false },
@@ -329,7 +500,6 @@ fun LoginScreen(
                         val uniId =
                             universityList.find { it.universityName == option }?.universityId
                         uniId?.let { viewModel.setSelectedUniversity(it) }
-                        uniId?.let { viewModel.setSelectedUniversity(it) }
                     },
                     options = universityList.map { it.universityName },
                     placeholder = "Choose your university",
@@ -340,17 +510,29 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         showUniversityDialog = false
-                        viewModel.onAuthGoogleClick(googleIdToken!!, false)
+                        when {
+                            googleIdToken != null -> {
+                                viewModel.onAuthGoogleClick(googleIdToken!!, exists = false)
+                            }
+
+                            facebookAccessToken != null -> {
+                                viewModel.onAuthFacebookClick(facebookAccessToken!!, exists = false)
+                            }
+
+                            twitterAccessToken != null -> {
+                                viewModel.onAuthTwitterClick(twitterAccessToken!!, exists = false)
+                            }
+
+                            instagramAuthCode != null -> {
+                                viewModel.onAuthInstagramClick(instagramAuthCode!!, exists = false)
+                            }
+                        }
                     },
                     enabled = viewModel.selectedUniversityId.collectAsState().value != null
-                ) {
-                    Text("OK")
-                }
+                ) { Text("OK") }
             },
             dismissButton = {
-                Button(onClick = { showUniversityDialog = false }) {
-                    Text("Cancel")
-                }
+                Button(onClick = { showUniversityDialog = false }) { Text("Cancel") }
             }
         )
     }
@@ -361,7 +543,6 @@ private fun startGoogleLogin(
     launcher: ActivityResultLauncher<IntentSenderRequest>
 ) {
     val request = GetSignInIntentRequest.builder()
-        // Use your Web Client ID here
         .setServerClientId("13172730276-np8mp31qu0gun6of0qch2gvder08hlaq.apps.googleusercontent.com")
         .build()
 

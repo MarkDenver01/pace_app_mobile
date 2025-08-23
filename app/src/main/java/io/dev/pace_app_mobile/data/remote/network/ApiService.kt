@@ -45,6 +45,30 @@ interface ApiService {
         @Field("universityId") universityId: Long?
     ): Response<LoginResponse>
 
+    @FormUrlEncoded
+    @POST("user/public/facebook_login")
+    suspend fun facebookLogin(
+        @Field("accessToken") accessToken: String,
+        @Field("universityId") universityId: Long?
+    ): Response<LoginResponse>
+
+    @FormUrlEncoded
+    @POST("user/public/instagram_login")
+    suspend fun instagramLogin(
+        @Field("accessToken") accessToken: String,
+        @Field("universityId") universityId: Long?
+    ): Response<LoginResponse>
+
+    @FormUrlEncoded
+    @POST("user/public/twitter_login")
+    suspend fun twitterLogin(
+        @Field("accessToken") accessToken: String,
+        @Field("universityId") universityId: Long?
+    ): Response<LoginResponse>
+
     @GET("user/public/check/google_account")
     suspend fun isGoogleAccountExist(@Query("email") email: String): Response<Boolean>
+
+    @GET("user/public/check/facebook_account")
+    suspend fun isFacebookAccountExist(@Query("accessToken") accessToken: String): Response<Boolean>
 }

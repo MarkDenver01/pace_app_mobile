@@ -29,6 +29,10 @@ class ApiRepositoryImpl @Inject constructor(
         return remoteDataSource.isGoogleAccountExist(email)
     }
 
+    override suspend fun isExistingFacebookAccount(accessToken: String): Boolean {
+        return remoteDataSource.isFacebookLogin(accessToken)
+    }
+
     override suspend fun login(email: String, password: String): NetworkResult<LoginResponse> {
         if (email.isEmpty() || password.isEmpty()) {
             return NetworkResult.Error(HttpStatus.BAD_REQUEST, "Email or password cannot be empty")
@@ -67,6 +71,75 @@ class ApiRepositoryImpl @Inject constructor(
             tokenManager.saveToken(loginEntity.jwtToken)
             loginDao.insertLoginResponse(loginEntity)
             NetworkResult.Success(getHttpStatus(loginResult.statusCode), loginResult)
+        } catch (e: Exception) {
+            NetworkResult.Error(getHttpStatus(401), e.message.toString())
+        }
+    }
+
+    override suspend fun facebookLogin(
+        accessToken: String,
+        universityId: Long?
+    ): NetworkResult<LoginResult> {
+        return try {
+            val loginResult = remoteDataSource.facebookLogin(accessToken, universityId)
+
+            val loginEntity = LoginEntity(
+                userName = loginResult.loginResponse?.username ?: "",
+                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                role = loginResult.loginResponse?.role.orEmpty()
+            )
+
+            tokenManager.saveToken(loginEntity.jwtToken)
+            loginDao.insertLoginResponse(loginEntity)
+
+            NetworkResult.Success(getHttpStatus(loginResult.statusCode),
+                loginResult)
+        } catch (e: Exception) {
+            NetworkResult.Error(getHttpStatus(401), e.message.toString())
+        }
+    }
+
+    override suspend fun instagramLogin(
+        accessToken: String,
+        universityId: Long?
+    ): NetworkResult<LoginResult> {
+        return try {
+            val loginResult = remoteDataSource.instagramLogin(accessToken, universityId)
+
+            val loginEntity = LoginEntity(
+                userName = loginResult.loginResponse?.username ?: "",
+                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                role = loginResult.loginResponse?.role.orEmpty()
+            )
+
+            tokenManager.saveToken(loginEntity.jwtToken)
+            loginDao.insertLoginResponse(loginEntity)
+
+            NetworkResult.Success(getHttpStatus(loginResult.statusCode),
+                loginResult)
+        } catch (e: Exception) {
+            NetworkResult.Error(getHttpStatus(401), e.message.toString())
+        }
+    }
+
+    override suspend fun twitterLogin(
+        accessToken: String,
+        universityId: Long?
+    ): NetworkResult<LoginResult> {
+        return try {
+            val loginResult = remoteDataSource.twitterLogin(accessToken, universityId)
+
+            val loginEntity = LoginEntity(
+                userName = loginResult.loginResponse?.username ?: "",
+                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                role = loginResult.loginResponse?.role.orEmpty()
+            )
+
+            tokenManager.saveToken(loginEntity.jwtToken)
+            loginDao.insertLoginResponse(loginEntity)
+
+            NetworkResult.Success(getHttpStatus(loginResult.statusCode),
+                loginResult)
         } catch (e: Exception) {
             NetworkResult.Error(getHttpStatus(401), e.message.toString())
         }

@@ -1,3 +1,6 @@
+import org.gradle.internal.impldep.com.amazonaws.PredefinedClientConfigurations.defaultConfig
+import org.gradle.internal.impldep.com.jcraft.jsch.ConfigRepository.defaultConfig
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -18,6 +21,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["appAuthRedirectScheme"] = "io.dev.pace_app_mobile"
     }
 
     buildTypes {
@@ -80,5 +85,5 @@ dependencies {
     kapt(libs.room.compiler)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.google.auth)
+    implementation(libs.bundles.oauth)
 }

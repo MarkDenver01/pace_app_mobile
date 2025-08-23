@@ -64,6 +64,48 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun facebookLogin(accessToken: String, universityId: Long?): LoginResult {
+        val response = api.facebookLogin(accessToken, universityId)
+        if (response.isSuccessful) {
+            val loginResult = LoginResult(response.body(), response.code())
+            return loginResult
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun instagramLogin(accessToken: String, universityId: Long?): LoginResult {
+        val response = api.instagramLogin(accessToken, universityId)
+        if (response.isSuccessful) {
+            val loginResult = LoginResult(response.body(), response.code())
+            return loginResult
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun twitterLogin(accessToken: String, universityId: Long?): LoginResult {
+        val response = api.twitterLogin(accessToken, universityId)
+        if (response.isSuccessful) {
+            val loginResult = LoginResult(response.body(), response.code())
+            return loginResult
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
     suspend fun register(registerRequest: RegisterRequest): RegisterResponse {
         val response = api.register(registerRequest)
         if (response.isSuccessful) {
@@ -103,8 +145,21 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun isGoogleAccountExist(email: String) : Boolean {
+    suspend fun isGoogleAccountExist(email: String): Boolean {
         val response = api.isGoogleAccountExist(email)
+        if (response.isSuccessful) {
+            return response.body() ?: false
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun isFacebookLogin(accessToken: String): Boolean {
+        val response = api.isFacebookAccountExist(accessToken)
         if (response.isSuccessful) {
             return response.body() ?: false
         } else {

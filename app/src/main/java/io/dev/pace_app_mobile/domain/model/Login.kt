@@ -39,5 +39,5 @@ data class LoginResponse(
  */
 data class LoginResult(
     val loginResponse: LoginResponse?,
-    val statusCode: Int
+    val statusCode: Int,
 )

@@ -24,6 +24,14 @@ interface ApiRepository {
     suspend fun isExistingGoogleAccount(email: String): Boolean
 
     /**
+     * Is existing facebook account.
+     *
+     * @param accessToken access token
+     * @return Boolean
+     */
+    suspend fun isExistingFacebookAccount(accessToken: String): Boolean
+
+    /**
      * Login
      *
      * @param email
@@ -40,6 +48,42 @@ interface ApiRepository {
      * @return
      */
     suspend fun googleLogin(idToken: String, universityId: Long? = null): NetworkResult<LoginResult>
+
+    /**
+     * Create facebook login.
+     *
+     * @param accessToken access token from facebook
+     * @param universityId get university id
+     * @return NetworkResult<LoginResult>
+     */
+    suspend fun facebookLogin(
+        accessToken: String,
+        universityId: Long? = null
+    ): NetworkResult<LoginResult>
+
+    /**
+     * Instagram login.
+     *
+     * @param accessToken
+     * @param universityId
+     * @return
+     */
+    suspend fun instagramLogin(
+        accessToken: String,
+        universityId: Long? = null
+    ): NetworkResult<LoginResult>
+
+    /**
+     * Twitter login.
+     *
+     * @param accessToken
+     * @param universityId
+     * @return
+     */
+    suspend fun twitterLogin(
+        accessToken: String,
+        universityId: Long? = null
+    ): NetworkResult<LoginResult>
 
     /**
      * Register

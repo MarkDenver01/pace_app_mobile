@@ -24,8 +24,8 @@ datastore = "1.1.7"
 room = "2.7.2"
 credentials = "1.2.2"
 google-auth = "21.2.0"
-
-
+facebook-sdk = "16.3.0"
+appauth = "0.11.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,7 +62,16 @@ room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
-google-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "google-auth" }
+oauth-google = { module = "com.google.android.gms:play-services-auth", version.ref = "google-auth" }
+oauth-facebook = { module = "com.facebook.android:facebook-login", version.ref = "facebook-sdk" }
+oauth-appauth = { module = "net.openid:appauth", version.ref = "appauth" }
+
+[bundles]
+oauth = [
+    "oauth-appauth",
+    "oauth-google",
+    "oauth-facebook"
+]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
