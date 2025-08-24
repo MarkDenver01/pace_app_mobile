@@ -3,7 +3,7 @@ package io.dev.pace_app_mobile.presentation.utils
 object OAuthProviders {
     // ---- Twitter (X) OAuth 2.0 with PKCE ----
     const val TW_CLIENT_ID =
-        "<TWITTER_CLIENT_ID>" // from Twitter developer portal (User authentication settings)
+        "RUNwWkZ6SFFJVl9ua0xNa1pBMVY6MTpjaQ" // from Twitter developer portal (User authentication settings)
     const val TW_REDIRECT_URI =
         "io.dev.pace://oauth2redirect/twitter" // register in manifest + Twitter portal
     const val TW_AUTH_URI = "https://twitter.com/i/oauth2/authorize"

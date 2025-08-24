@@ -171,7 +171,7 @@ fun LoginScreen(
                 val token = result.accessToken.token
                 if (token != null) {
                     // Try login immediately; if backend needs university, VM will emit dialog event
-                    viewModel.checkFacebookAccount(token, true)
+                    viewModel.checkFacebookAccount(token)
                     // keep token for potential follow-up new-user flow
                     facebookAccessToken = token
                 } else {

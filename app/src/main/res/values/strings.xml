@@ -10,7 +10,7 @@
     <string name="button_yes">YES</string>
     <string name="button_no">NO</string>
     <string name="server_client_id">13172730276-pfjqu8ne6uid79brp15nrklqt8p58lbc.apps.googleusercontent.com</string>
-    <string name="facebook_app_id">1193623572571079</string>
-    <string name="fb_login_protocol_scheme">fb1193623572571079</string>
-    <string name="facebook_client_token">49bba05b2b94adfc7c2a29c4fad13888</string>
+    <string name="facebook_app_id">4105704173006243</string>
+    <string name="fb_login_protocol_scheme">fb4105704173006243</string>
+    <string name="facebook_client_token">6d80be21e712b6b2f9b594585b268347</string>
 </resources>

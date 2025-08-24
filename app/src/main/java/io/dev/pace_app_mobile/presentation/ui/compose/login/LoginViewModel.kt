@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 // UI state for the main login screen
@@ -342,20 +343,21 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun checkFacebookAccount(accessToken: String, exists: Boolean) {
+    fun checkFacebookAccount(accessToken: String) {
         viewModelScope.launch {
             try {
                 _eventFlow.emit(LoginEvent.ShowProgressDialog(true))
                 val exists = facebookAccountUseCase(accessToken)
                 _eventFlow.emit(LoginEvent.ShowProgressDialog(false))
-
+                Timber.d("checking facebook account: $exists")
                 if (exists) {
                     onAuthFacebookClick(accessToken, true)
                 } else {
                     fetchUniversitiesForFacebook(accessToken)
                 }
             } catch (e: Exception) {
-                _eventFlow.emit(LoginEvent.ShowErrorDialog("Error checking Google account."))
+                Timber.e("Facebook error: ${e.message}")
+                _eventFlow.emit(LoginEvent.ShowErrorDialog("Error checking Facebook account."))
                 _eventFlow.emit(LoginEvent.ShowProgressDialog(false))
             }
         }
