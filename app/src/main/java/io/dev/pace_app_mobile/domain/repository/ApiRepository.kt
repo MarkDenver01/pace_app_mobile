@@ -111,6 +111,14 @@ interface ApiRepository {
     suspend fun getQuestions(): Result<List<QuestionResponse>>
 
     /**
+     * Get all questions by university
+     *
+     * @param universityId
+     * @return
+     */
+    suspend fun getAllQuestionsByUniversity(): Result<List<QuestionResponse>>
+
+    /**
      * Get universities
      *
      * @return

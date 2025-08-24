@@ -4,19 +4,17 @@ object OAuthProviders {
     // ---- Twitter (X) OAuth 2.0 with PKCE ----
     const val TW_CLIENT_ID =
         "RUNwWkZ6SFFJVl9ua0xNa1pBMVY6MTpjaQ" // from Twitter developer portal (User authentication settings)
-    const val TW_REDIRECT_URI =
-        "io.dev.pace://oauth2redirect/twitter" // register in manifest + Twitter portal
     const val TW_AUTH_URI = "https://twitter.com/i/oauth2/authorize"
-    const val TW_TOKEN_URI = "https://api.twitter.com/2/oauth2/token"
-    val TW_SCOPES =
-        listOf("tweet.read", "users.read", "offline.access") // email not available in v2
+    const val TW_TOKEN_URI = "https://api.twitter.com/oauth2/token"
+    const val TW_REDIRECT_URI = "pace_app_mobile://oauth2redirect/twitter"
+    val TW_SCOPES = listOf("tweet.read", "users.read", "offline.access")
 
     // ---- Instagram (Basic Display) ----
     // Instagram Basic Display does NOT support PKCE; token exchange requires CLIENT SECRET.
     // Best practice: get AUTHORIZATION CODE in app, send it to backend, backend exchanges for access_token.
     const val IG_CLIENT_ID = "<INSTAGRAM_APP_ID>"
     const val IG_REDIRECT_URI =
-        "io.dev.pace://oauth2redirect/instagram" // add to IG app settings + manifest
+        "pace_app_mobile://oauth2redirect/instagram" // add to IG app settings + manifest
     const val IG_AUTH_URI = "https://api.instagram.com/oauth/authorize"
 
     // ---- Facebook SDK ----

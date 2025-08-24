@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -75,6 +77,7 @@ import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 import io.dev.pace_app_mobile.presentation.utils.OAuthProviders
+import io.dev.pace_app_mobile.presentation.utils.OAuthProviders.IG_AUTH_URI
 import io.dev.pace_app_mobile.presentation.utils.ProgressDialog
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
@@ -83,6 +86,7 @@ import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.CodeVerifierUtil
 import net.openid.appauth.ResponseTypeValues
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,7 +135,7 @@ fun LoginScreen(
                     // If the backend returns BAD_REQUEST for missing university, we will open the picker
                     viewModel.onAuthInstagramClick(code, exists = true)
                 } else {
-                    Log.e("InstagramAuth", "No authorization code in redirect")
+                    Timber.e("No authorization code in redirect")
                 }
             }
         }
@@ -152,14 +156,11 @@ fun LoginScreen(
                                 viewModel.onAuthTwitterClick(accessToken, exists = true)
                             }
                         } else {
-                            Log.e(
-                                "TwitterAuth",
-                                "Token exchange failed: ${tokenEx?.errorDescription}"
-                            )
+                            Timber.e("Token exchange failed: ${tokenEx?.errorDescription}")
                         }
                     }
                 } else {
-                    Log.e("TwitterAuth", "Authorization error: ${ex?.errorDescription}")
+                    Timber.e("Authorization error: ${ex?.errorDescription}")
                 }
             }
         }
@@ -420,30 +421,13 @@ fun LoginScreen(
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_twitter,
-                        onClick = {
-                            val serviceConfig = AuthorizationServiceConfiguration(
-                                Uri.parse(OAuthProviders.TW_AUTH_URI),
-                                Uri.parse(OAuthProviders.TW_TOKEN_URI)
-                            )
-                            val req = AuthorizationRequest.Builder(
-                                serviceConfig,
-                                OAuthProviders.TW_CLIENT_ID,
-                                ResponseTypeValues.CODE,
-                                Uri.parse(OAuthProviders.TW_REDIRECT_URI)
-                            ).setScopes(OAuthProviders.TW_SCOPES)
-                                .setCodeVerifier(CodeVerifierUtil.generateRandomCodeVerifier())
-                                .build()
-
-
-                            val authIntent = authService.getAuthorizationRequestIntent(req)
-                            twitterAuthLauncher.launch(authIntent)
-                        }
+                        onClick = { startTwitterLogin(authService, twitterAuthLauncher) }
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_instagram,
                         onClick = {
                             // Instagram Basic Display authorization (response_type=code)
-                            val authUri = Uri.parse(OAuthProviders.IG_AUTH_URI).buildUpon()
+                            val authUri = Uri.parse(IG_AUTH_URI).buildUpon()
                                 .appendQueryParameter("client_id", OAuthProviders.IG_CLIENT_ID)
                                 .appendQueryParameter(
                                     "redirect_uri",
@@ -553,6 +537,28 @@ private fun startGoogleLogin(
             launcher.launch(intentSenderRequest)
         }
         .addOnFailureListener { e ->
-            Log.e("GoogleLogin", "getSignInIntent failed", e)
+            Timber.e("getSignInIntent failed: ${e.message}")
         }
 }
+
+fun startTwitterLogin(
+    authService: AuthorizationService,
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>
+) {
+    val authRequest = AuthorizationRequest.Builder(
+        AuthorizationServiceConfiguration(
+            Uri.parse(OAuthProviders.TW_AUTH_URI),
+            Uri.parse(OAuthProviders.TW_TOKEN_URI)
+        ),
+        OAuthProviders.TW_CLIENT_ID,
+        ResponseTypeValues.CODE,
+        Uri.parse(OAuthProviders.TW_REDIRECT_URI)
+    )
+        .setScopes(*OAuthProviders.TW_SCOPES.toTypedArray())
+        .setCodeVerifier(io.dev.pace_app_mobile.presentation.utils.CodeVerifierUtil.generateRandomCodeVerifier()).build()
+
+
+    val intent = authService.getAuthorizationRequestIntent(authRequest)
+    launcher.launch(intent)
+}
+

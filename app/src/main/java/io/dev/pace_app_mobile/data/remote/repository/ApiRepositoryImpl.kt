@@ -17,6 +17,7 @@ import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
+import timber.log.Timber
 import javax.inject.Inject
 
 class ApiRepositoryImpl @Inject constructor(
@@ -41,35 +42,77 @@ class ApiRepositoryImpl @Inject constructor(
         return try {
             val loginResponse = remoteDataSource.login(LoginRequest(email, password))
 
-            // gather data
-            val loginEntity = LoginEntity(
-                userName = loginResponse.username,
-                jwtToken = loginResponse.jwtToken,
-                role = loginResponse.role
-            )
+            if (loginDao.isAccountExist(email)) {
+                // save jwt token for API access
+                tokenManager.saveToken(loginResponse.jwtToken)
+                tokenManager.saveUniversityId(loginResponse.studentResponse.universityId)
+                loginDao.updateLoginByEmail(
+                    email = email,
+                    userName = loginResponse.username,
+                    jwtToken = loginResponse.jwtToken,
+                    role = loginResponse.role
+                )
 
-            // save jwt token for API access
-            tokenManager.saveToken(loginEntity.jwtToken)
-            // insert to db
-            loginDao.insertLoginResponse(loginEntity)
+
+            } else {
+                // gather data
+                val loginEntity = LoginEntity(
+                    userName = loginResponse.username,
+                    jwtToken = loginResponse.jwtToken,
+                    role = loginResponse.role,
+                    universityId = loginResponse.studentResponse.universityId,
+                    email = email
+                )
+
+                // save jwt token for API access
+                tokenManager.saveToken(loginEntity.jwtToken)
+                tokenManager.saveUniversityId(loginEntity.universityId!!)
+                // insert to db
+                loginDao.insertLoginResponse(loginEntity)
+            }
+
             NetworkResult.Success(HttpStatus.OK, loginResponse)
         } catch (e: Exception) {
             NetworkResult.Error(HttpStatus.INTERNAL_SERVER_ERROR, "${e.message}")
         }
     }
 
-    override suspend fun googleLogin(idToken: String, universityId: Long?): NetworkResult<LoginResult> {
+    override suspend fun googleLogin(
+        idToken: String,
+        universityId: Long?
+    ): NetworkResult<LoginResult> {
         return try {
             val loginResult = remoteDataSource.googleLogin(idToken, universityId)
 
-            val loginEntity = LoginEntity(
-                userName = loginResult.loginResponse?.username ?: "",
-                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
-                role = loginResult.loginResponse?.role.orEmpty()
-            )
+            val checkEmail = loginResult.loginResponse?.studentResponse?.email ?: ""
+            if (loginDao.isAccountExist(checkEmail)) {
+                // save jwt token for API access
+                tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
+                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
+                    ?: 1L)
+                loginDao.updateLoginByEmail(
+                    email = loginResult.loginResponse?.studentResponse?.email ?: "",
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role ?: ""
+                )
 
-            tokenManager.saveToken(loginEntity.jwtToken)
-            loginDao.insertLoginResponse(loginEntity)
+                val universityId = loginDao.getUniversityId(checkEmail)
+                Timber.d("check university id from googl login: $universityId")
+            } else {
+                // gather data
+                val loginEntity = LoginEntity(
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role.orEmpty(),
+                    universityId = universityId,
+                    email = loginResult.loginResponse?.studentResponse?.email ?: ""
+                )
+                tokenManager.saveToken(loginEntity.jwtToken)
+                tokenManager.saveUniversityId(loginEntity.universityId!!)
+                loginDao.insertLoginResponse(loginEntity)
+                Timber.d("check university id from google login: ${loginEntity.universityId}")
+            }
             NetworkResult.Success(getHttpStatus(loginResult.statusCode), loginResult)
         } catch (e: Exception) {
             NetworkResult.Error(getHttpStatus(401), e.message.toString())
@@ -83,17 +126,39 @@ class ApiRepositoryImpl @Inject constructor(
         return try {
             val loginResult = remoteDataSource.facebookLogin(accessToken, universityId)
 
-            val loginEntity = LoginEntity(
-                userName = loginResult.loginResponse?.username ?: "",
-                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
-                role = loginResult.loginResponse?.role.orEmpty()
+            val checkEmail = loginResult.loginResponse?.studentResponse?.email ?: ""
+            if (loginDao.isAccountExist(checkEmail)) {
+                // save jwt token for API access
+                tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
+                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
+                    ?: 1L)
+                loginDao.updateLoginByEmail(
+                    email = loginResult.loginResponse?.studentResponse?.email ?: "",
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role ?: ""
+                )
+
+                val universityId = loginDao.getUniversityId(checkEmail)
+                Timber.d("xxxxxxx n: $universityId")
+            } else {
+                // gather data
+                val loginEntity = LoginEntity(
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role.orEmpty(),
+                    universityId = universityId,
+                    email = loginResult.loginResponse?.studentResponse?.email ?: ""
+                )
+                tokenManager.saveToken(loginEntity.jwtToken)
+                tokenManager.saveUniversityId(loginEntity.universityId!!)
+                loginDao.insertLoginResponse(loginEntity)
+                Timber.d("check university id from facebook login: ${loginEntity.universityId}")
+            }
+            NetworkResult.Success(
+                getHttpStatus(loginResult.statusCode),
+                loginResult
             )
-
-            tokenManager.saveToken(loginEntity.jwtToken)
-            loginDao.insertLoginResponse(loginEntity)
-
-            NetworkResult.Success(getHttpStatus(loginResult.statusCode),
-                loginResult)
         } catch (e: Exception) {
             NetworkResult.Error(getHttpStatus(401), e.message.toString())
         }
@@ -106,17 +171,42 @@ class ApiRepositoryImpl @Inject constructor(
         return try {
             val loginResult = remoteDataSource.instagramLogin(accessToken, universityId)
 
-            val loginEntity = LoginEntity(
-                userName = loginResult.loginResponse?.username ?: "",
-                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
-                role = loginResult.loginResponse?.role.orEmpty()
+            val checkEmail = loginResult.loginResponse?.studentResponse?.email ?: ""
+            if (loginDao.isAccountExist(checkEmail)) {
+                // save jwt token for API access
+                tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
+                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
+                    ?: 1L)
+                loginDao.updateLoginByEmail(
+                    email = loginResult.loginResponse?.studentResponse?.email ?: "",
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role ?: ""
+                )
+
+                val universityId = loginDao.getUniversityId(checkEmail
+                )
+                Timber.d("check university id from insta login: $universityId")
+            } else {
+                // gather data
+                val loginEntity = LoginEntity(
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role.orEmpty(),
+                    universityId = universityId,
+                    email = loginResult.loginResponse?.studentResponse?.email ?: ""
+                )
+                tokenManager.saveToken(loginEntity.jwtToken)
+                tokenManager.saveUniversityId(loginEntity.universityId!!)
+                loginDao.insertLoginResponse(loginEntity)
+                Timber.d("check university id from instagram login: ${loginEntity.universityId}")
+            }
+
+            NetworkResult.Success(
+                getHttpStatus(loginResult.statusCode),
+                loginResult
             )
 
-            tokenManager.saveToken(loginEntity.jwtToken)
-            loginDao.insertLoginResponse(loginEntity)
-
-            NetworkResult.Success(getHttpStatus(loginResult.statusCode),
-                loginResult)
         } catch (e: Exception) {
             NetworkResult.Error(getHttpStatus(401), e.message.toString())
         }
@@ -129,17 +219,41 @@ class ApiRepositoryImpl @Inject constructor(
         return try {
             val loginResult = remoteDataSource.twitterLogin(accessToken, universityId)
 
-            val loginEntity = LoginEntity(
-                userName = loginResult.loginResponse?.username ?: "",
-                jwtToken = loginResult.loginResponse?.jwtToken ?: "",
-                role = loginResult.loginResponse?.role.orEmpty()
+            val checkEmail = loginResult.loginResponse?.studentResponse?.email ?: ""
+            if (loginDao.isAccountExist(checkEmail)) {
+                // save jwt token for API access
+                tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
+                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
+                    ?: 1L)
+                loginDao.updateLoginByEmail(
+                    email = loginResult.loginResponse?.studentResponse?.email ?: "",
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role ?: ""
+                )
+
+                val universityId = loginDao.getUniversityId(checkEmail
+                )
+                Timber.d("check university id from twit login: $universityId")
+            } else {
+                // gather data
+                val loginEntity = LoginEntity(
+                    userName = loginResult.loginResponse?.username ?: "",
+                    jwtToken = loginResult.loginResponse?.jwtToken ?: "",
+                    role = loginResult.loginResponse?.role.orEmpty(),
+                    universityId = universityId,
+                    email = loginResult.loginResponse?.studentResponse?.email ?: ""
+                )
+                tokenManager.saveToken(loginEntity.jwtToken)
+                tokenManager.saveUniversityId(loginEntity.universityId!!)
+                loginDao.insertLoginResponse(loginEntity)
+                Timber.d("check university id from twitter login: ${loginEntity.universityId}")
+            }
+
+            NetworkResult.Success(
+                getHttpStatus(loginResult.statusCode),
+                loginResult
             )
-
-            tokenManager.saveToken(loginEntity.jwtToken)
-            loginDao.insertLoginResponse(loginEntity)
-
-            NetworkResult.Success(getHttpStatus(loginResult.statusCode),
-                loginResult)
         } catch (e: Exception) {
             NetworkResult.Error(getHttpStatus(401), e.message.toString())
         }
@@ -183,6 +297,17 @@ class ApiRepositoryImpl @Inject constructor(
             Result.success(result)
         } catch (e: Exception) {
             Log.e("getQuestions", "Exception: ${e.message}", e)
+            Result.failure(Exception("Failed to load questions: $e"))
+        }
+    }
+
+    override suspend fun getAllQuestionsByUniversity(): Result<List<QuestionResponse>> {
+        return try {
+            val result = remoteDataSource.getAllQuestionsByUniversity(
+                tokenManager.getUniversityId()!!)
+            Result.success(result)
+        } catch (e: Exception) {
+            Timber.e("getAllQuestionsByUniversity error: ${e.message}")
             Result.failure(Exception("Failed to load questions: $e"))
         }
     }

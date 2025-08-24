@@ -8,5 +8,7 @@ data class LoginEntity(
     @PrimaryKey(autoGenerate = true) val userId: Int = 0,
     val userName: String,
     val jwtToken: String,
-    val role: String
+    val role: String,
+    val universityId: Long? = null,
+    val email: String? = null
 )

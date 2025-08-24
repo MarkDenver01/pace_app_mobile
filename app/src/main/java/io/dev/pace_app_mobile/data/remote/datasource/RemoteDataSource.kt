@@ -132,6 +132,19 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun getAllQuestionsByUniversity(universityId: Long): List<QuestionResponse> {
+        val response = api.getAllQuestionsByUniversity(universityId)
+        if (response.isSuccessful) {
+            return response.body().orEmpty()
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
     suspend fun getUniversities(): List<UniversityResponse> {
         val response = api.getAllUniversity()
         if (response.isSuccessful) {

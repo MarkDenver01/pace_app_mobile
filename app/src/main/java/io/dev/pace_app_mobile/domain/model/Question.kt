@@ -74,4 +74,7 @@ data class QuestionResponse(
     val category: String,
     val courseName: String,
     // val imgPath: String // TODO add img in backend
+    val courseDescription: String,
+    val universityId: Long,
+    val universityName: String
 )

@@ -10,6 +10,7 @@ import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
 import io.dev.pace_app_mobile.domain.model.Question
 import io.dev.pace_app_mobile.domain.model.QuestionCategory
+import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.navigation.Routes
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class AssessmentViewModel @Inject constructor(
     private val questionUseCase: QuestionUseCase,
+    private val allQuestionsByUniversityUseCase: AllQuestionsByUniversityUseCase,
     private val recommendationUseCase: CourseRecommendationUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
@@ -41,24 +43,6 @@ class AssessmentViewModel @Inject constructor(
     val topCourses = _topCourses.asStateFlow()
 
     val answeredQuestions = mutableListOf<AnsweredQuestionRequest>()
-
-
-//    private val allQuestions = listOf(
-//        // General Interest
-//        Question(1, QuestionCategory.GENERAL, "Are you interested in how businesses operate?", R.drawable.ic_figure_1),
-//        Question(2, QuestionCategory.GENERAL, "Do you enjoy watching business-related news or documentaries?", R.drawable.ic_figure_1),
-//        Question(3, QuestionCategory.GENERAL, "Are you curious about the stock market and investments?", R.drawable.ic_figure_1),
-//
-//        // Career Interest
-//        Question(4, QuestionCategory.CAREER, "Are you interested in a career in finance?", R.drawable.ic_figure_2),
-//        Question(5, QuestionCategory.CAREER, "Are you interested in a career in marketing?", R.drawable.ic_figure_2),
-//        Question(6, QuestionCategory.CAREER, "Are you interested in a career in human resources?", R.drawable.ic_figure_2),
-//
-//        // Personal Qualities
-//        Question(7, QuestionCategory.PERSONAL, "Are you ambitious?", R.drawable.ic_figure_1),
-//        Question(8, QuestionCategory.PERSONAL, "Are you hardworking?", R.drawable.ic_figure_1),
-//        Question(9, QuestionCategory.PERSONAL, "Are you persistent?", R.drawable.ic_figure_1)
-//    )
 
     val totalQuestions: Int
         get() = _questions.value.size
@@ -85,12 +69,35 @@ class AssessmentViewModel @Inject constructor(
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     init {
-        fetchQuestions()
+        fetchAllQuestionsByUniversity()
     }
 
     private fun fetchQuestions() {
         viewModelScope.launch {
             val result = questionUseCase()
+            result.fold(
+                onSuccess = { questionList ->
+                    _questions.value = questionList.map {
+                        Question(
+                            id = it.questionId,
+                            category = QuestionCategory.fromString(it.category),
+                            text = it.question,
+                            imageResId = R.drawable.ic_figure_1, // Update if category-based image mapping needed,
+                            courseName = it.courseName
+                        )
+                    }
+                },
+                onFailure = {
+                    // You may trigger a dialog or snackbar via UI
+                    _questions.value = emptyList()
+                }
+            )
+        }
+    }
+
+    private fun fetchAllQuestionsByUniversity() {
+        viewModelScope.launch {
+            val result = allQuestionsByUniversityUseCase()
             result.fold(
                 onSuccess = { questionList ->
                     _questions.value = questionList.map {
@@ -140,7 +147,7 @@ class AssessmentViewModel @Inject constructor(
         _currentQuestionIndex.value = 0
         _answers.value = emptyMap()
         _navigateTo.value = null
-        fetchQuestions()
+        fetchAllQuestionsByUniversity()
     }
 
 

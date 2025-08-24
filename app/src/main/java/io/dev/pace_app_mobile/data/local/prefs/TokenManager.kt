@@ -22,8 +22,16 @@ class TokenManager @Inject constructor(
         prefs.edit().putString("jwt_token", token).apply()
     }
 
+    fun saveUniversityId(universityId: Long) {
+        prefs.edit().putLong("university_id", universityId).apply()
+    }
+
     fun getToken(): String? {
         return prefs.getString("jwt_token", null)
+    }
+
+    fun getUniversityId(): Long? {
+        return prefs.getLong("university_id", 0L)
     }
 
     fun clearToken() {

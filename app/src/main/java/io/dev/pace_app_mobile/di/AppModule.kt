@@ -11,6 +11,7 @@ import io.dev.pace_app_mobile.data.remote.datasource.RemoteDataSource
 import io.dev.pace_app_mobile.data.remote.network.ApiService
 import io.dev.pace_app_mobile.data.remote.repository.ApiRepositoryImpl
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
+import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookLoginUseCase
@@ -56,6 +57,11 @@ object AppModule {
     @Singleton
     fun provideQuestionUseCase(repository: ApiRepository): QuestionUseCase =
         QuestionUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideAllQuestionsByUniversityUseCase(repository: ApiRepository): AllQuestionsByUniversityUseCase =
+        AllQuestionsByUniversityUseCase(repository)
 
     @Provides
     @Singleton
