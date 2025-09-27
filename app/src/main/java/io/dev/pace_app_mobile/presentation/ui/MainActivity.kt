@@ -18,6 +18,7 @@ import io.dev.pace_app_mobile.navigation.startGraph
 import io.dev.pace_app_mobile.navigation.titleGraph
 import io.dev.pace_app_mobile.presentation.theme.Pace_app_mobileTheme
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginViewModel
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -28,6 +29,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         //enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        intent?.data?.let { uri ->
+            val universityId = uri.getQueryParameter("universityId")
+            val token = uri.getQueryParameter("token")
+
+            Timber.e("university id: $universityId - token: $token")
+        }
 
         // Handle intent when activity is launched with redirect URI
         handleAuthRedirect(intent)
