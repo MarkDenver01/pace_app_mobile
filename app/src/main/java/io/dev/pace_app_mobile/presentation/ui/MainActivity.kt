@@ -8,12 +8,9 @@ import androidx.activity.viewModels
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.facebook.CallbackManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.navigation.assessmentGraph
-import io.dev.pace_app_mobile.navigation.loginGraph
-import io.dev.pace_app_mobile.navigation.signUpGraph
 import io.dev.pace_app_mobile.navigation.startGraph
 import io.dev.pace_app_mobile.navigation.titleGraph
 import io.dev.pace_app_mobile.presentation.theme.Pace_app_mobileTheme
@@ -23,35 +20,52 @@ import timber.log.Timber
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    val viewModel: LoginViewModel by viewModels()
+    private val loginViewModel: LoginViewModel by viewModels()
+    private var universityId: String? = null
+    private var dynamicToken: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        // Extract dynamic link params
         intent?.data?.let { uri ->
-            val universityId = uri.getQueryParameter("universityId")
-            val token = uri.getQueryParameter("token")
-
-            Timber.e("university id: $universityId - token: $token")
+            universityId = uri.getQueryParameter("universityId")
+            dynamicToken = uri.getQueryParameter("token").toString()
+            Timber.d("Dynamic link → universityId: $universityId, token: $dynamicToken")
         }
 
-        // Handle intent when activity is launched with redirect URI
+        // Handle OAuth redirects
         handleAuthRedirect(intent)
 
         setContent {
             Pace_app_mobileTheme {
                 val navController = rememberNavController()
 
+                // Decide startDestination
+                val startDestination = when {
+                    // 1. From dynamic link
+                    !universityId.isNullOrEmpty() && dynamicToken.isNotEmpty() -> {
+                        Routes.TITLE_ROUTE
+                    }
+                    // 2. Already logged in
+                    loginViewModel.isUserLoggedIn() -> {
+                        Routes.START_ASSESSMENT_ROUTE
+                    }
+                    // 3. Default
+                    else -> {
+                        Routes.START_ROUTE
+                    }
+                }
+
+                Timber.d("Navigation startDestination → $startDestination")
+
                 NavHost(
                     navController = navController,
-                    startDestination = Routes.START_ROUTE
+                    startDestination = startDestination
                 ) {
                     startGraph(navController)
-                    titleGraph(navController)
-                    loginGraph(navController)
-                    signUpGraph(navController)
+                    titleGraph(navController, universityId, dynamicToken)
                     assessmentGraph(navController)
                 }
             }
@@ -65,7 +79,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleAuthRedirect(intent: Intent?) {
-        val viewModel: LoginViewModel by viewModels()
         intent?.data?.let { uri ->
             val scheme = uri.scheme
             val host = uri.host
@@ -76,8 +89,8 @@ class MainActivity : ComponentActivity() {
                 val error = uri.getQueryParameter("error")
 
                 when (path) {
-                    "/twitter" -> viewModel.handleTwitterRedirect(code, error)
-                    "/instagram" -> viewModel.handleInstagramRedirect(code, error)
+                    "/twitter" -> loginViewModel.handleTwitterRedirect(code, error)
+                    "/instagram" -> loginViewModel.handleInstagramRedirect(code, error)
                 }
             }
         }

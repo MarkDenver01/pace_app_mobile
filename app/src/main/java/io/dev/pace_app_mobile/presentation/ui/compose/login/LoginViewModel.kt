@@ -439,4 +439,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun isUserLoggedIn() : Boolean {
+        return false // TODO
+    }
+
 }

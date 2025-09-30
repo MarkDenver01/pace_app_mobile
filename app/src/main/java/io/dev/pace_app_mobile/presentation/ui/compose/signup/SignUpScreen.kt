@@ -1,13 +1,10 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.signup
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -48,14 +45,16 @@ import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
-import io.dev.pace_app_mobile.presentation.utils.CustomDropDownPicker
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     navController: NavController,
+    universityId: String? = null,
+    dynamicToken: String,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val sizes = LocalResponsiveSizes.current
@@ -73,13 +72,16 @@ fun SignUpScreen(
     val showSuccessDialog by viewModel.showSuccessDialog.collectAsState()
     val showErrorDialog by viewModel.showErrorDialog.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val university by viewModel.university.collectAsState()
 
     var agree by remember { mutableStateOf(false) }
 
-    var selectedUniversityName by remember { mutableStateOf("") }
-
-    val universities by viewModel.universities.collectAsState()
-    val universityNames = universities.map { it.universityName }
+    // Fetch the specific university once when universityId is provided
+    LaunchedEffect(universityId) {
+        universityId?.toLongOrNull()?.let { id ->
+            viewModel.fetchUniversityById(id)
+        }
+    }
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -106,7 +108,7 @@ fun SignUpScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp) // apply where needed
+                .padding(horizontal = 24.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -140,13 +142,14 @@ fun SignUpScreen(
                     fontSize = sizes.buttonFontSize,
                 )
 
-                CustomDropDownPicker(
-                    selectedOption = selectedUniversityName,
-                    onOptionSelected = { selectedUniversityName = it },
-                    options = universityNames,
-                    placeholder = "Select your university",
-                    leadingIcon = Icons.Default.Edit, // Using a generic icon for now
-                    modifier = Modifier.fillMaxWidth()
+                // University field (read-only)
+                CustomTextField(
+                    value = university?.universityName ?: "",
+                    onValueChange = {},
+                    placeholder = "University",
+                    leadingIcon = Icons.Default.Edit,
+                    fontSize = sizes.smallFontSize,
+                    enabled = false
                 )
 
                 CustomTextField(
@@ -175,7 +178,6 @@ fun SignUpScreen(
                     fontSize = sizes.buttonFontSize
                 )
 
-
                 Spacer(modifier = Modifier.height(spacing.sm))
 
                 CustomCheckBox(
@@ -195,27 +197,25 @@ fun SignUpScreen(
 
                 CustomDynamicButton(
                     onClick = {
-                        val universityId = viewModel.getUniversityId(selectedUniversityName)
-
-                        if (universityId != null) {
+                        val selectedUniversityId = universityId?.toLongOrNull()
+                        if (selectedUniversityId != null) {
                             viewModel.onSignupClick(
                                 agreed = agree,
                                 username = "$firstName $lastName",
                                 email = mailAddress,
                                 password = password,
-                                universityId = universityId,
+                                universityId = selectedUniversityId,
+                                token = dynamicToken,
                                 onSuccess = {
                                     viewModel.showSuccessDialog()
                                 }
                             )
                         } else {
-                            // Handle the case where a university wasn't selected
-                            viewModel.showErrorDialog("Please select a university.")
+                            viewModel.showErrorDialog("University not found.")
                         }
                     },
                     content = stringResource(id = R.string.button_sign_up)
                 )
-
             }
         }
     }
@@ -224,9 +224,7 @@ fun SignUpScreen(
         AlertDynamicConfirmationDialog(
             message = "You must agree to the terms.",
             alertType = AlertType.WARNING,
-            onClose = {
-                viewModel.dismissDialogs()
-            }
+            onClose = { viewModel.dismissDialogs() }
         )
     }
 
@@ -241,15 +239,11 @@ fun SignUpScreen(
         )
     }
 
-    // Error Dialog
     if (showErrorDialog && errorMessage != null) {
         AlertDynamicConfirmationDialog(
             message = errorMessage!!,
             alertType = AlertType.ERROR,
-            onClose = {
-                viewModel.dismissDialogs()
-            }
+            onClose = { viewModel.dismissDialogs() }
         )
     }
-
 }

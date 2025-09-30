@@ -10,4 +10,8 @@ class UniversityUseCase @Inject constructor(
     suspend operator fun invoke() : Result<List<UniversityResponse>> {
         return repository.getUniversities()
     }
+
+    suspend fun invoke(universityId: Long) : Result<UniversityResponse> {
+        return repository.getUniversityById(universityId)
+    }
 }

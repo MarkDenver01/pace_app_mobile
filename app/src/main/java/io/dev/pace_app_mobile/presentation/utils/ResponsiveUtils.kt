@@ -205,7 +205,8 @@ fun CustomTextField(
     leadingIcon: ImageVector? = null,
     leadingIconPainter: Painter? = null,
     fontSize: TextUnit = LocalResponsiveSizes.current.buttonFontSize,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -271,14 +272,18 @@ fun CustomTextField(
             focusedTextColor = Color(0xFFCC4A1A),
             unfocusedTextColor = Color(0xFFCC4A1A),
             focusedContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.1f),
-            unfocusedContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.05f)
+            unfocusedContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.05f),
+            disabledBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.2f),
+            disabledTextColor = Color.Gray,
+            disabledContainerColor = Color.LightGray.copy(alpha = 0.1f)
         ),
         visualTransformation = if (isPassword && !passwordVisible)
             PasswordVisualTransformation() else VisualTransformation.None,
         textStyle = LocalTextStyle.current.copy(
             color = Color(0xFFCC4A1A),
             fontSize = fontSize
-        )
+        ),
+        enabled = enabled
     )
 }
 

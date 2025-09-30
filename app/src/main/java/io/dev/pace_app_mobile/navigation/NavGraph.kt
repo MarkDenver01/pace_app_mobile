@@ -18,21 +18,21 @@ fun NavGraphBuilder.startGraph(navController: NavController) {
     }
 }
 
-fun NavGraphBuilder.titleGraph(navController: NavController) {
+fun NavGraphBuilder.titleGraph(
+    navController: NavController,
+    universityId: String?,
+    dynamicToken: String
+) {
     composable(Routes.TITLE_ROUTE) {
         TitleScreen(navController = navController)
     }
-}
 
-fun NavGraphBuilder.loginGraph(navController: NavController) {
-    composable(Routes.LOGIN_ROUTE) {
-        LoginScreen(navController = navController)
-    }
-}
-
-fun NavGraphBuilder.signUpGraph(navController: NavController) {
     composable(Routes.SIGN_UP_ROUTE) {
-        SignUpScreen(navController)
+        SignUpScreen(navController, universityId, dynamicToken)
+    }
+
+    composable(Routes.LOGIN_ROUTE) {
+        LoginScreen(navController, universityId, dynamicToken)
     }
 }
 

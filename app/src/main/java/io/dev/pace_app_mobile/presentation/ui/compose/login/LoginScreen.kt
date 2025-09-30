@@ -92,6 +92,8 @@ import timber.log.Timber
 @Composable
 fun LoginScreen(
     navController: NavController,
+    universityId: String? = null,
+    dynamicToken: String,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val sizes = LocalResponsiveSizes.current

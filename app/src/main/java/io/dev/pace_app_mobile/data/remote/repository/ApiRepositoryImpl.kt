@@ -13,10 +13,12 @@ import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
+import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
+import net.openid.appauth.TokenResponse
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -32,6 +34,15 @@ class ApiRepositoryImpl @Inject constructor(
 
     override suspend fun isExistingFacebookAccount(accessToken: String): Boolean {
         return remoteDataSource.isFacebookLogin(accessToken)
+    }
+
+    override suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse> {
+        return try {
+            val universityLinkResponse  = remoteDataSource.validateDynamicLink(token)
+            NetworkResult.Success(HttpStatus.OK, universityLinkResponse)
+        } catch (e: Exception) {
+            NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
+        }
     }
 
     override suspend fun login(email: String, password: String): NetworkResult<LoginResponse> {
@@ -88,8 +99,10 @@ class ApiRepositoryImpl @Inject constructor(
             if (loginDao.isAccountExist(checkEmail)) {
                 // save jwt token for API access
                 tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
-                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
-                    ?: 1L)
+                tokenManager.saveUniversityId(
+                    loginResult.loginResponse?.studentResponse?.universityId
+                        ?: 1L
+                )
                 loginDao.updateLoginByEmail(
                     email = loginResult.loginResponse?.studentResponse?.email ?: "",
                     userName = loginResult.loginResponse?.username ?: "",
@@ -130,8 +143,10 @@ class ApiRepositoryImpl @Inject constructor(
             if (loginDao.isAccountExist(checkEmail)) {
                 // save jwt token for API access
                 tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
-                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
-                    ?: 1L)
+                tokenManager.saveUniversityId(
+                    loginResult.loginResponse?.studentResponse?.universityId
+                        ?: 1L
+                )
                 loginDao.updateLoginByEmail(
                     email = loginResult.loginResponse?.studentResponse?.email ?: "",
                     userName = loginResult.loginResponse?.username ?: "",
@@ -175,8 +190,10 @@ class ApiRepositoryImpl @Inject constructor(
             if (loginDao.isAccountExist(checkEmail)) {
                 // save jwt token for API access
                 tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
-                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
-                    ?: 1L)
+                tokenManager.saveUniversityId(
+                    loginResult.loginResponse?.studentResponse?.universityId
+                        ?: 1L
+                )
                 loginDao.updateLoginByEmail(
                     email = loginResult.loginResponse?.studentResponse?.email ?: "",
                     userName = loginResult.loginResponse?.username ?: "",
@@ -184,7 +201,8 @@ class ApiRepositoryImpl @Inject constructor(
                     role = loginResult.loginResponse?.role ?: ""
                 )
 
-                val universityId = loginDao.getUniversityId(checkEmail
+                val universityId = loginDao.getUniversityId(
+                    checkEmail
                 )
                 Timber.d("check university id from insta login: $universityId")
             } else {
@@ -223,8 +241,10 @@ class ApiRepositoryImpl @Inject constructor(
             if (loginDao.isAccountExist(checkEmail)) {
                 // save jwt token for API access
                 tokenManager.saveToken(loginResult.loginResponse?.jwtToken ?: "")
-                tokenManager.saveUniversityId(loginResult.loginResponse?.studentResponse?.universityId
-                    ?: 1L)
+                tokenManager.saveUniversityId(
+                    loginResult.loginResponse?.studentResponse?.universityId
+                        ?: 1L
+                )
                 loginDao.updateLoginByEmail(
                     email = loginResult.loginResponse?.studentResponse?.email ?: "",
                     userName = loginResult.loginResponse?.username ?: "",
@@ -232,7 +252,8 @@ class ApiRepositoryImpl @Inject constructor(
                     role = loginResult.loginResponse?.role ?: ""
                 )
 
-                val universityId = loginDao.getUniversityId(checkEmail
+                val universityId = loginDao.getUniversityId(
+                    checkEmail
                 )
                 Timber.d("check university id from twit login: $universityId")
             } else {
@@ -304,7 +325,8 @@ class ApiRepositoryImpl @Inject constructor(
     override suspend fun getAllQuestionsByUniversity(): Result<List<QuestionResponse>> {
         return try {
             val result = remoteDataSource.getAllQuestionsByUniversity(
-                tokenManager.getUniversityId()!!)
+                tokenManager.getUniversityId()!!
+            )
             Result.success(result)
         } catch (e: Exception) {
             Timber.e("getAllQuestionsByUniversity error: ${e.message}")
@@ -318,6 +340,15 @@ class ApiRepositoryImpl @Inject constructor(
             Result.success(result)
         } catch (e: Exception) {
             Result.failure(Exception("Failed to load universities: $e"))
+        }
+    }
+
+    override suspend fun getUniversityById(universityId: Long): Result<UniversityResponse> {
+        return try {
+            val result = remoteDataSource.getUniversityById(universityId)
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(Exception("Failed to get university: $e"))
         }
     }
 

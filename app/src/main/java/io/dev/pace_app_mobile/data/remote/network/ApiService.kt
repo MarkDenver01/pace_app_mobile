@@ -7,7 +7,9 @@ import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
+import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
+import net.openid.appauth.TokenResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -33,6 +35,7 @@ interface ApiService {
 
     @GET("user/api/questions/all/{universityId}")
     suspend fun getAllQuestionsByUniversity(@Path("universityId") universityId: Long): Response<List<QuestionResponse>>
+
 
     @POST("user/api/course_recommended/top3")
     suspend fun getCourseRecommendation(
@@ -75,4 +78,13 @@ interface ApiService {
 
     @GET("user/public/check/facebook_account")
     suspend fun isFacebookAccountExist(@Query("accessToken") accessToken: String): Response<Boolean>
+
+
+    @GET("user/public/university/select")
+    suspend fun getUniversityById(@Query("university_id") universityId: Long?): Response<UniversityResponse>
+
+    @GET("user/public/dynamic_link/token_validation")
+    suspend fun validateToken(
+        @Query("token") token: String
+    ): Response<UniversityLinkResponse>
 }

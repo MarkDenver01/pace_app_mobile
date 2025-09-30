@@ -13,6 +13,7 @@ import io.dev.pace_app_mobile.data.remote.repository.ApiRepositoryImpl
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
+import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleAccountUseCase
@@ -102,5 +103,10 @@ object AppModule {
     @Singleton
     fun provideFacebookAccountUseCase(repository: ApiRepository): FacebookAccountUseCase =
         FacebookAccountUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideDynamicLinkValidationUseCase(repository: ApiRepository): DynamicLinkValidationUseCase =
+        DynamicLinkValidationUseCase(repository)
 
 }

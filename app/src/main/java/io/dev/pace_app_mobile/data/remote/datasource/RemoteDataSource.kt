@@ -9,10 +9,10 @@ import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
+import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
-import retrofit2.Response
+import net.openid.appauth.TokenResponse
 import javax.inject.Inject
-import kotlin.math.log
 
 class RemoteDataSource @Inject constructor(
     private val api: ApiService
@@ -158,6 +158,20 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun getUniversityById(universityId: Long): UniversityResponse {
+        val response = api.getUniversityById(universityId)
+        if (response.isSuccessful) {
+            val body = response.body()
+            if (body != null) {
+                return body
+            } else {
+                throw Exception("Response body was null for universityId=$universityId")
+            }
+        } else {
+            throw Exception("API error ${response.code()} : ${response.message()}")
+        }
+    }
+
     suspend fun isGoogleAccountExist(email: String): Boolean {
         val response = api.isGoogleAccountExist(email)
         if (response.isSuccessful) {
@@ -175,6 +189,24 @@ class RemoteDataSource @Inject constructor(
         val response = api.isFacebookAccountExist(accessToken)
         if (response.isSuccessful) {
             return response.body() ?: false
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun validateDynamicLink(token: String): UniversityLinkResponse {
+        val response = api.validateToken(token)
+        if (response.isSuccessful) {
+            val body = response.body()
+            if (body != null) {
+                return body
+            } else {
+                throw Exception("Response body was null ")
+            }
         } else {
             throw Exception(
                 "error: " +

@@ -5,8 +5,10 @@ import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
+import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
+import net.openid.appauth.TokenResponse
 
 
 /**
@@ -30,6 +32,14 @@ interface ApiRepository {
      * @return Boolean
      */
     suspend fun isExistingFacebookAccount(accessToken: String): Boolean
+
+    /**
+     * Check if dynamic link is valid via token.
+     *
+     * @param token token
+     * @return true or false
+     */
+    suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse>
 
     /**
      * Login
@@ -124,6 +134,14 @@ interface ApiRepository {
      * @return
      */
     suspend fun getUniversities(): Result<List<UniversityResponse>>
+
+    /**
+     * Get specific university.
+     *
+     * @param universityId university id
+     * @return return to specific university
+     */
+    suspend fun getUniversityById(universityId: Long): Result<UniversityResponse>
 
     /**
      * Get course recommendation

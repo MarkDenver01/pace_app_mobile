@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import io.dev.pace_app_mobile.presentation.utils.responsiveHeightFraction
 import io.dev.pace_app_mobile.presentation.utils.responsiveTextSp
 import io.dev.pace_app_mobile.presentation.utils.responsiveWidthFraction
+import kotlin.math.max
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -84,6 +85,7 @@ data class ResponsiveSizes(
     val iconSize: Dp,
     val labelFontSize: TextUnit,
     val fontLargeSizeLarge: TextUnit,
+    val smallFontSize: TextUnit
 )
 
 val LocalResponsiveSizes = staticCompositionLocalOf {
@@ -97,7 +99,8 @@ val LocalResponsiveSizes = staticCompositionLocalOf {
         paddingVertical = 32.dp,
         iconSize = 20.dp,
         labelFontSize = 16.sp,
-        fontLargeSizeLarge = 32.sp
+        fontLargeSizeLarge = 32.sp,
+        smallFontSize = 14.sp
     )
 }
 
@@ -128,14 +131,20 @@ fun Pace_app_mobileTheme(
         paddingVertical = responsiveHeightFraction(0.05f, min = 16.dp, max = 40.dp),
         iconSize = responsiveWidthFraction(0.07f, min = 18.dp, max = 32.dp),
         labelFontSize = responsiveTextSp(base = 18f, scaleFactor = 0.03f, min = 14f, max = 28f),
-        fontLargeSizeLarge = responsiveTextSp(base = 24f, scaleFactor = 0.03f, min = 20f, max = 32f)
+        fontLargeSizeLarge = responsiveTextSp(
+            base = 24f,
+            scaleFactor = 0.03f,
+            min = 20f,
+            max = 32f
+        ),
+        smallFontSize = responsiveTextSp(base = 14f, scaleFactor = 0.03f, min = 10f, max = 14f)
     )
 
     CompositionLocalProvider(
         LocalResponsiveSizes provides responsiveSizes,
         LocalAppColors provides AppColors(),
         LocalAppSpacing provides AppSpacing(),
-       LocalAppTypography provides AppTypography()
+        LocalAppTypography provides AppTypography()
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
