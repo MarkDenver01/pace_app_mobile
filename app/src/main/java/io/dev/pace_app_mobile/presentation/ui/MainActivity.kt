@@ -5,15 +5,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import io.dev.pace_app_mobile.domain.enums.Customization
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.navigation.assessmentGraph
 import io.dev.pace_app_mobile.navigation.startGraph
 import io.dev.pace_app_mobile.navigation.titleGraph
 import io.dev.pace_app_mobile.presentation.theme.Pace_app_mobileTheme
+import io.dev.pace_app_mobile.presentation.ui.compose.CustomizationViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginViewModel
 import timber.log.Timber
 
@@ -21,6 +25,7 @@ import timber.log.Timber
 class MainActivity : ComponentActivity() {
 
     private val loginViewModel: LoginViewModel by viewModels()
+    private val customizationViewModel: CustomizationViewModel by viewModels()
     private var universityId: String? = null
     private var dynamicToken: String = ""
 
@@ -28,18 +33,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // Extract dynamic link params
-        intent?.data?.let { uri ->
-            universityId = uri.getQueryParameter("universityId")
-            dynamicToken = uri.getQueryParameter("token").toString()
-            Timber.d("Dynamic link → universityId: $universityId, token: $dynamicToken")
-        }
+        // Handle dynamic link params
+        handleDynamicLink(intent)
 
         // Handle OAuth redirects
         handleAuthRedirect(intent)
 
         setContent {
-            Pace_app_mobileTheme {
+            val theme by customizationViewModel.themeState.collectAsState()
+            Pace_app_mobileTheme(theme ?: Customization.lightTheme) {
                 val navController = rememberNavController()
 
                 // Decide startDestination
@@ -75,6 +77,10 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        // Handle dynamic link if activity is reused
+        handleDynamicLink(intent)
+
+        // Handle OAuth redirect
         handleAuthRedirect(intent)
     }
 
@@ -92,6 +98,23 @@ class MainActivity : ComponentActivity() {
                     "/twitter" -> loginViewModel.handleTwitterRedirect(code, error)
                     "/instagram" -> loginViewModel.handleInstagramRedirect(code, error)
                 }
+            }
+        }
+    }
+
+    /**
+     * Extracts dynamic link params and applies customization theme
+     */
+    private fun handleDynamicLink(intent: Intent?) {
+        intent?.data?.let { uri ->
+            universityId = uri.getQueryParameter("universityId")
+            dynamicToken = uri.getQueryParameter("token").orEmpty()
+
+            Timber.d("Dynamic link → universityId: $universityId, token: $dynamicToken")
+
+            // Load theme dynamically
+            universityId?.toLongOrNull()?.let { id ->
+                customizationViewModel.loadTheme(id)
             }
         }
     }

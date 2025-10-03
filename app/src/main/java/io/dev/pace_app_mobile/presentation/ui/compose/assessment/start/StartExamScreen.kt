@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.presentation.theme.BgApp
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
@@ -50,6 +51,7 @@ fun StartExamScreen(
     val navigateTo by viewModel.navigateTo.collectAsState()
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
+    val colors = LocalAppColors.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     LaunchedEffect(navigateTo) {
@@ -102,7 +104,7 @@ fun StartExamScreen(
                     text = "PATH?",
                     fontSize = sizes.buttonFontSize,
                     fontWeight = FontWeight.SemiBold,
-                    color =  Color(0xFFCC4A1A),
+                    color =  colors.primary,
                 )
             }
             Spacer(modifier = Modifier.height(spacing.lg))

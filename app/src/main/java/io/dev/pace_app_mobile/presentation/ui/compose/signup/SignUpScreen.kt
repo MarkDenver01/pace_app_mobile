@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.presentation.theme.BgApp
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
@@ -60,6 +61,7 @@ fun SignUpScreen(
     val sizes = LocalResponsiveSizes.current
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val colors = LocalAppColors.current
 
     var mailAddress by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -122,7 +124,7 @@ fun SignUpScreen(
                     text = stringResource(id = R.string.signup_title),
                     fontSize = sizes.titleFontSize,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFCC4A1A),
+                    color = colors.primary,
                     modifier = Modifier.padding(bottom = spacing.md)
                 )
 
@@ -214,7 +216,9 @@ fun SignUpScreen(
                             viewModel.showErrorDialog("University not found.")
                         }
                     },
-                    content = stringResource(id = R.string.button_sign_up)
+                    content = stringResource(id = R.string.button_sign_up),
+                    backgroundColor = colors.primary,
+                    pressedBackgroundColor = colors.pressed
                 )
             }
         }

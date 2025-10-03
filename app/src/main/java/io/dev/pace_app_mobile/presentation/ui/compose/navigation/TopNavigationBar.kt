@@ -32,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.utils.responsiveDp
 import io.dev.pace_app_mobile.presentation.utils.responsiveSp
 
@@ -48,10 +49,12 @@ fun TopNavigationBar(
     val statusBarHeight = WindowInsets.statusBars
         .asPaddingValues().calculateTopPadding()
 
+    val colors = LocalAppColors.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF4D9DDA)) // Color fills behind status bar
+            .background(colors.primary) // Color fills behind status bar
     ) {
         Spacer(modifier = Modifier.height(statusBarHeight))
 
@@ -64,7 +67,7 @@ fun TopNavigationBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp) // Adjust as needed
-                .background(Color(0xFF0170C1)),
+                .background(colors.primary),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

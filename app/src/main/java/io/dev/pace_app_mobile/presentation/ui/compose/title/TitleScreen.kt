@@ -30,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.presentation.theme.BgApp
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
@@ -43,6 +44,7 @@ fun TitleScreen(
     val navigateTo by viewModel.navigateTo.collectAsState()
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val colors = LocalAppColors.current
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -89,7 +91,9 @@ fun TitleScreen(
             // --- login ---
             CustomDynamicButton(
                 onClick = { viewModel.onLoginClick() },
-                content = stringResource(id = R.string.button_login)
+                content = stringResource(id = R.string.button_login),
+                backgroundColor = colors.primary,
+                pressedBackgroundColor = colors.pressed
             )
 
             Spacer(modifier = Modifier.height(spacing.sm))

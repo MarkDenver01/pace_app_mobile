@@ -10,9 +10,11 @@ import io.dev.pace_app_mobile.data.local.room.dao.LoginDao
 import io.dev.pace_app_mobile.data.remote.datasource.RemoteDataSource
 import io.dev.pace_app_mobile.data.remote.network.ApiService
 import io.dev.pace_app_mobile.data.remote.repository.ApiRepositoryImpl
+import io.dev.pace_app_mobile.domain.model.CustomizationResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
+import io.dev.pace_app_mobile.domain.usecase.CustomizationUseCase
 import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookLoginUseCase
@@ -22,6 +24,7 @@ import io.dev.pace_app_mobile.domain.usecase.InstagramLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
+import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import javax.inject.Singleton
@@ -108,5 +111,15 @@ object AppModule {
     @Singleton
     fun provideDynamicLinkValidationUseCase(repository: ApiRepository): DynamicLinkValidationUseCase =
         DynamicLinkValidationUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideCustomizationUseCase(repository: ApiRepository): CustomizationUseCase =
+        CustomizationUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideStudentAssessmentUseCase(repository: ApiRepository): StudentAssessmentUseCase =
+        StudentAssessmentUseCase(repository)
 
 }

@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.presentation.theme.BgApp
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
@@ -52,9 +53,9 @@ fun QuestionCompletedScreen(
 ) {
     val navigateTo by viewModel.navigateTo.collectAsState()
     val spacing = LocalAppSpacing.current
+    val colors = LocalAppColors.current
     val sizes = LocalResponsiveSizes.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -105,6 +106,7 @@ fun QuestionCompletedScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                         ) {
+                            append("")
                             append("Assessment ")
                         }
                         withStyle(
@@ -127,8 +129,8 @@ fun QuestionCompletedScreen(
                     viewModel.onViewResultsClick()
                 },
                 content = "See Results",
-                backgroundColor = Color(0xFF0170C1),
-                pressedBackgroundColor = Color(0xFF4D9DDA)
+                backgroundColor = colors.primary,
+                pressedBackgroundColor = colors.pressed
             )
         }
     }

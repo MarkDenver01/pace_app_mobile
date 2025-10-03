@@ -24,3 +24,14 @@ data class StudentResponse(
     val universityId: Long,
     val universityName: String
 )
+
+data class StudentAssessmentRequest(
+    val email: String,
+    val userName: String,
+    val courseId: Long,
+    val universityId: Long
+)
+
+data class StudentAssessmentResponse(
+    val message: String
+)

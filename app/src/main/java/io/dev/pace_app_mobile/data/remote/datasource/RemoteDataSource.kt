@@ -3,12 +3,15 @@ package io.dev.pace_app_mobile.data.remote.datasource
 import io.dev.pace_app_mobile.data.remote.network.ApiService
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
+import io.dev.pace_app_mobile.domain.model.CustomizationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import net.openid.appauth.TokenResponse
@@ -27,6 +30,20 @@ class RemoteDataSource @Inject constructor(
 
         if (response.isSuccessful) {
             return response.body().orEmpty()
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun saveStudentAssesment(studentAssessmentRequest: StudentAssessmentRequest):
+            StudentAssessmentResponse {
+        val response = api.savedStudentAssessment(studentAssessmentRequest)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("empty body response")
         } else {
             throw Exception(
                 "error: " +
@@ -206,6 +223,24 @@ class RemoteDataSource @Inject constructor(
                 return body
             } else {
                 throw Exception("Response body was null ")
+            }
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun getCustomizationTheme(universityId: Long): CustomizationResponse {
+        val response = api.getCustomizationTheme(universityId)
+        if (response.isSuccessful) {
+            val body = response.body()
+            if (body != null) {
+                return body
+            } else {
+                throw Exception("Theme not found")
             }
         } else {
             throw Exception(

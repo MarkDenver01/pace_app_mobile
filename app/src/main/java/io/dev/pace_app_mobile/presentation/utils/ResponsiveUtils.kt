@@ -209,6 +209,7 @@ fun CustomTextField(
     enabled: Boolean = true
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
+    val colors = LocalAppColors.current
 
     OutlinedTextField(
         value = value,
@@ -226,21 +227,22 @@ fun CustomTextField(
                     Icon(
                         imageVector = leadingIcon,
                         contentDescription = placeholder,
-                        tint = Color(0xFFCC4A1A),
+                        tint = colors.primary,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color(0xFFCC4A1A).copy(alpha = 0.1f))
+                            .background(colors.primary.copy(alpha = 0.1f))
                             .padding(6.dp)
                     )
                 }
+
                 leadingIconPainter != null -> {
                     Icon(
                         painter = leadingIconPainter,
                         contentDescription = placeholder,
-                        tint = Color(0xFFCC4A1A),
+                        tint = colors.primary,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color(0xFFCC4A1A).copy(alpha = 0.1f))
+                            .background(colors.primary.copy(alpha = 0.1f))
                             .padding(6.dp)
                     )
                 }
@@ -255,7 +257,7 @@ fun CustomTextField(
                     Icon(
                         painter = painterResource(id = visibilityIcon),
                         contentDescription = description,
-                        tint = Color(0xFFCC4A1A)
+                        tint = colors.primary
                     )
                 }
             }
@@ -266,21 +268,21 @@ fun CustomTextField(
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.6f),
-            unfocusedBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.3f),
-            cursorColor = Color(0xFFCC4A1A),
-            focusedTextColor = Color(0xFFCC4A1A),
-            unfocusedTextColor = Color(0xFFCC4A1A),
-            focusedContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.1f),
-            unfocusedContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.05f),
-            disabledBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.2f),
+            focusedBorderColor = colors.primary.copy(alpha = 0.6f),
+            unfocusedBorderColor = colors.primary.copy(alpha = 0.3f),
+            cursorColor = colors.primary,
+            focusedTextColor = colors.primary,
+            unfocusedTextColor = colors.primary,
+            focusedContainerColor = colors.primary.copy(alpha = 0.1f),
+            unfocusedContainerColor = colors.primary.copy(alpha = 0.05f),
+            disabledBorderColor = colors.primary.copy(alpha = 0.2f),
             disabledTextColor = Color.Gray,
             disabledContainerColor = Color.LightGray.copy(alpha = 0.1f)
         ),
         visualTransformation = if (isPassword && !passwordVisible)
             PasswordVisualTransformation() else VisualTransformation.None,
         textStyle = LocalTextStyle.current.copy(
-            color = Color(0xFFCC4A1A),
+            color = colors.primary,
             fontSize = fontSize
         ),
         enabled = enabled
@@ -351,7 +353,9 @@ fun CustomIconButton(
         modifier = Modifier
             .testTag("hello world")
             .then(
-                if (width != null) Modifier.width(width).height(height)
+                if (width != null) Modifier
+                    .width(width)
+                    .height(height)
                 else Modifier.height(height)
             ),
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
@@ -716,6 +720,7 @@ fun CustomDynamicInfoCard(
     iconColor: Color = Color.White
 ) {
     val spacing = LocalAppSpacing.current
+    val colors = LocalAppColors.current
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -747,7 +752,7 @@ fun CustomDynamicInfoCard(
                 }
                 Text(
                     text = title,
-                    color = LocalAppColors.current.textPrimary,
+                    color = colors.primary,
                     fontSize = titleFontSize,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
@@ -759,7 +764,7 @@ fun CustomDynamicInfoCard(
             // Body content
             Text(
                 text = content,
-                color = LocalAppColors.current.textPrimary.copy(alpha = 0.95f),
+                color = colors.primary.copy(alpha = 0.95f),
                 fontSize = bodyFontSize,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -769,7 +774,7 @@ fun CustomDynamicInfoCard(
             // Footer
             Text(
                 text = footerReminder,
-                color = LocalAppColors.current.textSecondary,
+                color = colors.primary,
                 fontSize = footerFontSize,
                 fontStyle = FontStyle.Italic,
                 modifier = Modifier.fillMaxWidth()
@@ -794,6 +799,9 @@ fun CustomCheckBox(
     label: String? = null,
     annotatedLabel: AnnotatedString? = null
 ) {
+
+    val colors = LocalAppColors.current
+
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -801,9 +809,9 @@ fun CustomCheckBox(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
-                checkedColor = Color(0xFFB23C0F),
+                checkedColor = colors.pressed,
                 uncheckedColor = Color.Gray,
-                checkmarkColor = Color(0xFFCC4A1A)
+                checkmarkColor = colors.primary
             )
         )
         Spacer(modifier = Modifier.width(4.dp))
@@ -811,14 +819,14 @@ fun CustomCheckBox(
             annotatedLabel != null -> {
                 Text(
                     text = annotatedLabel,
-                    color = Color(0xFFCC4A1A)
+                    color = colors.primary
                 )
             }
 
             label != null -> {
                 Text(
                     text = label,
-                    color = Color(0xFFCC4A1A)
+                    color = colors.primary
                 )
             }
         }
@@ -839,6 +847,9 @@ fun YesNoButtonGroup(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val colors = LocalAppColors.current
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -850,10 +861,10 @@ fun YesNoButtonGroup(
                 .height(48.dp)
                 .weight(1f),
             fontSize = 14.sp,
-            backgroundColor = if (selected == "YES") Color(0xFFCC4A1A) else Color( 0xFFCACACA),
-            pressedBackgroundColor = if (selected == "YES") Color(0xFFB23C0F) else Color(0xFFD9D9D9),
+            backgroundColor = if (selected == "YES") colors.primary else Color(0xFFCACACA),
+            pressedBackgroundColor = if (selected == "YES") colors.primary else Color(0xFFD9D9D9),
             cornerRadius = 80.dp, // pill shape (height = 48.dp, radius = height)
-            borderColor = if (selected == "YES") Color(0xFFCC4A1A) else Color(0xFF999999),
+            borderColor = if (selected == "YES") colors.primary else Color(0xFF999999),
             content = "YES"
         )
 
@@ -863,10 +874,10 @@ fun YesNoButtonGroup(
                 .height(48.dp)
                 .weight(1f),
             fontSize = 14.sp,
-            backgroundColor = if (selected == "NO") Color(0xFFCC4A1A) else Color( 0xFFCACACA),
-            pressedBackgroundColor = if (selected == "NO") Color(0xFFB23C0F) else Color(0xFFD9D9D9),
+            backgroundColor = if (selected == "NO") colors.primary else Color(0xFFCACACA),
+            pressedBackgroundColor = if (selected == "NO") colors.primary else Color(0xFFD9D9D9),
             cornerRadius = 80.dp,
-            borderColor = if (selected == "NO") Color(0xFFCC4A1A) else Color(0xFF999999),
+            borderColor = if (selected == "NO") colors.primary else Color(0xFF999999),
             content = "NO"
         )
     }
@@ -891,6 +902,8 @@ fun ProgressHeader(
         label = "AnimatedProgress"
     )
 
+    val colors = LocalAppColors.current
+
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "Question ${currentIndex.coerceAtLeast(1)} of $totalQuestions",
@@ -904,14 +917,14 @@ fun ProgressHeader(
         )
 
         LinearProgressIndicator(
-        progress = { progress.coerceIn(0f, 1f) },
-        modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-        color = Color(0xFFCC4A1A),
-        trackColor = Color(0xFFEFEFEF),
-        strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+            progress = { progress.coerceIn(0f, 1f) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp)),
+            color = colors.primary,
+            trackColor = Color(0xFFEFEFEF),
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
         )
     }
 }
@@ -965,7 +978,11 @@ fun AlertConfirmationDialog(
                                 .background(Color(0xFF3DDC84)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Check, contentDescription = "Confirm", tint = Color.White)
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = "Confirm",
+                                tint = Color.White
+                            )
                         }
                     }
 
@@ -979,7 +996,11 @@ fun AlertConfirmationDialog(
                                 .background(Color(0xFFE57373)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Close, contentDescription = "Cancel", tint = Color.White)
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Cancel",
+                                tint = Color.White
+                            )
                         }
                     }
                 }
@@ -1067,8 +1088,10 @@ fun AssessmentResultDialog(
         text = {
             Column {
                 topCourses.forEachIndexed { index, course ->
-                    Text(text = "${index + 1}. $course", style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White)
+                    Text(
+                        text = "${index + 1}. $course", style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White
+                    )
                 }
             }
         },
@@ -1103,6 +1126,7 @@ fun CustomDropDownPicker(
     fontSize: TextUnit = LocalResponsiveSizes.current.buttonFontSize
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val colors = LocalAppColors.current
 
     Box(modifier = modifier) {
         OutlinedTextField(
@@ -1119,10 +1143,10 @@ fun CustomDropDownPicker(
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = placeholder,
-                    tint = Color(0xFFCC4A1A),
+                    tint = colors.primary,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color(0xFFCC4A1A).copy(alpha = 0.1f))
+                        .background(colors.background.copy(alpha = 0.1f))
                         .padding(6.dp)
                 )
             },
@@ -1130,7 +1154,7 @@ fun CustomDropDownPicker(
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = "Dropdown Arrow",
-                    tint = Color(0xFFCC4A1A)
+                    tint = colors.primary
                 )
             },
             singleLine = true,
@@ -1139,17 +1163,19 @@ fun CustomDropDownPicker(
             shape = RoundedCornerShape(50),
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { expanded = true }, // The clickable modifier must be outside the TextField
+                .clickable {
+                    expanded = true
+                }, // The clickable modifier must be outside the TextField
             colors = OutlinedTextFieldDefaults.colors(
-                disabledBorderColor = Color(0xFFCC4A1A).copy(alpha = 0.3f),
-                disabledTextColor = Color(0xFFCC4A1A),
+                disabledBorderColor = colors.primary.copy(alpha = 0.3f),
+                disabledTextColor = colors.primary,
                 disabledPlaceholderColor = Color.LightGray,
-                disabledLeadingIconColor = Color(0xFFCC4A1A),
-                disabledTrailingIconColor = Color(0xFFCC4A1A),
-                disabledContainerColor = Color(0xFFCC4A1A).copy(alpha = 0.05f)
+                disabledLeadingIconColor = colors.primary,
+                disabledTrailingIconColor = colors.primary,
+                disabledContainerColor = colors.primary.copy(alpha = 0.05f)
             ),
             textStyle = LocalTextStyle.current.copy(
-                color = Color(0xFFCC4A1A),
+                color = colors.primary,
                 fontSize = fontSize
             )
         )
@@ -1160,14 +1186,14 @@ fun CustomDropDownPicker(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .fillMaxWidth(0.95f) // Adjust width to be similar to the text field
-                .background(Color(0xFFCC4A1A).copy(alpha = 0.05f))
+                .background(colors.primary.copy(alpha = 0.05f))
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
                     text = {
                         Text(
                             text = option,
-                            color = Color(0xFFCC4A1A),
+                            color = colors.primary,
                             fontSize = fontSize
                         )
                     },
@@ -1214,9 +1240,12 @@ fun UniversityDialog(
             title = { Text("Select University") },
             text = {
                 var expanded by remember { mutableStateOf(false) }
-                var selectedText by remember { mutableStateOf(
-                    universities.firstOrNull { it.universityId == selectedUniversityId }?.universityName ?: ""
-                ) }
+                var selectedText by remember {
+                    mutableStateOf(
+                        universities.firstOrNull { it.universityId == selectedUniversityId }?.universityName
+                            ?: ""
+                    )
+                }
 
                 Column {
                     Box(

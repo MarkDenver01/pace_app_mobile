@@ -88,23 +88,28 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val result = dynamicLinkValidationUseCase(token)
-                Timber.d("result: $result.data.message")
+                Timber.d("result: ${result.data?.message}")
                 when (result) {
                     is NetworkResult.Success -> {
-                        val result = registerUseCase(
-                            username = username,
-                            email = email,
-                            password = password,
-                            universityId = universityId
-                        )
+                        if (result.data?.message == "success") {
+                            val registerResult = registerUseCase(
+                                username = username,
+                                email = email,
+                                password = password,
+                                universityId = universityId
+                            )
 
-                        if (result.isSuccess) {
-                            onSuccess()
+                            if (registerResult.isSuccess) {
+                                onSuccess()
+                            } else {
+                                _errorMessage.value =
+                                    registerResult.exceptionOrNull()?.message ?: "Unknown error"
+                                _showErrorDialog.value = true
+                            }
                         } else {
-                            _errorMessage.value =
-                                result.exceptionOrNull()?.message ?: "Unknown error"
-                            _showErrorDialog.value = true
+                            setShowInvalidTokenWarningDialog(true)
                         }
+
                     }
 
                     is NetworkResult.Error -> {

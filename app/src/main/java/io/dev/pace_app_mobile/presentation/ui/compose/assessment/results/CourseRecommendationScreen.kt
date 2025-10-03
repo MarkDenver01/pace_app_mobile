@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,10 +24,12 @@ import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
 import io.dev.pace_app_mobile.presentation.theme.BgApp
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,8 +41,14 @@ fun CourseRecommendedResultScreen(
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
+    val colors = LocalAppColors.current
     val topCourses by viewModel.topCourses.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (topCourses.isEmpty()) {
+            viewModel.fetchCourseRecommendation()
+        }
+    }
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -66,64 +72,67 @@ fun CourseRecommendedResultScreen(
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(spacing.md),
+            contentPadding = PaddingValues(bottom = 80.dp)
         ) {
-            // --- Logo & Title ---
-            Image(
-                painter = painterResource(id = R.drawable.ic_result),
-                contentDescription = "Assessment Result",
-                modifier = Modifier.size(180.dp)
-            )
+            // --- Header Section ---
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_result),
+                        contentDescription = "Assessment Result",
+                        modifier = Modifier.size(180.dp)
+                    )
 
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFF4D9DDA),
-                            fontSize = sizes.fontLargeSizeLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    ) {
-                        append("Recommended ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFFCC4A1A),
-                            fontSize = sizes.fontLargeSizeLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    ) {
-                        append("Course Result")
-                    }
-                },
-                modifier = Modifier.padding(vertical = spacing.md)
-            )
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = Color(0xFF4D9DDA),
+                                    fontSize = sizes.fontLargeSizeLarge,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            ) {
+                                append("Recommended ")
+                            }
+                            withStyle(
+                                style = SpanStyle(
+                                    color = colors.primary,
+                                    fontSize = sizes.fontLargeSizeLarge,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            ) {
+                                append("Course Result")
+                            }
+                        },
+                        modifier = Modifier.padding(vertical = spacing.md)
+                    )
 
-            Spacer(modifier = Modifier.height(spacing.lg))
+                    Spacer(modifier = Modifier.height(spacing.lg))
+                }
+            }
 
             // --- Course List ---
             if (topCourses.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(spacing.md),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(topCourses) { course ->
-                       CourseCard(course)
-                    }
+                items(topCourses) { course ->
+                    CourseCard(course)
                 }
             } else {
-                Text(
-                    text = "No course results available.",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                item {
+                    Text(
+                        text = "No course recommended",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
@@ -142,8 +151,7 @@ fun CourseCard(course: CourseRecommendation) {
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 text = "Course: ${course.courseName}",
@@ -177,4 +185,3 @@ fun CourseCard(course: CourseRecommendation) {
         }
     }
 }
-

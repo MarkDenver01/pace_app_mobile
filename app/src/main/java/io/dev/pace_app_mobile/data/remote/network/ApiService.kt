@@ -2,11 +2,14 @@ package io.dev.pace_app_mobile.data.remote.network
 
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
+import io.dev.pace_app_mobile.domain.model.CustomizationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import net.openid.appauth.TokenResponse
@@ -30,7 +33,7 @@ interface ApiService {
         @Body request: RegisterRequest
     ): Response<RegisterResponse>
 
-    @GET("user/api/questions")
+    @GET("user/api/questions/all")
     suspend fun getAllQuestions(): Response<List<QuestionResponse>>
 
     @GET("user/api/questions/all/{universityId}")
@@ -41,6 +44,11 @@ interface ApiService {
     suspend fun getCourseRecommendation(
         @Body request: List<AnsweredQuestionRequest>
     ): Response<List<CourseRecommendationResponse>>
+
+    @POST("user/api/student_assessment/save")
+    suspend fun savedStudentAssessment(
+        @Body request: StudentAssessmentRequest
+    ): Response<StudentAssessmentResponse>
 
     @GET("user/public/university/all")
     suspend fun getAllUniversity(): Response<List<UniversityResponse>>
@@ -87,4 +95,9 @@ interface ApiService {
     suspend fun validateToken(
         @Query("token") token: String
     ): Response<UniversityLinkResponse>
+
+    @GET("user/public/customization")
+    suspend fun getCustomizationTheme(
+        @Query("universityId") universityId: Long
+    ): Response<CustomizationResponse>
 }

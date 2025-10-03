@@ -1,7 +1,7 @@
 package io.dev.pace_app_mobile.presentation.theme
 
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -17,42 +17,132 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.dev.pace_app_mobile.domain.enums.Customization
 import io.dev.pace_app_mobile.presentation.utils.responsiveHeightFraction
 import io.dev.pace_app_mobile.presentation.utils.responsiveTextSp
 import io.dev.pace_app_mobile.presentation.utils.responsiveWidthFraction
-import kotlin.math.max
+import timber.log.Timber
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// ---------------------- Color Schemes (aligned with frontend) ----------------------
+
+data class AppColorScheme(
+    val primary: Color,
+    val onPrimary: Color,
+    val background: Color,
+    val onBackground: Color,
+    val surface: Color,
+    val onSurface: Color,
+    val border: Color,
+    val placeholder: Color,
+    val disabled: Color,
+    val pressed: Color,
+    val success: Color,
+    val error: Color,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+private val LightColorScheme = AppColorScheme(
+    primary = Color(0xFFD94022),      // frontend lightTheme.primary
+    background = Color(0xFFF9FAFB),   // frontend lightTheme.background
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    border = Color(0xFFE0E0E0),
+    placeholder = Color(0xFF9E9E9E),
+    disabled = Color(0xFFBDBDBD),
+    pressed = Color(0xFFBF360C),
+    success = Color(0xFF4CAF50),
+    error = Color(0xFFF44336)
 )
 
-data class AppColors(
-    val primary: Color = Color(0xFF4CAF50),
-    val primaryDark: Color = Color(0xFF2E7D32),
-    val textPrimary: Color = Color.White,
-    val textSecondary: Color = Color.LightGray,
-    val error: Color = Color.Red
+private val DarkColorScheme = AppColorScheme(
+    primary = Color(0xFFD94022),      // frontend darkTheme.primary
+    background = Color(0xFF121212),   // default dark bg
+    onPrimary = Color.White,
+    onBackground = Color.White,
+    surface = Color(0xFF1E1E1E),
+    onSurface = Color.White,
+    border = Color(0xFF2C2C2C),
+    placeholder = Color(0xFF9E9E9E),
+    disabled = Color(0xFF616161),
+    pressed = Color(0xFFBF360C),
+    success = Color(0xFF81C784),
+    error = Color(0xFFE57373)
 )
 
-val LocalAppColors = staticCompositionLocalOf { AppColors() }
+private val RedishColorScheme = AppColorScheme(
+    primary = Color(0xFFD32F2F),      // frontend redishTheme.primary
+    background = Color(0xFFFFF5F5),   // frontend redishTheme.background
+    onPrimary = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    border = Color(0xFFE57373),
+    placeholder = Color(0xFFBDBDBD),
+    disabled = Color(0xFFE0E0E0),
+    pressed = Color(0xFFB71C1C),
+    success = Color(0xFF4CAF50),
+    error = Color(0xFFF44336)
+)
+
+private val PurplelishColorScheme = AppColorScheme(
+    primary = Color(0xFF7E57C2),      // frontend purplelishTheme.primary
+    background = Color(0xFFF7F3FC),   // frontend purplelishTheme.background
+    onPrimary = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    border = Color(0xFFD1C4E9),
+    placeholder = Color(0xFF9E9E9E),
+    disabled = Color(0xFFBDBDBD),
+    pressed = Color(0xFF5E35B1),
+    success = Color(0xFF4CAF50),
+    error = Color(0xFFF44336)
+)
+
+private val BrownishColorScheme = AppColorScheme(
+    primary = Color(0xFF8D6E63),      // frontend brownishTheme.primary
+    background = Color(0xFFFEFAF5),   // frontend brownishTheme.background
+    onPrimary = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    border = Color(0xFFD7CCC8),
+    placeholder = Color(0xFF9E9E9E),
+    disabled = Color(0xFFBCAAA4),
+    pressed = Color(0xFF6D4C41),
+    success = Color(0xFF4CAF50),
+    error = Color(0xFFF44336)
+)
+
+fun AppColorScheme.toMaterialColors(darkTheme: Boolean = false): ColorScheme {
+    return if (darkTheme) {
+        darkColorScheme(
+            primary = primary,
+            onPrimary = onPrimary,
+            background = background,
+            onBackground = onBackground,
+            surface = surface,
+            onSurface = onSurface,
+            error = error,
+            onError = Color.White,
+        )
+    } else {
+        lightColorScheme(
+            primary = primary,
+            onPrimary = onPrimary,
+            background = background,
+            onBackground = onBackground,
+            surface = surface,
+            onSurface = onSurface,
+            error = error,
+            onError = Color.White,
+        )
+    }
+}
+
+// ---------------------- Custom Locals ----------------------
+val LocalAppColors = staticCompositionLocalOf { LightColorScheme }
 
 data class AppSpacing(
     val xs: Dp = 4.dp,
@@ -104,21 +194,35 @@ val LocalResponsiveSizes = staticCompositionLocalOf {
     )
 }
 
+// ---------------------- Theme ----------------------
+
 @Composable
 fun Pace_app_mobileTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    customization: Customization = Customization.lightTheme,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val context = LocalContext.current
+
+    Timber.e("xxxxx: ${customization.name}")
+    val colorScheme = when (customization) {
+        Customization.darkTheme -> {
+            if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // fallback to custom dark scheme if dynamic colors unavailable
+                DarkColorScheme
+            } else DarkColorScheme
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        Customization.lightTheme -> {
+            if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // fallback to custom light scheme if dynamic colors unavailable
+                LightColorScheme
+            } else LightColorScheme
+        }
+
+        Customization.redishTheme -> RedishColorScheme
+        Customization.purplelishTheme -> PurplelishColorScheme
+        Customization.brownishTheme -> BrownishColorScheme
     }
 
     val responsiveSizes = ResponsiveSizes(
@@ -142,12 +246,14 @@ fun Pace_app_mobileTheme(
 
     CompositionLocalProvider(
         LocalResponsiveSizes provides responsiveSizes,
-        LocalAppColors provides AppColors(),
+        LocalAppColors provides colorScheme,
         LocalAppSpacing provides AppSpacing(),
         LocalAppTypography provides AppTypography()
     ) {
         MaterialTheme(
-            colorScheme = colorScheme,
+            colorScheme = colorScheme.toMaterialColors(
+                darkTheme = (customization == Customization.darkTheme)
+            ),
             typography = Typography,
             content = content
         )

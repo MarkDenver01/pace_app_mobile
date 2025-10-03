@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
@@ -45,6 +46,7 @@ fun StartScreen(
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val colors = LocalAppColors.current
 
     Scaffold(
         modifier = Modifier
@@ -84,7 +86,9 @@ fun StartScreen(
             // --- Get Started Button ---
             CustomDynamicButton(
                 onClick = { viewModel.onStartClick() },
-                content = stringResource(id = R.string.button_get_started)
+                content = stringResource(id = R.string.button_get_started),
+                backgroundColor = colors.primary,
+                pressedBackgroundColor = colors.pressed
             )
         }
     }

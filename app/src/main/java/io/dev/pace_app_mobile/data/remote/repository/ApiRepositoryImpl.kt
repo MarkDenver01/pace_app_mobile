@@ -8,11 +8,14 @@ import io.dev.pace_app_mobile.data.remote.datasource.RemoteDataSource
 import io.dev.pace_app_mobile.domain.enums.HttpStatus
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
+import io.dev.pace_app_mobile.domain.model.CustomizationResponse
 import io.dev.pace_app_mobile.domain.model.LoginRequest
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
@@ -34,15 +37,6 @@ class ApiRepositoryImpl @Inject constructor(
 
     override suspend fun isExistingFacebookAccount(accessToken: String): Boolean {
         return remoteDataSource.isFacebookLogin(accessToken)
-    }
-
-    override suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse> {
-        return try {
-            val universityLinkResponse  = remoteDataSource.validateDynamicLink(token)
-            NetworkResult.Success(HttpStatus.OK, universityLinkResponse)
-        } catch (e: Exception) {
-            NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
-        }
     }
 
     override suspend fun login(email: String, password: String): NetworkResult<LoginResponse> {
@@ -357,8 +351,37 @@ class ApiRepositoryImpl @Inject constructor(
             val result = remoteDataSource.fetchCourseRecommendation(answers)
             Result.success(result)
         } catch (e: Exception) {
-            Log.e("getQuestions", "Exception: ${e.message}", e)
+            Timber.e("getQuestions - exception: ${e.message}")
             Result.failure(Exception("Failed to get recommendation: $e"))
+        }
+    }
+
+    override suspend fun saveStudentAssessment(studentAssessmentRequest: StudentAssessmentRequest): Result<StudentAssessmentResponse> {
+        return try {
+            val result = remoteDataSource.saveStudentAssesment(studentAssessmentRequest)
+            Result.success(result)
+        } catch (e: Exception) {
+            Timber.e("getQuestions - exception: ${e.message}")
+            Result.failure(Exception("Failed to get recommendation: $e"))
+        }
+    }
+
+    override suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse> {
+        return try {
+            val universityLinkResponse  = remoteDataSource.validateDynamicLink(token)
+            NetworkResult.Success(HttpStatus.OK, universityLinkResponse)
+        } catch (e: Exception) {
+            NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
+        }
+    }
+
+    override suspend fun getCustomizationTheme(universityId: Long): NetworkResult<CustomizationResponse> {
+        return  try {
+            val result = remoteDataSource.getCustomizationTheme(universityId)
+            NetworkResult.Success(HttpStatus.OK, result)
+        } catch (e: Exception) {
+            Timber.e("getCustomizationTheme - exception: ${e.message}")
+            NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
         }
     }
 }

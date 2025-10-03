@@ -10,9 +10,11 @@ import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
 import io.dev.pace_app_mobile.domain.model.Question
 import io.dev.pace_app_mobile.domain.model.QuestionCategory
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
+import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.navigation.Routes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,12 +22,15 @@ import javax.inject.Inject
 
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import kotlin.collections.map
 
 @HiltViewModel
 class AssessmentViewModel @Inject constructor(
     private val questionUseCase: QuestionUseCase,
     private val allQuestionsByUniversityUseCase: AllQuestionsByUniversityUseCase,
-    private val recommendationUseCase: CourseRecommendationUseCase
+    private val recommendationUseCase: CourseRecommendationUseCase,
+    private val studentAssessmentUseCase: StudentAssessmentUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -68,11 +73,7 @@ class AssessmentViewModel @Inject constructor(
             questionId?.let { answers[it] }
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    init {
-        fetchAllQuestionsByUniversity()
-    }
-
-    private fun fetchQuestions() {
+    fun fetchQuestions() {
         viewModelScope.launch {
             val result = questionUseCase()
             result.fold(
@@ -127,6 +128,18 @@ class AssessmentViewModel @Inject constructor(
     }
 
     fun onCompletedClick() {
+//        viewModelScope.launch {
+//            val result = studentAssessmentUseCase(studentAssessmentRequest)
+//            result.fold(
+//                onSuccess = { studentResponse ->
+//                    _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
+//                },
+//                onFailure = {
+//                    // You may trigger a dialog or snackbar via UI
+//                    Timber.e("xxx error detected.")
+//                }
+//            )
+//        }
         _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
     }
 
@@ -147,7 +160,7 @@ class AssessmentViewModel @Inject constructor(
         _currentQuestionIndex.value = 0
         _answers.value = emptyMap()
         _navigateTo.value = null
-        fetchAllQuestionsByUniversity()
+        fetchQuestions()
     }
 
 
@@ -185,12 +198,12 @@ class AssessmentViewModel @Inject constructor(
     }
 
     fun onCompletedAssessment() {
-        fetchCourseRecommendation(buildAnsweredQuestions())
+        onCompletedClick()
     }
 
-    fun fetchCourseRecommendation(userAnswers: List<AnsweredQuestionRequest>) {
+    fun fetchCourseRecommendation() {
         viewModelScope.launch {
-            val result = recommendationUseCase(userAnswers)
+            val result = recommendationUseCase(buildAnsweredQuestions())
             result.fold(
                 onSuccess = { recommendationList ->
                     _topCourses.value = recommendationList.map {
@@ -204,33 +217,12 @@ class AssessmentViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    // You may trigger a dialog or snackbar via UI
-                    _questions.value = emptyList()
-                }
-            )
-        }
-
-        viewModelScope.launch {
-            val result = questionUseCase()
-            result.fold(
-                onSuccess = { questionList ->
-                    _questions.value = questionList.map {
-                        Question(
-                            id = it.questionId,
-                            category = QuestionCategory.fromString(it.category),
-                            text = it.question,
-                            imageResId = R.drawable.ic_figure_1, // Update if category-based image mapping needed,
-                            courseName = it.courseName
-                        )
-                    }
-                },
-                onFailure = {
-                    // You may trigger a dialog or snackbar via UI
-                    _questions.value = emptyList()
+                    _topCourses.value = emptyList()
                 }
             )
         }
     }
+
 
     private fun buildAnsweredQuestions(): List<AnsweredQuestionRequest> {
         return answers.value.map { (questionId, answer) ->

@@ -2,9 +2,12 @@ package io.dev.pace_app_mobile.domain.repository
 
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendationResponse
+import io.dev.pace_app_mobile.domain.model.CustomizationResponse
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
@@ -32,14 +35,6 @@ interface ApiRepository {
      * @return Boolean
      */
     suspend fun isExistingFacebookAccount(accessToken: String): Boolean
-
-    /**
-     * Check if dynamic link is valid via token.
-     *
-     * @param token token
-     * @return true or false
-     */
-    suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse>
 
     /**
      * Login
@@ -152,4 +147,25 @@ interface ApiRepository {
     suspend fun getCourseRecommendation(
         answers: List<AnsweredQuestionRequest>
     ): Result<List<CourseRecommendationResponse>>
+
+    suspend fun saveStudentAssessment(
+        studentAssessmentRequest: StudentAssessmentRequest
+    ): Result<StudentAssessmentResponse>
+
+
+    /**
+     * Check if dynamic link is valid via token.
+     *
+     * @param token token
+     * @return true or false
+     */
+    suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse>
+
+    /**
+     * Get customization theme.
+     *
+     * @param universityId university id
+     * @return get theme customization made by unversity admin
+     */
+    suspend fun getCustomizationTheme(universityId: Long): NetworkResult<CustomizationResponse>
 }

@@ -67,6 +67,7 @@ import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.navigation.Routes.START_ASSESSMENT_ROUTE
 import io.dev.pace_app_mobile.presentation.theme.BgApp
+import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
@@ -99,6 +100,7 @@ fun LoginScreen(
     val sizes = LocalResponsiveSizes.current
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val colors = LocalAppColors.current
 
     // UI state
     var mailAddress by remember { mutableStateOf("") }
@@ -331,7 +333,7 @@ fun LoginScreen(
                     text = stringResource(id = R.string.login_title),
                     fontSize = sizes.titleFontSize,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFCC4A1A),
+                    color = colors.primary,
                     modifier = Modifier.padding(bottom = spacing.md)
                 )
 
@@ -366,7 +368,7 @@ fun LoginScreen(
                     )
                     Text(
                         text = "Forgot password?",
-                        color = Color(0xFFCC4A1A),
+                        color = colors.primary,
                         modifier = Modifier.clickable {
                             // TODO: navigate to forgot password screen
                         }
@@ -377,7 +379,9 @@ fun LoginScreen(
 
                 CustomDynamicButton(
                     onClick = { viewModel.onLoginClick(mailAddress, password) },
-                    content = stringResource(id = R.string.button_login)
+                    content = stringResource(id = R.string.button_login),
+                    backgroundColor = colors.primary,
+                    pressedBackgroundColor = colors.pressed
                 )
 
                 Spacer(modifier = Modifier.height(spacing.md))
@@ -389,7 +393,7 @@ fun LoginScreen(
                             append("Create here.")
                         }
                     },
-                    color = Color(0xFFCC4A1A),
+                    color = colors.primary,
                     modifier = Modifier.clickable {
                         viewModel.onSignupClick()
                     }
@@ -401,14 +405,18 @@ fun LoginScreen(
                     text = "Or Sign in with ",
                     fontSize = sizes.titleFontSize,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFCC4A1A),
+                    color = colors.primary,
                     modifier = Modifier.padding(bottom = spacing.md)
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CustomIconButton(
                         icon = R.drawable.ic_google,
-                        onClick = { startGoogleLogin(oneTapClient, launcher) }
+                        onClick = { startGoogleLogin(oneTapClient, launcher) },
+                        backgroundColor = colors.primary,
+                        pressedBackgroundColor = colors.pressed,
+                        contentColor = colors.primary,
+                        borderColor = colors.primary
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_facebook,
@@ -419,11 +427,19 @@ fun LoginScreen(
                                 callbackManager,
                                 listOf("email", "public_profile")
                             )
-                        }
+                        },
+                        backgroundColor = colors.primary,
+                        pressedBackgroundColor = colors.pressed,
+                        contentColor = colors.primary,
+                        borderColor = colors.primary
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_twitter,
-                        onClick = { startTwitterLogin(authService, twitterAuthLauncher) }
+                        onClick = { startTwitterLogin(authService, twitterAuthLauncher) },
+                        backgroundColor = colors.primary,
+                        pressedBackgroundColor = colors.pressed,
+                        contentColor = colors.primary,
+                        borderColor = colors.primary
                     )
                     CustomIconButton(
                         icon = R.drawable.ic_instagram,
@@ -445,7 +461,11 @@ fun LoginScreen(
 
                             val intent = Intent(Intent.ACTION_VIEW, authUri)
                             instagramAuthLauncher.launch(intent)
-                        }
+                        },
+                        backgroundColor = colors.primary,
+                        pressedBackgroundColor = colors.pressed,
+                        contentColor = colors.primary,
+                        borderColor = colors.primary
                     )
                 }
             }
