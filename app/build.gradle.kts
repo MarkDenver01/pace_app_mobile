@@ -87,4 +87,8 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.bundles.oauth)
     implementation(libs.timber)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.lottie.compose)
 }

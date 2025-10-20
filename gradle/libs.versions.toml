@@ -27,6 +27,8 @@ google-auth = "21.2.0"
 facebook-sdk = "latest.release"
 appauth = "0.11.1"
 
+lottie = "6.1.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -66,6 +68,10 @@ oauth-google = { module = "com.google.android.gms:play-services-auth", version.r
 oauth-facebook = { module = "com.facebook.android:facebook-login", version.ref = "facebook-sdk" }
 oauth-appauth = { module = "net.openid:appauth", version.ref = "appauth" }
 timber = { group = "com.jakewharton.timber", name = "timber", version = "5.0.1" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 
 [bundles]
 oauth = [

@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                 val startDestination = when {
                     // 1. From dynamic link
                     !universityId.isNullOrEmpty() && dynamicToken.isNotEmpty() -> {
-                        Routes.TITLE_ROUTE
+                        Routes.START_ROUTE
                     }
                     // 2. Already logged in
                     loginViewModel.isUserLoggedIn() -> {
@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     startDestination = startDestination
                 ) {
-                    startGraph(navController)
+                    startGraph(navController, universityId, dynamicToken)
                     titleGraph(navController, universityId, dynamicToken)
                     assessmentGraph(navController)
                 }

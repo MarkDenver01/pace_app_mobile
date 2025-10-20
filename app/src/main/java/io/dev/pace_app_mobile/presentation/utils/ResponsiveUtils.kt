@@ -1,9 +1,14 @@
 package io.dev.pace_app_mobile.presentation.utils
 
 import android.app.DatePickerDialog
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,6 +59,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
@@ -63,8 +69,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -78,6 +87,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
@@ -1027,6 +1040,7 @@ fun AlertDynamicConfirmationDialog(
         AlertType.SUCCESS -> Pair(Color(0xFF4CAF50), Color(0xFF388E3C)) // Green
         AlertType.WARNING -> Pair(Color(0xFFFFA000), Color(0xFFF57C00)) // Orange
         AlertType.ERROR -> Pair(Color(0xFFD32F2F), Color(0xFFC62828))   // Red
+        AlertType.QUESTION -> Pair(Color(0xFFFFA000), Color(0xFFF57C00))
     }
 
     Dialog(
@@ -1290,17 +1304,104 @@ fun UniversityDialog(
     }
 }
 
+@Composable
+fun SweetAlertDialog(
+    type: AlertType,
+    title: String,
+    message: String,
+    show: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    confirmText: String = "Yes",        // Customizable confirm button text
+    dismissText: String = "No"     // Customizable dismiss button text
+) {
+    val colors = LocalAppColors.current
 
+    if (show) {
+        AnimatedVisibility(
+            visible = show,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut()
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x99000000)) // semi-transparent overlay
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(32.dp)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(24.dp)
+                    ) {
+                        // Load different Lottie animation based on alert type
+                        val animationRes = when (type) {
+                            AlertType.SUCCESS -> R.raw.success
+                            AlertType.WARNING -> R.raw.warning
+                            AlertType.ERROR -> R.raw.error
+                            AlertType.QUESTION -> R.raw.question
+                        }
 
+                        val composition by rememberLottieComposition(
+                            LottieCompositionSpec.RawRes(animationRes)
+                        )
+                        val progress by animateLottieCompositionAsState(composition)
 
+                        LottieAnimation(
+                            composition = composition,
+                            progress = progress,
+                            modifier = Modifier.size(120.dp)
+                                .graphicsLayer { alpha = 0.8f } // optional transparency
+                                .drawWithContent {
+                                    drawContent()
+                                    drawRect(colors.primary, alpha = 0.5f, blendMode = BlendMode.SrcAtop)
+                                }
+                        )
 
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-
-
-
-
-
-
-
-
-
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(onClick = onDismiss) {
+                                Text(dismissText, color = Color.Gray)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = onConfirm,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = when (type) {
+                                        AlertType.SUCCESS -> Color(0xFF43A047)
+                                        AlertType.WARNING -> Color(0xFFFFA000)
+                                        AlertType.ERROR -> Color(0xFFE53935)
+                                        AlertType.QUESTION -> colors.primary
+                                    },
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text(confirmText)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

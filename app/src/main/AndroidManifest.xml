@@ -65,8 +65,8 @@
                 <!-- Cloudflare Quick Tunnel public URL -->
                 <data
                     android:scheme="https"
-                    android:host="lab-household-wedding-approach.trycloudflare.com"
-                    android:pathPrefix="/" />
+                    android:host="pace-app-frontend.onrender.com"
+                    android:pathPrefix="/app-link" />
             </intent-filter>
 
 

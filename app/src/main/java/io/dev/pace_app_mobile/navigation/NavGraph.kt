@@ -12,9 +12,17 @@ import io.dev.pace_app_mobile.presentation.ui.compose.signup.SignUpScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.start.StartScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.title.TitleScreen
 
-fun NavGraphBuilder.startGraph(navController: NavController) {
+fun NavGraphBuilder.startGraph(
+    navController: NavController,
+    universityId: String? = null,
+    dynamicToken: String? = null
+) {
     composable(Routes.START_ROUTE) {
-        StartScreen(navController = navController)
+        StartScreen(
+            navController = navController,
+            universityId = universityId,
+            dynamicToken = dynamicToken
+        )
     }
 }
 
