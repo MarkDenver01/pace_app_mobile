@@ -103,7 +103,7 @@ interface ApiService {
         @Query("universityId") universityId: Long
     ): Response<CustomizationResponse>
 
-    @GET("user/public/link/domain_email")
+    @GET("user/public/link/email_domain")
     suspend fun getEmailDomain(
         @Query("universityId") universityId: Long
     ): Response<UniversityDomainResponse>

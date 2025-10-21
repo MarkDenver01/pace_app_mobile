@@ -71,6 +71,7 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = universityDomainEmailUseCase(universityId)) {
                 is NetworkResult.Success -> {
+                    Timber.w("data:  ${result.data?.domainEmail}" )
                     _universityDomainEmail.value = result.data
                 }
                 is NetworkResult.Error -> {

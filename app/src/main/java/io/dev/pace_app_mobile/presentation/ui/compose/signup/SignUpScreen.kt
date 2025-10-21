@@ -84,6 +84,7 @@ fun SignUpScreen(
     LaunchedEffect(storedLink?.universityId) {
         storedLink?.universityId?.let { id ->
             signUpViewModel.fetchUniversityById(id)
+            signUpViewModel.fetchUniversityDomainEmail(id)
         }
     }
 
