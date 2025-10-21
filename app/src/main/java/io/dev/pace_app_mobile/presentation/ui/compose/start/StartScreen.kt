@@ -122,7 +122,7 @@ fun StartScreen(
             show = showOldNewStudentDialog,
             onConfirm = {
                 showOldNewStudentDialog = false
-                navController.navigate(Routes.START_ASSESSMENT_ROUTE) {
+                navController.navigate(Routes.SIGN_UP_ROUTE) {
                     popUpTo(Routes.START_ROUTE) { inclusive = false }
                 }
             },

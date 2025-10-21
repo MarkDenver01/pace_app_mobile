@@ -10,6 +10,7 @@ import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
+import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import net.openid.appauth.TokenResponse
@@ -21,6 +22,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import java.util.function.LongBinaryOperator
 
 interface ApiService {
     @POST("user/public/login")
@@ -100,4 +102,9 @@ interface ApiService {
     suspend fun getCustomizationTheme(
         @Query("universityId") universityId: Long
     ): Response<CustomizationResponse>
+
+    @GET("user/public/link/domain_email")
+    suspend fun getEmailDomain(
+        @Query("universityId") universityId: Long
+    ): Response<UniversityDomainResponse>
 }

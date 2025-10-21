@@ -16,6 +16,7 @@ import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
+import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
@@ -382,6 +383,16 @@ class ApiRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Timber.e("getCustomizationTheme - exception: ${e.message}")
             NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
+        }
+    }
+
+    override suspend fun getUniversityDomainEmail(universityId: Long): NetworkResult<UniversityDomainResponse> {
+        return try {
+            val result = remoteDataSource.getUniversityEmailDomain(universityId)
+            NetworkResult.Success(HttpStatus.OK, result)
+        } catch (e: Exception) {
+            Timber.e("getUniversityDomainEmail error: ${e.message}")
+            NetworkResult.Error(HttpStatus.NOT_FOUND, "University domain email not found")
         }
     }
 }

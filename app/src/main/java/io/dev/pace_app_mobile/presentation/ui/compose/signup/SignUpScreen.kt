@@ -43,20 +43,19 @@ import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
+import io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links.DynamicLinkViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    universityId: String? = null,
-    dynamicToken: String,
-    viewModel: SignUpViewModel = hiltViewModel()
+    signUpViewModel: SignUpViewModel = hiltViewModel(),
+    dynamicLinkViewModel: DynamicLinkViewModel = hiltViewModel()
 ) {
     val sizes = LocalResponsiveSizes.current
     val spacing = LocalAppSpacing.current
@@ -69,26 +68,29 @@ fun SignUpScreen(
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
 
-    val navigateTo by viewModel.navigateTo.collectAsState()
-    val showAgreeDialog by viewModel.showAgreeWarningDialog.collectAsState()
-    val showSuccessDialog by viewModel.showSuccessDialog.collectAsState()
-    val showErrorDialog by viewModel.showErrorDialog.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val university by viewModel.university.collectAsState()
+    val navigateTo by signUpViewModel.navigateTo.collectAsState()
+    val showAgreeDialog by signUpViewModel.showAgreeWarningDialog.collectAsState()
+    val showSuccessDialog by signUpViewModel.showSuccessDialog.collectAsState()
+    val showErrorDialog by signUpViewModel.showErrorDialog.collectAsState()
+    val errorMessage by signUpViewModel.errorMessage.collectAsState()
+    val university by signUpViewModel.university.collectAsState()
+    val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
+    val universityDomainEmail by signUpViewModel.universityDomainEmail.collectAsState()
 
     var agree by remember { mutableStateOf(false) }
 
+
     // Fetch the specific university once when universityId is provided
-    LaunchedEffect(universityId) {
-        universityId?.toLongOrNull()?.let { id ->
-            viewModel.fetchUniversityById(id)
+    LaunchedEffect(storedLink?.universityId) {
+        storedLink?.universityId?.let { id ->
+            signUpViewModel.fetchUniversityById(id)
         }
     }
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
             navController.navigate(route)
-            viewModel.resetNavigation()
+            signUpViewModel.resetNavigation()
         }
     }
 
@@ -155,8 +157,11 @@ fun SignUpScreen(
                 )
 
                 CustomTextField(
-                    value = mailAddress,
-                    onValueChange = { mailAddress = it },
+                    value = mailAddress + (universityDomainEmail?.domainEmail ?: ""),
+                    onValueChange = { input ->
+                        val domain = universityDomainEmail?.domainEmail ?: ""
+                        mailAddress = input.removeSuffix(domain)
+                    },
                     placeholder = "Email",
                     leadingIcon = Icons.Default.Email,
                     fontSize = sizes.buttonFontSize,
@@ -199,21 +204,21 @@ fun SignUpScreen(
 
                 CustomDynamicButton(
                     onClick = {
-                        val selectedUniversityId = universityId?.toLongOrNull()
+                        val selectedUniversityId = storedLink?.universityId
                         if (selectedUniversityId != null) {
-                            viewModel.onSignupClick(
+                            signUpViewModel.onSignupClick(
                                 agreed = agree,
                                 username = "$firstName $lastName",
                                 email = mailAddress,
                                 password = password,
                                 universityId = selectedUniversityId,
-                                token = dynamicToken,
+                                token = storedLink!!.dynamicToken,
                                 onSuccess = {
-                                    viewModel.showSuccessDialog()
+                                    signUpViewModel.showSuccessDialog()
                                 }
                             )
                         } else {
-                            viewModel.showErrorDialog("University not found.")
+                            signUpViewModel.showErrorDialog("University not found.")
                         }
                     },
                     content = stringResource(id = R.string.button_sign_up),
@@ -228,7 +233,7 @@ fun SignUpScreen(
         AlertDynamicConfirmationDialog(
             message = "You must agree to the terms.",
             alertType = AlertType.WARNING,
-            onClose = { viewModel.dismissDialogs() }
+            onClose = { signUpViewModel.dismissDialogs() }
         )
     }
 
@@ -237,8 +242,8 @@ fun SignUpScreen(
             message = "Register successful!",
             alertType = AlertType.SUCCESS,
             onClose = {
-                viewModel.dismissDialogs()
-                viewModel.onSuccessTransition()
+                signUpViewModel.dismissDialogs()
+                signUpViewModel.onSuccessTransition()
             }
         )
     }
@@ -247,7 +252,7 @@ fun SignUpScreen(
         AlertDynamicConfirmationDialog(
             message = errorMessage!!,
             alertType = AlertType.ERROR,
-            onClose = { viewModel.dismissDialogs() }
+            onClose = { signUpViewModel.dismissDialogs() }
         )
     }
 }

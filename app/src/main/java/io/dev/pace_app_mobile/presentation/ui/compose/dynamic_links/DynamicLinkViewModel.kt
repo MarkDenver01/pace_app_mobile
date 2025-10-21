@@ -1,7 +1,6 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.dev.pace_app_mobile.domain.model.SharedDynamicLink

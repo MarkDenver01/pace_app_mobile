@@ -36,7 +36,7 @@ fun NavGraphBuilder.titleGraph(
     }
 
     composable(Routes.SIGN_UP_ROUTE) {
-        SignUpScreen(navController, universityId, dynamicToken)
+        SignUpScreen(navController = navController)
     }
 
     composable(Routes.LOGIN_ROUTE) {

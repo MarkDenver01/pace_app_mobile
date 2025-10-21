@@ -8,6 +8,7 @@ import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.QuestionResponse
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
+import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
@@ -168,4 +169,12 @@ interface ApiRepository {
      * @return get theme customization made by unversity admin
      */
     suspend fun getCustomizationTheme(universityId: Long): NetworkResult<CustomizationResponse>
+
+    /**
+     * Get university domain email.
+     *
+     * @param universityId find by using university id
+     * @return get university domain email
+     */
+    suspend fun getUniversityDomainEmail(universityId: Long): NetworkResult<UniversityDomainResponse>
 }

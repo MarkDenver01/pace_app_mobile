@@ -33,6 +33,7 @@ import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
 import io.dev.pace_app_mobile.domain.usecase.SaveDynamicLinkUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
+import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.UpdateVerificationUseCase
 import javax.inject.Singleton
@@ -142,12 +143,22 @@ object AppModule {
     ): DynamicLinkRepository = DynamicLinkRepositoryImpl(dataStore)
 
     @Provides
-    fun provideSaveDynamicLinkUseCase(repo: DynamicLinkRepository) = SaveDynamicLinkUseCase(repo)
+    @Singleton
+    fun provideSaveDynamicLinkUseCase(repository: DynamicLinkRepository) =
+        SaveDynamicLinkUseCase(repository)
 
     @Provides
-    fun provideGetDynamicLinkUseCase(repo: DynamicLinkRepository) = GetDynamicLinkUseCase(repo)
+    @Singleton
+    fun provideGetDynamicLinkUseCase(repository: DynamicLinkRepository) =
+        GetDynamicLinkUseCase(repository)
 
     @Provides
-    fun provideUpdateVerificationUseCase(repo: DynamicLinkRepository) =
-        UpdateVerificationUseCase(repo)
+    @Singleton
+    fun provideUpdateVerificationUseCase(repository: DynamicLinkRepository) =
+        UpdateVerificationUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideUniversityDomainEmailUseCase(repository: ApiRepository) =
+        UniversityDomainEmailUseCase(repository)
 }

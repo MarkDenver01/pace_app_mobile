@@ -10,3 +10,12 @@ package io.dev.pace_app_mobile.domain.model
 data class UniversityLinkResponse(
     val message: String
 )
+
+/**
+ * University domain response
+ *
+ * @property domainEmail
+ */
+data class UniversityDomainResponse(
+    val domainEmail: String
+)

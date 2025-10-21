@@ -12,6 +12,7 @@ import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.RegisterResponse
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
+import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import net.openid.appauth.TokenResponse
@@ -241,6 +242,24 @@ class RemoteDataSource @Inject constructor(
                 return body
             } else {
                 throw Exception("Theme not found")
+            }
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun getUniversityEmailDomain(universityId: Long): UniversityDomainResponse {
+        val response = api.getEmailDomain(universityId)
+        if (response.isSuccessful) {
+            val body = response.body()
+            if (body != null) {
+                return body
+            } else {
+                throw Exception("University domain email not found")
             }
         } else {
             throw Exception(

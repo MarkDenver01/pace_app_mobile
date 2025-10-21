@@ -3,9 +3,11 @@ package io.dev.pace_app_mobile.presentation.ui.compose.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
+import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
@@ -21,13 +23,17 @@ import javax.inject.Inject
 class SignUpViewModel @Inject constructor(
     private val universityUseCase: UniversityUseCase,
     private val registerUseCase: RegisterUseCase,
-    private val dynamicLinkValidationUseCase: DynamicLinkValidationUseCase
+    private val dynamicLinkValidationUseCase: DynamicLinkValidationUseCase,
+    private val universityDomainEmailUseCase: UniversityDomainEmailUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
 
     private val _universities = MutableStateFlow<List<UniversityResponse>>(emptyList())
     val universities: StateFlow<List<UniversityResponse>> = _universities.asStateFlow()
+
+    private val _universityDomainEmail = MutableStateFlow<UniversityDomainResponse?>(null)
+    val universityDomainEmail: StateFlow<UniversityDomainResponse?> = _universityDomainEmail.asStateFlow()
 
     private val _university = MutableStateFlow<UniversityResponse?>(null)
     val university: StateFlow<UniversityResponse?> = _university.asStateFlow()
@@ -55,9 +61,25 @@ class SignUpViewModel @Inject constructor(
                     _university.value = response
                 }
                 .onFailure { e ->
-                    _errorMessage.value = e.message ?: "Failed to get the university."
+                    _errorMessage.value = "Failed to get the university"
                     _showErrorDialog.value = true
                 }
+        }
+    }
+
+    fun fetchUniversityDomainEmail(universityId: Long) {
+        viewModelScope.launch {
+            when (val result = universityDomainEmailUseCase(universityId)) {
+                is NetworkResult.Success -> {
+                    _universityDomainEmail.value = result.data
+                }
+                is NetworkResult.Error -> {
+                    Timber.e("Cannot find the domain email: ${result.message}")
+                }
+                is NetworkResult.Loading -> {
+                    Timber.d("do nothing...")
+                }
+            }
         }
     }
 
@@ -102,8 +124,7 @@ class SignUpViewModel @Inject constructor(
                             if (registerResult.isSuccess) {
                                 onSuccess()
                             } else {
-                                _errorMessage.value =
-                                    registerResult.exceptionOrNull()?.message ?: "Unknown error"
+                                _errorMessage.value = "Registration failed"
                                 _showErrorDialog.value = true
                             }
                         } else {
@@ -122,7 +143,7 @@ class SignUpViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "Unexpected error occurred"
+                _errorMessage.value = "Unexpected error happens $e"
                 _showErrorDialog.value = true
             }
         }
