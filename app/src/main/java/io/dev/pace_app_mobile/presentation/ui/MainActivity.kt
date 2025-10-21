@@ -8,17 +8,21 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.dev.pace_app_mobile.domain.enums.Customization
+import io.dev.pace_app_mobile.domain.model.SharedDynamicLink
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.navigation.assessmentGraph
 import io.dev.pace_app_mobile.navigation.startGraph
 import io.dev.pace_app_mobile.navigation.titleGraph
 import io.dev.pace_app_mobile.presentation.theme.Pace_app_mobileTheme
 import io.dev.pace_app_mobile.presentation.ui.compose.CustomizationViewModel
+import io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links.DynamicLinkViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginViewModel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -26,6 +30,9 @@ class MainActivity : ComponentActivity() {
 
     private val loginViewModel: LoginViewModel by viewModels()
     private val customizationViewModel: CustomizationViewModel by viewModels()
+
+    private val dynamicLinkViewModel: DynamicLinkViewModel by viewModels()
+
     private var universityId: String? = null
     private var dynamicToken: String = ""
 
@@ -33,31 +40,27 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // Handle dynamic link params
+        // Handle dynamic link & OAuth redirects
         handleDynamicLink(intent)
-
-        // Handle OAuth redirects
         handleAuthRedirect(intent)
 
         setContent {
             val theme by customizationViewModel.themeState.collectAsState()
+            val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
+
             Pace_app_mobileTheme(theme ?: Customization.lightTheme) {
                 val navController = rememberNavController()
 
                 // Decide startDestination
                 val startDestination = when {
-                    // 1. From dynamic link
-                    !universityId.isNullOrEmpty() && dynamicToken.isNotEmpty() -> {
-                        Routes.START_ROUTE
-                    }
-                    // 2. Already logged in
-                    loginViewModel.isUserLoggedIn() -> {
-                        Routes.START_ASSESSMENT_ROUTE
-                    }
-                    // 3. Default
-                    else -> {
-                        Routes.START_ROUTE
-                    }
+                    // Dynamic link available
+                    storedLink != null && !storedLink!!.isVerified -> Routes.START_ROUTE
+
+                    // User already logged in
+                    loginViewModel.isUserLoggedIn() -> Routes.START_ASSESSMENT_ROUTE
+
+                    // Default
+                    else -> Routes.START_ROUTE
                 }
 
                 Timber.d("Navigation startDestination → $startDestination")
@@ -112,10 +115,23 @@ class MainActivity : ComponentActivity() {
 
             Timber.d("Dynamic link → universityId: $universityId, token: $dynamicToken")
 
-            // Load theme dynamically
-            universityId?.toLongOrNull()?.let { id ->
-                customizationViewModel.loadTheme(id)
+            val uniId = universityId?.toLongOrNull() ?: 0L
+
+            val data = SharedDynamicLink(
+                universityId = uniId,
+                dynamicToken = dynamicToken,
+                isVerified = false
+            )
+
+            // Save to DataStore via ViewModel (Hilt DI)
+            lifecycleScope.launch {
+                dynamicLinkViewModel.saveLink(data)
             }
+
+            Timber.d("Stored dynamic link (DataStore via ViewModel): $data")
+
+            // Load theme dynamically
+            customizationViewModel.loadTheme(uniId)
         }
     }
 }

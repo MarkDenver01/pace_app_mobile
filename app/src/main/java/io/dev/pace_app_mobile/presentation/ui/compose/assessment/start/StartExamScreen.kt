@@ -113,8 +113,8 @@ fun StartExamScreen(
             CustomDynamicButton(
                 onClick = { viewModel.onBeginClick() },
                 content = "Let's Begin",
-                backgroundColor = Color(0xFF0170C1),
-                pressedBackgroundColor = Color(0xFF4D9DDA)
+                backgroundColor = colors.primary,
+                pressedBackgroundColor = colors.pressed
             )
 
         }
