@@ -65,7 +65,7 @@ fun EmailVerificationScreen(
         topBar = {
             TopNavigationBar(
                 navController = navController,
-                title = "Email Verification",
+                title = "",
                 showLeftButton = false,
                 showRightButton = false,
                 onLeftClick = { navController.popBackStack() }
