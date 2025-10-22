@@ -54,6 +54,7 @@ import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 @Composable
 fun SignUpScreen(
     navController: NavController,
+    isOldStudent: Boolean = false,
     signUpViewModel: SignUpViewModel = hiltViewModel(),
     dynamicLinkViewModel: DynamicLinkViewModel = hiltViewModel()
 ) {
@@ -157,13 +158,19 @@ fun SignUpScreen(
                     enabled = false
                 )
 
+                val domain = universityDomainEmail?.domainEmail ?: ""
+                val emailValue = if (isOldStudent && domain.isNotEmpty()) {
+                    mailAddress + domain
+                } else mailAddress
+
                 CustomTextField(
-                    value = mailAddress + (universityDomainEmail?.domainEmail ?: ""),
+                    value = emailValue,
                     onValueChange = { input ->
-                        val domain = universityDomainEmail?.domainEmail ?: ""
-                        mailAddress = input.removeSuffix(domain)
+                        mailAddress = if (isOldStudent && domain.isNotEmpty()) {
+                            input.removeSuffix(domain)
+                        } else input
                     },
-                    placeholder = "Email",
+                    placeholder = "University Domain Email",
                     leadingIcon = Icons.Default.Email,
                     fontSize = sizes.buttonFontSize,
                 )
@@ -210,7 +217,7 @@ fun SignUpScreen(
                             signUpViewModel.onSignupClick(
                                 agreed = agree,
                                 username = "$firstName $lastName",
-                                email = mailAddress,
+                                email = if (isOldStudent) mailAddress + domain else mailAddress,
                                 password = password,
                                 universityId = selectedUniversityId,
                                 token = storedLink!!.dynamicToken,

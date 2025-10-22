@@ -2,7 +2,9 @@ package io.dev.pace_app_mobile.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.done.QuestionCompletedScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.questions.MainQuestionScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.results.CourseRecommendedResultScreen
@@ -35,8 +37,14 @@ fun NavGraphBuilder.titleGraph(
         TitleScreen(navController = navController)
     }
 
-    composable(Routes.SIGN_UP_ROUTE) {
-        SignUpScreen(navController = navController)
+    composable(
+        route = Routes.SIGN_UP_WITH_ARG,
+        arguments = listOf(
+            navArgument("isOldStudent") { type = NavType.BoolType }
+        )
+    ) { backStackEntry ->
+        val isOldStudent = backStackEntry.arguments?.getBoolean("isOldStudent") ?: false
+        SignUpScreen(navController = navController, isOldStudent = isOldStudent)
     }
 
     composable(Routes.LOGIN_ROUTE) {
