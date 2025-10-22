@@ -426,7 +426,8 @@ fun CustomDynamicButton(
     cornerRadius: Dp = 24.dp,
     elevation: Dp = 8.dp,
     borderColor: Color = Color.Transparent, // New parameter
-    content: String
+    content: String,
+    enabled: Boolean = true // Optional flag (default = true for backward compatibility)
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -438,6 +439,7 @@ fun CustomDynamicButton(
 
     Button(
         onClick = onClick,
+        enabled = enabled, // ✅ Enable/disable logic handled here
         modifier = modifier
             .height(height)
             .border(
@@ -448,7 +450,9 @@ fun CustomDynamicButton(
         shape = RoundedCornerShape(cornerRadius),
         colors = ButtonDefaults.buttonColors(
             containerColor = animatedBackgroundColor,
-            contentColor = Color.White
+            contentColor = Color.White,
+            disabledContainerColor = backgroundColor.copy(alpha = 0.5f), // ✅ visually show disabled state
+            disabledContentColor = Color.White.copy(alpha = 0.6f)
         ),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = elevation,
@@ -1316,9 +1320,10 @@ fun SweetAlertDialog(
     message: String,
     show: Boolean,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit = {},
     confirmText: String = "Yes",
-    dismissText: String = "No"
+    dismissText: String = "No",
+    isSingleButton: Boolean = false
 ) {
     val colors = LocalAppColors.current
     val animationRes = when (type) {
@@ -1352,6 +1357,7 @@ fun SweetAlertDialog(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(24.dp)
                     ) {
+                        // Animation
                         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animationRes))
                         val progress by animateLottieCompositionAsState(
                             composition = composition,
@@ -1371,6 +1377,8 @@ fun SweetAlertDialog(
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
+
+                        // Title
                         Text(
                             text = title,
                             style = MaterialTheme.typography.titleLarge.copy(
@@ -1381,6 +1389,8 @@ fun SweetAlertDialog(
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
+
+                        // Message
                         Text(
                             text = message,
                             style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
@@ -1390,28 +1400,13 @@ fun SweetAlertDialog(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedButton(
-                                onClick = onDismiss,
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(1.dp, Color.LightGray),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = Color.Gray
-                                ),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(dismissText)
-                            }
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
+                        // Conditional Buttons
+                        if (isSingleButton) {
+                            // --- Single Confirm Button ---
                             Button(
                                 onClick = onConfirm,
                                 shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = when (type) {
                                         AlertType.SUCCESS -> Color(0xFF4CAF50)
@@ -1428,6 +1423,45 @@ fun SweetAlertDialog(
                                     color = Color.White
                                 )
                             }
+                        } else {
+                            // --- Two Buttons ---
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedButton(
+                                    onClick = onDismiss,
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = BorderStroke(1.dp, Color.LightGray),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = Color.Gray
+                                    ),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(dismissText)
+                                }
+
+                                Button(
+                                    onClick = onConfirm,
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = when (type) {
+                                            AlertType.SUCCESS -> Color(0xFF4CAF50)
+                                            AlertType.WARNING -> Color(0xFFFFA000)
+                                            AlertType.ERROR -> Color(0xFFD32F2F)
+                                            AlertType.QUESTION -> colors.primary
+                                        }
+                                    ),
+                                    contentPadding = PaddingValues(vertical = 10.dp)
+                                ) {
+                                    Text(
+                                        text = confirmText,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1435,5 +1469,6 @@ fun SweetAlertDialog(
         }
     }
 }
+
 
 

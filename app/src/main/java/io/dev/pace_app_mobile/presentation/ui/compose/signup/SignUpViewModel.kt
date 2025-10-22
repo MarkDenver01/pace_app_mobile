@@ -33,7 +33,8 @@ class SignUpViewModel @Inject constructor(
     val universities: StateFlow<List<UniversityResponse>> = _universities.asStateFlow()
 
     private val _universityDomainEmail = MutableStateFlow<UniversityDomainResponse?>(null)
-    val universityDomainEmail: StateFlow<UniversityDomainResponse?> = _universityDomainEmail.asStateFlow()
+    val universityDomainEmail: StateFlow<UniversityDomainResponse?> =
+        _universityDomainEmail.asStateFlow()
 
     private val _university = MutableStateFlow<UniversityResponse?>(null)
     val university: StateFlow<UniversityResponse?> = _university.asStateFlow()
@@ -71,12 +72,14 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = universityDomainEmailUseCase(universityId)) {
                 is NetworkResult.Success -> {
-                    Timber.w("data:  ${result.data?.domainEmail}" )
+                    Timber.w("data:  ${result.data?.domainEmail}")
                     _universityDomainEmail.value = result.data
                 }
+
                 is NetworkResult.Error -> {
                     Timber.e("Cannot find the domain email: ${result.message}")
                 }
+
                 is NetworkResult.Loading -> {
                     Timber.d("do nothing...")
                 }
@@ -110,7 +113,7 @@ class SignUpViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val result = dynamicLinkValidationUseCase(token)
+                val result = dynamicLinkValidationUseCase(universityId, token)
                 Timber.d("result: ${result.data?.message}")
                 when (result) {
                     is NetworkResult.Success -> {
@@ -176,5 +179,9 @@ class SignUpViewModel @Inject constructor(
 
     fun onSuccessTransition() {
         _navigateTo.value = Routes.LOGIN_ROUTE
+    }
+
+    fun onSuccessTransition(email: String) {
+        _navigateTo.value = Routes.EMAIL_VERIFICATION_WITH_ARG
     }
 }

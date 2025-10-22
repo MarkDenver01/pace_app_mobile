@@ -160,7 +160,10 @@ interface ApiRepository {
      * @param token token
      * @return true or false
      */
-    suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse>
+    suspend fun validateDynamicLink(
+        universityId: Long,
+        token: String
+    ): NetworkResult<UniversityLinkResponse>
 
     /**
      * Get customization theme.

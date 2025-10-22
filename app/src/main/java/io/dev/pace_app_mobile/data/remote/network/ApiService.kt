@@ -93,8 +93,9 @@ interface ApiService {
     @GET("user/public/university/select")
     suspend fun getUniversityById(@Query("university_id") universityId: Long?): Response<UniversityResponse>
 
-    @GET("user/public/dynamic_link/token_validation")
+    @GET("user/public/dynamic_link/validate")
     suspend fun validateToken(
+        @Query("universityId") universityId: Long,
         @Query("token") token: String
     ): Response<UniversityLinkResponse>
 

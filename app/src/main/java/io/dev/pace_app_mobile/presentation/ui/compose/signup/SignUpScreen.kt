@@ -1,5 +1,6 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.signup
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,10 +46,10 @@ import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links.DynamicLinkViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
-import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
+import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -238,29 +239,48 @@ fun SignUpScreen(
     }
 
     if (showAgreeDialog) {
-        AlertDynamicConfirmationDialog(
+        SweetAlertDialog(
+            type = AlertType.WARNING,
+            title = "Terms of Agreement",
             message = "You must agree to the terms.",
-            alertType = AlertType.WARNING,
-            onClose = { signUpViewModel.dismissDialogs() }
+            show = true,
+            onConfirm = { signUpViewModel.dismissDialogs() },
+            confirmText = "Close",
+            isSingleButton = true
         )
     }
 
     if (showSuccessDialog) {
-        AlertDynamicConfirmationDialog(
-            message = "Register successful!",
-            alertType = AlertType.SUCCESS,
-            onClose = {
+        SweetAlertDialog(
+            type = AlertType.SUCCESS,
+            title = "Account Verification",
+            message = "Verification code has been sent to your e-mail. Please verify your account.",
+            show = true,
+            onConfirm = {
                 signUpViewModel.dismissDialogs()
-                signUpViewModel.onSuccessTransition()
-            }
+                val emailValue = if (isOldStudent) mailAddress + (universityDomainEmail?.domainEmail ?: "")
+                else mailAddress
+                navController.navigate("email_verification_route/${Uri.encode(emailValue)}") {
+                    launchSingleTop = true
+                }
+            },
+            confirmText = "Proceed",
+            isSingleButton = true
         )
     }
 
     if (showErrorDialog && errorMessage != null) {
-        AlertDynamicConfirmationDialog(
+        SweetAlertDialog(
+            type = AlertType.ERROR,
+            title = "Error",
             message = errorMessage!!,
-            alertType = AlertType.ERROR,
-            onClose = { signUpViewModel.dismissDialogs() }
+            show = true,
+            onConfirm = {
+                signUpViewModel.dismissDialogs()
+            },
+            confirmText = "Ok",
+            isSingleButton = true
         )
+
     }
 }

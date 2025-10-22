@@ -216,8 +216,8 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun validateDynamicLink(token: String): UniversityLinkResponse {
-        val response = api.validateToken(token)
+    suspend fun validateDynamicLink(universityId: Long, token: String): UniversityLinkResponse {
+        val response = api.validateToken(universityId, token)
         if (response.isSuccessful) {
             val body = response.body()
             if (body != null) {

@@ -71,7 +71,6 @@ import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
-import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDropDownPicker
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
@@ -80,6 +79,7 @@ import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 import io.dev.pace_app_mobile.presentation.utils.OAuthProviders
 import io.dev.pace_app_mobile.presentation.utils.OAuthProviders.IG_AUTH_URI
 import io.dev.pace_app_mobile.presentation.utils.ProgressDialog
+import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
@@ -477,19 +477,27 @@ fun LoginScreen(
     }
 
     if (showDialog) {
-        AlertDynamicConfirmationDialog(
-            message = dialogMessage,
-            alertType = when {
+        SweetAlertDialog(
+            type = when {
                 isWarningDialog -> AlertType.WARNING
                 isSuccessDialog -> AlertType.SUCCESS
                 else -> AlertType.ERROR
             },
-            onClose = {
+            title = when {
+                isWarningDialog -> "Warning"
+                isSuccessDialog -> "Success"
+                else -> "Error"
+            },
+            message = dialogMessage,
+            show = true,
+            onConfirm = {
                 showDialog = false
                 if (isSuccessDialog) {
                     navController.navigate(START_ASSESSMENT_ROUTE)
                 }
-            }
+            },
+            confirmText = "Close",
+            isSingleButton = true
         )
     }
 

@@ -9,6 +9,7 @@ import io.dev.pace_app_mobile.presentation.ui.compose.assessment.done.QuestionCo
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.questions.MainQuestionScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.results.CourseRecommendedResultScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.start.StartExamScreen
+import io.dev.pace_app_mobile.presentation.ui.compose.email_verification.EmailVerificationScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.signup.SignUpScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.start.StartScreen
@@ -49,6 +50,14 @@ fun NavGraphBuilder.titleGraph(
 
     composable(Routes.LOGIN_ROUTE) {
         LoginScreen(navController, universityId, dynamicToken)
+    }
+
+    composable(
+        route = Routes.EMAIL_VERIFICATION_WITH_ARG,
+        arguments = listOf(navArgument("email") { type = NavType.StringType })
+    ) { backStackEntry ->
+        val email = backStackEntry.arguments?.getString("email") ?: ""
+        EmailVerificationScreen(navController, email)
     }
 }
 

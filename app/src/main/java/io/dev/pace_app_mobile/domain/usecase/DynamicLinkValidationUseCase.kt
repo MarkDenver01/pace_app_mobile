@@ -9,7 +9,10 @@ import javax.inject.Inject
 class DynamicLinkValidationUseCase @Inject constructor(
     private val repository: ApiRepository
 ) {
-    suspend operator fun invoke(token: String): NetworkResult<UniversityLinkResponse> {
-        return repository.validateDynamicLink(token)
+    suspend operator fun invoke(
+        universityId: Long,
+        token: String
+    ): NetworkResult<UniversityLinkResponse> {
+        return repository.validateDynamicLink(universityId, token)
     }
 }

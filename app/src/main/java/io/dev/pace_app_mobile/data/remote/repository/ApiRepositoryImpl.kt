@@ -367,9 +367,12 @@ class ApiRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun validateDynamicLink(token: String): NetworkResult<UniversityLinkResponse> {
+    override suspend fun validateDynamicLink(
+        universityId: Long,
+        token: String
+    ): NetworkResult<UniversityLinkResponse> {
         return try {
-            val universityLinkResponse  = remoteDataSource.validateDynamicLink(token)
+            val universityLinkResponse = remoteDataSource.validateDynamicLink(universityId, token)
             NetworkResult.Success(HttpStatus.OK, universityLinkResponse)
         } catch (e: Exception) {
             NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
@@ -377,7 +380,7 @@ class ApiRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getCustomizationTheme(universityId: Long): NetworkResult<CustomizationResponse> {
-        return  try {
+        return try {
             val result = remoteDataSource.getCustomizationTheme(universityId)
             NetworkResult.Success(HttpStatus.OK, result)
         } catch (e: Exception) {
