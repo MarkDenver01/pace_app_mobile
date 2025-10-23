@@ -12,7 +12,6 @@ import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
-import net.openid.appauth.TokenResponse
 
 
 /**

@@ -92,4 +92,5 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling)
     implementation(libs.lottie.compose)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.coil.compose)
 }

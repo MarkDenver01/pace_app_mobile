@@ -1,6 +1,5 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.start
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,15 +19,18 @@ import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
+import io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links.DynamicLinkViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
+import io.dev.pace_app_mobile.presentation.utils.UniversityLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartScreen(
     navController: NavController,
-    viewModel: StartViewModel = hiltViewModel(),
+    startViewModel: StartViewModel = hiltViewModel(),
+    dynamicLinkViewModel: DynamicLinkViewModel = hiltViewModel(),
     universityId: String? = null,
     dynamicToken: String? = null
 ) {
@@ -37,17 +38,24 @@ fun StartScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var showGuestDialog by remember { mutableStateOf(false) }
     var showOldNewStudentDialog by remember { mutableStateOf(false) }
+    val logoPath by startViewModel.logoPath.collectAsState()
+    val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
 
     // 🔹 Automatically show the dialog if opened from a dynamic link
     LaunchedEffect(Unit) {
         if (!universityId.isNullOrEmpty() && !dynamicToken.isNullOrEmpty()) {
+            startViewModel.fetchLogoPathWithDynamicUrl(universityId.toLong())
             showGuestDialog = true
+        } else {
+            startViewModel.fetchLogoPathWithDynamicUrl(
+                storedLink?.universityId ?: 0L
+            )
         }
     }
 
     // 🔹 Navigation observer
     LaunchedEffect(Unit) {
-        viewModel.navigateTo.collect {
+        startViewModel.navigateTo.collect {
             navController.navigate(Routes.TITLE_ROUTE) {
                 popUpTo(Routes.START_ROUTE) { inclusive = true }
             }
@@ -79,11 +87,8 @@ fun StartScreen(
             verticalArrangement = Arrangement.Center
         ) {
             // --- Logo Block ---
-            Image(
-                painter = painterResource(id = R.drawable.ic_logo),
-                contentDescription = "PACE Logo",
-                modifier = Modifier.size(300.dp)
-            )
+
+            UniversityLogo(logoPath)
 
             // --- Get Started Button ---
             CustomDynamicButton(

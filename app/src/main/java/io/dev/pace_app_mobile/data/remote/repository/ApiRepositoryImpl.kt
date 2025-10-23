@@ -23,8 +23,10 @@ import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
 import net.openid.appauth.TokenResponse
+import okhttp3.internal.http.HttpMethod
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.reflect.KClass
 
 class ApiRepositoryImpl @Inject constructor(
     private val remoteDataSource: RemoteDataSource,
@@ -398,4 +400,5 @@ class ApiRepositoryImpl @Inject constructor(
             NetworkResult.Error(HttpStatus.NOT_FOUND, "University domain email not found")
         }
     }
+
 }

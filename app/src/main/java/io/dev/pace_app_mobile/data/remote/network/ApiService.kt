@@ -14,6 +14,7 @@ import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import net.openid.appauth.TokenResponse
+import okhttp3.internal.http.HttpMethod
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -108,4 +109,5 @@ interface ApiService {
     suspend fun getEmailDomain(
         @Query("universityId") universityId: Long
     ): Response<UniversityDomainResponse>
+
 }
