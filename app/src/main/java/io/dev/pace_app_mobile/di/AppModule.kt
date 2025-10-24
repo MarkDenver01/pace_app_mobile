@@ -36,6 +36,7 @@ import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.UpdateVerificationUseCase
+import io.dev.pace_app_mobile.domain.usecase.VerificationCodeUseCase
 import javax.inject.Singleton
 
 @Module
@@ -161,4 +162,9 @@ object AppModule {
     @Singleton
     fun provideUniversityDomainEmailUseCase(repository: ApiRepository) =
         UniversityDomainEmailUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideVerificationCodeUseCase(repository: ApiRepository) =
+        VerificationCodeUseCase(repository)
 }

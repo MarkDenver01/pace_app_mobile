@@ -15,7 +15,8 @@ import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
-import net.openid.appauth.TokenResponse
+import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
+import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(
@@ -261,6 +262,20 @@ class RemoteDataSource @Inject constructor(
             } else {
                 throw Exception("University domain email not found")
             }
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun sendVerificationCode(verificationCodeRequest: VerificationCodeRequest):
+            VerificationCodeResponse {
+        val response = api.sendVerificationCode(verificationCodeRequest)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("empty body response")
         } else {
             throw Exception(
                 "error: " +

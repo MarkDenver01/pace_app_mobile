@@ -19,14 +19,13 @@ import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
+import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
+import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
-import net.openid.appauth.TokenResponse
-import okhttp3.internal.http.HttpMethod
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.reflect.KClass
 
 class ApiRepositoryImpl @Inject constructor(
     private val remoteDataSource: RemoteDataSource,
@@ -398,6 +397,19 @@ class ApiRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Timber.e("getUniversityDomainEmail error: ${e.message}")
             NetworkResult.Error(HttpStatus.NOT_FOUND, "University domain email not found")
+        }
+    }
+
+    override suspend fun sendVerificationCode(verificationCodeRequest: VerificationCodeRequest): NetworkResult<VerificationCodeResponse> {
+        return try {
+            val result = remoteDataSource.sendVerificationCode(verificationCodeRequest)
+            NetworkResult.Success(
+                getHttpStatus(200),
+                result
+            )
+        } catch (e: Exception) {
+            Timber.e("exception: ${e.message}")
+            NetworkResult.Error(getHttpStatus(401), e.message.toString())
         }
     }
 

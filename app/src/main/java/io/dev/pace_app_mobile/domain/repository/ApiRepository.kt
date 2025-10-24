@@ -11,6 +11,8 @@ import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
+import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
+import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 
 
@@ -179,4 +181,12 @@ interface ApiRepository {
      * @return get university domain email
      */
     suspend fun getUniversityDomainEmail(universityId: Long): NetworkResult<UniversityDomainResponse>
+
+    /**
+     * Validating student account.
+     *
+     * @param verificationCodeRequest request validate account parameters
+     * @return validate account response
+     */
+    suspend fun sendVerificationCode(verificationCodeRequest: VerificationCodeRequest): NetworkResult<VerificationCodeResponse>
 }

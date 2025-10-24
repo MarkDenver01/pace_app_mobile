@@ -223,7 +223,12 @@ fun SignUpScreen(
                                 universityId = selectedUniversityId,
                                 token = storedLink!!.dynamicToken,
                                 onSuccess = {
-                                    signUpViewModel.showSuccessDialog()
+                                    signUpViewModel.onSendVerificationCodeClick(
+                                        if (isOldStudent) mailAddress + domain else mailAddress,
+                                        onSuccess = {
+                                            signUpViewModel.showSuccessDialog()
+                                        }
+                                    )
                                 }
                             )
                         } else {
@@ -258,8 +263,9 @@ fun SignUpScreen(
             show = true,
             onConfirm = {
                 signUpViewModel.dismissDialogs()
-                val emailValue = if (isOldStudent) mailAddress + (universityDomainEmail?.domainEmail ?: "")
-                else mailAddress
+                val emailValue =
+                    if (isOldStudent) mailAddress + (universityDomainEmail?.domainEmail ?: "")
+                    else mailAddress
                 navController.navigate("email_verification_route/${Uri.encode(emailValue)}") {
                     launchSingleTop = true
                 }

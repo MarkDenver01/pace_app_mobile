@@ -3,12 +3,15 @@ package io.dev.pace_app_mobile.presentation.ui.compose.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.dev.pace_app_mobile.domain.model.RegisterRequest
 import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
+import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
 import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
+import io.dev.pace_app_mobile.domain.usecase.VerificationCodeUseCase
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +27,8 @@ class SignUpViewModel @Inject constructor(
     private val universityUseCase: UniversityUseCase,
     private val registerUseCase: RegisterUseCase,
     private val dynamicLinkValidationUseCase: DynamicLinkValidationUseCase,
-    private val universityDomainEmailUseCase: UniversityDomainEmailUseCase
+    private val universityDomainEmailUseCase: UniversityDomainEmailUseCase,
+    private val verificationCodeUseCase: VerificationCodeUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -97,6 +101,23 @@ class SignUpViewModel @Inject constructor(
         _navigateTo.value = null
     }
 
+    fun onSendVerificationCodeClick(email: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            val request = VerificationCodeRequest(email = email)
+            val result = verificationCodeUseCase.invoke(request)
+            when (result) {
+                is NetworkResult.Success -> {
+                    onSuccess()
+                }
+                is NetworkResult.Error -> {
+                    _errorMessage.value = "Send verification failed"
+                    _showErrorDialog.value = true
+                }
+                is NetworkResult.Loading -> {}
+            }
+        }
+    }
+
     fun onSignupClick(
         agreed: Boolean,
         username: String,
@@ -128,7 +149,11 @@ class SignUpViewModel @Inject constructor(
                             if (registerResult.isSuccess) {
                                 onSuccess()
                             } else {
-                                _errorMessage.value = "Registration failed"
+                                if (result.status?.code == 400) {
+                                    _errorMessage.value = "Password size must be between 6 and 40"
+                                } else {
+                                    _errorMessage.value = "Registration failed"
+                                }
                                 _showErrorDialog.value = true
                             }
                         } else {

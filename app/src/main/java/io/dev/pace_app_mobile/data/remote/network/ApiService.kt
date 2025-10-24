@@ -13,8 +13,8 @@ import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityDomainResponse
 import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
-import net.openid.appauth.TokenResponse
-import okhttp3.internal.http.HttpMethod
+import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
+import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -23,7 +23,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import java.util.function.LongBinaryOperator
 
 interface ApiService {
     @POST("user/public/login")
@@ -109,5 +108,9 @@ interface ApiService {
     suspend fun getEmailDomain(
         @Query("universityId") universityId: Long
     ): Response<UniversityDomainResponse>
+
+    @POST("user/public/account/send/verification")
+    suspend fun sendVerificationCode(@Body verificationCodeRequest: VerificationCodeRequest):
+            Response<VerificationCodeResponse>
 
 }
