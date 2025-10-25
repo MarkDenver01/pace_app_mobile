@@ -191,9 +191,24 @@ fun EmailVerificationScreen(
             show = true,
             onConfirm = {
                 emailVerificationViewModel.reset()
+                emailVerificationViewModel.savedVerifiedAccount(email)
                 navController.navigate("login_route") {
                     popUpTo("email_verification_route") { inclusive = true }
                 }
+            },
+            confirmText = "Complete",
+            isSingleButton = true
+        )
+    }
+
+    if (uiState.errorMessage?.contains("404 NOT_FOUND") == true) {
+        SweetAlertDialog(
+            type = AlertType.ERROR,
+            title = "Verification failed",
+            message = "Please check your 4 digit verification code.",
+            show = true,
+            onConfirm = {
+                emailVerificationViewModel.reset()
             },
             confirmText = "Complete",
             isSingleButton = true

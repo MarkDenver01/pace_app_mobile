@@ -332,6 +332,7 @@ fun CustomIconButton(
     text: String? = null, // null = icon-only
     onClick: () -> Unit,
     width: Dp? = null,
+    fillMaxWidth: Boolean = false, // Optional new flag
     height: Dp = 48.dp,
     fontSize: TextUnit = 14.sp,
     backgroundColor: Color = Color(0xFFCC4A1A).copy(alpha = 0.08f),
@@ -356,6 +357,16 @@ fun CustomIconButton(
         label = "IconBtnBorder"
     )
 
+    val buttonModifier = Modifier
+        .height(height)
+        .then(
+            when {
+                fillMaxWidth -> Modifier.fillMaxWidth()
+                width != null -> Modifier.width(width)
+                else -> Modifier // no width modifier
+            }
+        )
+
     OutlinedButton(
         onClick = onClick,
         enabled = enabled, // <-- Use it here
@@ -368,14 +379,7 @@ fun CustomIconButton(
             disabledContainerColor = Color.Gray.copy(alpha = 0.1f), // Optional disabled state
             disabledContentColor = Color.Gray.copy(alpha = 0.5f)
         ),
-        modifier = Modifier
-            .testTag("hello world")
-            .then(
-                if (width != null) Modifier
-                    .width(width)
-                    .height(height)
-                else Modifier.height(height)
-            ),
+        modifier = buttonModifier,
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
@@ -392,7 +396,9 @@ fun CustomIconButton(
                 Text(
                     text = it,
                     fontSize = fontSize,
-                    color = if (enabled) contentColor else Color.Gray
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
                 )
             }
         }

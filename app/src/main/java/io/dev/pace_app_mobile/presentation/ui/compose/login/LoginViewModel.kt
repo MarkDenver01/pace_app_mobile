@@ -100,7 +100,7 @@ class LoginViewModel @Inject constructor(
                     _eventFlow.emit(LoginEvent.ShowSuccessDialog("Login successful!"))
 
                 is NetworkResult.Error ->
-                    _eventFlow.emit(LoginEvent.ShowErrorDialog(result.message ?: "Login failed."))
+                    _eventFlow.emit(LoginEvent.ShowErrorDialog( "Login failed."))
 
                 else -> Unit
             }

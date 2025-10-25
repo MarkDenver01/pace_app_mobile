@@ -1,22 +1,20 @@
 package io.dev.pace_app_mobile.di
 
 import android.content.Context
-import androidx.compose.ui.geometry.Rect
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.dev.pace_app_mobile.data.local.datastore.DynamicLinkDataStore
+import io.dev.pace_app_mobile.data.local.datastore.LocalDataStore
 import io.dev.pace_app_mobile.data.local.prefs.TokenManager
 import io.dev.pace_app_mobile.data.local.room.dao.LoginDao
 import io.dev.pace_app_mobile.data.remote.datasource.RemoteDataSource
 import io.dev.pace_app_mobile.data.remote.network.ApiService
 import io.dev.pace_app_mobile.data.remote.repository.ApiRepositoryImpl
-import io.dev.pace_app_mobile.data.remote.repository.DynamicLinkRepositoryImpl
-import io.dev.pace_app_mobile.domain.model.CustomizationResponse
+import io.dev.pace_app_mobile.data.local.repository.LocalDataStoreRepositoryImpl
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
-import io.dev.pace_app_mobile.domain.repository.DynamicLinkRepository
+import io.dev.pace_app_mobile.domain.repository.LocalDataStoreRepository
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
 import io.dev.pace_app_mobile.domain.usecase.CustomizationUseCase
@@ -24,6 +22,7 @@ import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetDynamicLinkUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.InstagramLoginUseCase
@@ -31,6 +30,7 @@ import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
 import io.dev.pace_app_mobile.domain.usecase.SaveDynamicLinkUseCase
+import io.dev.pace_app_mobile.domain.usecase.SavedVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
@@ -136,28 +136,38 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDynamicLinkDataStore(@ApplicationContext context: Context) =
-        DynamicLinkDataStore(context)
+        LocalDataStore(context)
 
     @Provides
     @Singleton
-    fun provideDynamicLinkRepository(
-        dataStore: DynamicLinkDataStore
-    ): DynamicLinkRepository = DynamicLinkRepositoryImpl(dataStore)
+    fun provideLocalDataStoreRepository(
+        dataStore: LocalDataStore
+    ): LocalDataStoreRepository = LocalDataStoreRepositoryImpl(dataStore)
 
     @Provides
     @Singleton
-    fun provideSaveDynamicLinkUseCase(repository: DynamicLinkRepository) =
+    fun provideSaveDynamicLinkUseCase(repository: LocalDataStoreRepository) =
         SaveDynamicLinkUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideGetDynamicLinkUseCase(repository: DynamicLinkRepository) =
+    fun provideGetDynamicLinkUseCase(repository: LocalDataStoreRepository) =
         GetDynamicLinkUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideUpdateVerificationUseCase(repository: DynamicLinkRepository) =
+    fun provideUpdateVerificationUseCase(repository: LocalDataStoreRepository) =
         UpdateVerificationUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGetVerifiedAccountUseCase(repository: LocalDataStoreRepository) =
+        GetVerifiedAccountUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideSaveVerifiedAccountUseCase(repository: LocalDataStoreRepository) =
+        SavedVerifiedAccountUseCase(repository)
 
     @Provides
     @Singleton

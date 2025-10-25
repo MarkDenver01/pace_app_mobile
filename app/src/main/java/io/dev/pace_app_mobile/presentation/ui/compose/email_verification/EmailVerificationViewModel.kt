@@ -3,8 +3,10 @@ package io.dev.pace_app_mobile.presentation.ui.compose.email_verification
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.dev.pace_app_mobile.domain.model.SharedVerifiedAccount
 import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
+import io.dev.pace_app_mobile.domain.usecase.SavedVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.VerificationCodeUseCase
@@ -26,7 +28,8 @@ data class EmailVerificationUiState(
 
 @HiltViewModel
 class EmailVerificationViewModel @Inject constructor(
-    private val verifyAccountUseCase: VerifyAccountUseCase
+    private val verifyAccountUseCase: VerifyAccountUseCase,
+    private val savedVerifiedAccountUseCase: SavedVerifiedAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EmailVerificationUiState())
@@ -128,5 +131,12 @@ class EmailVerificationViewModel @Inject constructor(
     fun reset() {
         countdownJob?.cancel()
         _uiState.value = EmailVerificationUiState()
+    }
+
+     fun savedVerifiedAccount(email: String) {
+        viewModelScope.launch {
+            val sharedVerifiedAccount = SharedVerifiedAccount(email, true)
+            savedVerifiedAccountUseCase.invoke(sharedVerifiedAccount)
+        }
     }
 }

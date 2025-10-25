@@ -30,9 +30,8 @@ class MainActivity : ComponentActivity() {
 
     private val loginViewModel: LoginViewModel by viewModels()
     private val customizationViewModel: CustomizationViewModel by viewModels()
-
     private val dynamicLinkViewModel: DynamicLinkViewModel by viewModels()
-
+    private var isDynamicLinkTapped: Boolean = false
     private var universityId: String? = null
     private var dynamicToken: String = ""
 
@@ -47,20 +46,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             val theme by customizationViewModel.themeState.collectAsState()
             val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
+            val verifiedAccount by dynamicLinkViewModel.verifiedAccount.collectAsState(initial = null)
 
             Pace_app_mobileTheme(theme ?: Customization.lightTheme) {
                 val navController = rememberNavController()
 
                 // Decide startDestination
-                val startDestination = when {
-                    // Dynamic link available
-                    storedLink != null && !storedLink!!.isVerified -> Routes.START_ROUTE
-
-                    // User already logged in
-                    loginViewModel.isUserLoggedIn() -> Routes.START_ASSESSMENT_ROUTE
-
-                    // Default
-                    else -> Routes.START_ROUTE
+                val startDestination = if (isDynamicLinkTapped) {
+                    // Priority 1: Dynamic link tapped
+                    Routes.START_ROUTE
+                } else {
+                    if (verifiedAccount?.verified == true) {
+                        // Priority 2: Verified account
+                        Routes.LOGIN_ROUTE
+                    } else if (loginViewModel.isUserLoggedIn()) {
+                        // Priority 3: Logged in
+                        Routes.START_ASSESSMENT_ROUTE
+                    } else {
+                        // Default
+                        Routes.START_ROUTE
+                    }
                 }
 
                 Timber.d("Navigation startDestination → $startDestination")
@@ -110,6 +115,7 @@ class MainActivity : ComponentActivity() {
      */
     private fun handleDynamicLink(intent: Intent?) {
         intent?.data?.let { uri ->
+            isDynamicLinkTapped = true
             universityId = uri.getQueryParameter("universityId")
             dynamicToken = uri.getQueryParameter("token").orEmpty()
 

@@ -386,20 +386,20 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(spacing.md))
 
-                Text(
-                    text = buildAnnotatedString {
-                        append("Don't you have an account? ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
-                            append("Create here.")
-                        }
-                    },
-                    color = colors.primary,
-                    modifier = Modifier.clickable {
-                        viewModel.onSignupClick()
-                    }
-                )
+//                Text(
+//                    text = buildAnnotatedString {
+//                        append("Don't you have an account? ")
+//                        withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
+//                            append("Create here.")
+//                        }
+//                    },
+//                    color = colors.primary,
+//                    modifier = Modifier.clickable {
+//                        viewModel.onSignupClick()
+//                    }
+//                )
 
-                Spacer(modifier = Modifier.height(spacing.md))
+//                Spacer(modifier = Modifier.height(spacing.md))
 
                 Text(
                     text = "Or Sign in with ",
@@ -413,60 +413,63 @@ fun LoginScreen(
                     CustomIconButton(
                         icon = R.drawable.ic_google,
                         onClick = { startGoogleLogin(oneTapClient, launcher) },
+                        text = "Sign in with Google",
+                        fillMaxWidth = true,
                         backgroundColor = colors.primary,
                         pressedBackgroundColor = colors.pressed,
                         contentColor = colors.primary,
-                        borderColor = colors.primary
+                        borderColor = colors.primary,
+                        cornerRadius = 24.dp
                     )
-                    CustomIconButton(
-                        icon = R.drawable.ic_facebook,
-                        onClick = {
-                            val registryOwner = activity as ActivityResultRegistryOwner
-                            LoginManager.getInstance().logIn(
-                                registryOwner,
-                                callbackManager,
-                                listOf("email", "public_profile")
-                            )
-                        },
-                        backgroundColor = colors.primary,
-                        pressedBackgroundColor = colors.pressed,
-                        contentColor = colors.primary,
-                        borderColor = colors.primary
-                    )
-                    CustomIconButton(
-                        icon = R.drawable.ic_twitter,
-                        onClick = { startTwitterLogin(authService, twitterAuthLauncher) },
-                        backgroundColor = colors.primary,
-                        pressedBackgroundColor = colors.pressed,
-                        contentColor = colors.primary,
-                        borderColor = colors.primary
-                    )
-                    CustomIconButton(
-                        icon = R.drawable.ic_instagram,
-                        onClick = {
-                            // Instagram Basic Display authorization (response_type=code)
-                            val authUri = Uri.parse(IG_AUTH_URI).buildUpon()
-                                .appendQueryParameter("client_id", OAuthProviders.IG_CLIENT_ID)
-                                .appendQueryParameter(
-                                    "redirect_uri",
-                                    OAuthProviders.IG_REDIRECT_URI
-                                )
-                                .appendQueryParameter(
-                                    "scope",
-                                    "user_profile"
-                                ) // 'user_media' optional
-                                .appendQueryParameter("response_type", "code")
-                                .build()
-
-
-                            val intent = Intent(Intent.ACTION_VIEW, authUri)
-                            instagramAuthLauncher.launch(intent)
-                        },
-                        backgroundColor = colors.primary,
-                        pressedBackgroundColor = colors.pressed,
-                        contentColor = colors.primary,
-                        borderColor = colors.primary
-                    )
+//                    CustomIconButton(
+//                        icon = R.drawable.ic_facebook,
+//                        onClick = {
+//                            val registryOwner = activity as ActivityResultRegistryOwner
+//                            LoginManager.getInstance().logIn(
+//                                registryOwner,
+//                                callbackManager,
+//                                listOf("email", "public_profile")
+//                            )
+//                        },
+//                        backgroundColor = colors.primary,
+//                        pressedBackgroundColor = colors.pressed,
+//                        contentColor = colors.primary,
+//                        borderColor = colors.primary
+//                    )
+//                    CustomIconButton(
+//                        icon = R.drawable.ic_twitter,
+//                        onClick = { startTwitterLogin(authService, twitterAuthLauncher) },
+//                        backgroundColor = colors.primary,
+//                        pressedBackgroundColor = colors.pressed,
+//                        contentColor = colors.primary,
+//                        borderColor = colors.primary
+//                    )
+//                    CustomIconButton(
+//                        icon = R.drawable.ic_instagram,
+//                        onClick = {
+//                            // Instagram Basic Display authorization (response_type=code)
+//                            val authUri = Uri.parse(IG_AUTH_URI).buildUpon()
+//                                .appendQueryParameter("client_id", OAuthProviders.IG_CLIENT_ID)
+//                                .appendQueryParameter(
+//                                    "redirect_uri",
+//                                    OAuthProviders.IG_REDIRECT_URI
+//                                )
+//                                .appendQueryParameter(
+//                                    "scope",
+//                                    "user_profile"
+//                                ) // 'user_media' optional
+//                                .appendQueryParameter("response_type", "code")
+//                                .build()
+//
+//
+//                            val intent = Intent(Intent.ACTION_VIEW, authUri)
+//                            instagramAuthLauncher.launch(intent)
+//                        },
+//                        backgroundColor = colors.primary,
+//                        pressedBackgroundColor = colors.pressed,
+//                        contentColor = colors.primary,
+//                        borderColor = colors.primary
+//                    )
                 }
             }
         }
