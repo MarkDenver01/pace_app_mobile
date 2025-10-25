@@ -25,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
+import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
@@ -73,6 +74,14 @@ fun MainQuestionScreen(
         navigateTo?.let { route ->
             navController.navigate(route)
             viewModel.resetNavigation()
+        }
+    }
+
+    LaunchedEffect(totalQuestions) {
+        if (totalQuestions == 0) {
+            navController.navigate(Routes.NO_QUESTION_ROUTE) {
+                popUpTo(Routes.START_ASSESSMENT_ROUTE) { inclusive = true }
+            }
         }
     }
 

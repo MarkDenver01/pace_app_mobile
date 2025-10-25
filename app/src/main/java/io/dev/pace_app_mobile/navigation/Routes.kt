@@ -8,6 +8,7 @@ object Routes {
     const val SIGN_UP_WITH_ARG = "sign_up_route/{isOldStudent}"
     const val START_ASSESSMENT_ROUTE = "start_assessment_route"
     const val QUESTION_ROUTE = "question_route"
+    const val NO_QUESTION_ROUTE = "no_question_route"
     const val QUESTION_COMPLETED_ROUTE = "question_completed_route"
     const val COURSE_RECOMMENDATION_ROUTE = "course_recommendation_route"
     const val EMAIL_VERIFICATION_ROUTE = "email_verification_route"
