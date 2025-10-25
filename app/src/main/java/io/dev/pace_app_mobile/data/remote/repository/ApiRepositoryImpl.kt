@@ -21,7 +21,9 @@ import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
 import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
+import io.dev.pace_app_mobile.domain.model.VerifyAccountRequest
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
+import io.dev.pace_app_mobile.domain.usecase.VerifyAccountUseCase
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
 import timber.log.Timber
@@ -404,12 +406,30 @@ class ApiRepositoryImpl @Inject constructor(
         return try {
             val result = remoteDataSource.sendVerificationCode(verificationCodeRequest)
             NetworkResult.Success(
-                getHttpStatus(200),
+                HttpStatus.OK,
                 result
             )
         } catch (e: Exception) {
             Timber.e("exception: ${e.message}")
-            NetworkResult.Error(getHttpStatus(401), e.message.toString())
+            NetworkResult.Error(HttpStatus.BAD_REQUEST, "exception: ${e.message}")
+        }
+    }
+
+    override suspend fun verifyAccount(
+        email: String,
+        verificationCode: Int
+    ): NetworkResult<VerificationCodeResponse> {
+        return try {
+            val verifyAccountRequest = VerifyAccountRequest(email, verificationCode)
+            val result = remoteDataSource.verifyAccount(verifyAccountRequest
+            )
+            NetworkResult.Success(
+                HttpStatus.OK,
+                result
+            )
+        } catch (e: Exception) {
+            Timber.e("exception: ${e.message}")
+            NetworkResult.Error(HttpStatus.BAD_REQUEST, "exception: ${e.message}")
         }
     }
 

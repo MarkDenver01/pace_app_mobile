@@ -15,12 +15,14 @@ import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
 import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
+import io.dev.pace_app_mobile.domain.model.VerifyAccountRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -111,6 +113,10 @@ interface ApiService {
 
     @POST("user/public/account/send/verification")
     suspend fun sendVerificationCode(@Body verificationCodeRequest: VerificationCodeRequest):
+            Response<VerificationCodeResponse>
+
+    @PUT("user/public/account/verify")
+    suspend fun verifyAccount(@Body verifyAccountRequest: VerifyAccountRequest):
             Response<VerificationCodeResponse>
 
 }

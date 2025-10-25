@@ -29,7 +29,6 @@ import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
-import io.dev.pace_app_mobile.presentation.utils.AlertDynamicConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 
@@ -38,9 +37,9 @@ import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 fun EmailVerificationScreen(
     navController: NavController,
     email: String,
-    viewModel: EmailVerificationViewModel = hiltViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsState()
+    emailVerificationViewModel: EmailVerificationViewModel = hiltViewModel(),
+    ) {
+    val uiState by emailVerificationViewModel.uiState.collectAsState()
     val colors = LocalAppColors.current
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
@@ -54,7 +53,7 @@ fun EmailVerificationScreen(
     // Start countdown when user completes 4 digits
     LaunchedEffect(combinedCode) {
         if (combinedCode.length == 4 && uiState.countdown == 0) {
-            viewModel.onCodeComplete()
+            emailVerificationViewModel.onCodeComplete()
         }
     }
 
@@ -153,7 +152,7 @@ fun EmailVerificationScreen(
             } else {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { viewModel.resendCode(email) }
+                    modifier = Modifier.clickable { emailVerificationViewModel.resendCode(email) }
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null, tint = colors.primary)
                     Spacer(Modifier.width(6.dp))
@@ -165,8 +164,8 @@ fun EmailVerificationScreen(
 
             // Verify Button
             CustomDynamicButton(
-                onClick = { viewModel.verifyCode(email, combinedCode) },
-                content = "VERIFY NOW",
+                onClick = { emailVerificationViewModel.verifyCode(email, combinedCode) },
+                 content = "VERIFY NOW",
                 backgroundColor = colors.primary,
                 pressedBackgroundColor = colors.pressed,
                 enabled = uiState.isVerifyEnabled
@@ -191,7 +190,7 @@ fun EmailVerificationScreen(
             message = "Successfully verified. You may now proceed on logging in.",
             show = true,
             onConfirm = {
-                viewModel.reset()
+                emailVerificationViewModel.reset()
                 navController.navigate("login_route") {
                     popUpTo("email_verification_route") { inclusive = true }
                 }

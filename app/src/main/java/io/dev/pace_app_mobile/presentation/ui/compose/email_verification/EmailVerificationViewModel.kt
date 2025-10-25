@@ -2,10 +2,19 @@ package io.dev.pace_app_mobile.presentation.ui.compose.email_verification
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
+import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
+import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
+import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
+import io.dev.pace_app_mobile.domain.usecase.VerificationCodeUseCase
+import io.dev.pace_app_mobile.domain.usecase.VerifyAccountUseCase
+import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 data class EmailVerificationUiState(
     val isSending: Boolean = false,
@@ -15,7 +24,10 @@ data class EmailVerificationUiState(
     val isVerifyEnabled: Boolean = false
 )
 
-class EmailVerificationViewModel : ViewModel() {
+@HiltViewModel
+class EmailVerificationViewModel @Inject constructor(
+    private val verifyAccountUseCase: VerifyAccountUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EmailVerificationUiState())
     val uiState: StateFlow<EmailVerificationUiState> = _uiState
@@ -62,15 +74,41 @@ class EmailVerificationViewModel : ViewModel() {
             _uiState.update { it.copy(errorMessage = null, isSending = true) }
             try {
                 delay(800)
-                val valid = code == "1234" // Demo condition for local test
-                if (valid) {
-                    countdownJob?.cancel()
-                    _uiState.update { it.copy(verifySuccess = true, isSending = false) }
-                } else {
-                    _uiState.update { it.copy(errorMessage = "Invalid verification code", isSending = false) }
+                when (val result = verifyAccountUseCase.invoke(email, code.toInt())) {
+                    is NetworkResult.Success -> {
+                        if (result.data?.message == "success") {
+                            countdownJob?.cancel()
+                            _uiState.update { it.copy(verifySuccess = true, isSending = false) }
+                        } else {
+                            _uiState.update {
+                                it.copy(
+                                    errorMessage = "Invalid verification code",
+                                    isSending = false
+                                )
+                            }
+                        }
+                    }
+
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                errorMessage = "Invalid verification code",
+                                isSending = false
+                            )
+                        }
+                    }
+
+                    is NetworkResult.Loading -> {
+                        // do nothing
+                    }
                 }
             } catch (ex: Exception) {
-                _uiState.update { it.copy(errorMessage = ex.message ?: "Verification failed", isSending = false) }
+                _uiState.update {
+                    it.copy(
+                        errorMessage = ex.message ?: "Verification failed",
+                        isSending = false
+                    )
+                }
             }
         }
     }

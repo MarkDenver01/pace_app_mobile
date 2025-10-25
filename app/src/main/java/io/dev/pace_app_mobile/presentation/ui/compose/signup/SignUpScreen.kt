@@ -171,7 +171,7 @@ fun SignUpScreen(
                             input.removeSuffix(domain)
                         } else input
                     },
-                    placeholder = "University Domain Email",
+                    placeholder = "Email Address",
                     leadingIcon = Icons.Default.Email,
                     fontSize = sizes.buttonFontSize,
                 )

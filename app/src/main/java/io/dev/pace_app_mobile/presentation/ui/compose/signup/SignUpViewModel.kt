@@ -110,6 +110,7 @@ class SignUpViewModel @Inject constructor(
                     onSuccess()
                 }
                 is NetworkResult.Error -> {
+                    Timber.e("error: ${result.message}")
                     _errorMessage.value = "Send verification failed"
                     _showErrorDialog.value = true
                 }

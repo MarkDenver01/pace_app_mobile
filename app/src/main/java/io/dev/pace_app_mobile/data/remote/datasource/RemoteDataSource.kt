@@ -17,6 +17,7 @@ import io.dev.pace_app_mobile.domain.model.UniversityLinkResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
 import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
+import io.dev.pace_app_mobile.domain.model.VerifyAccountRequest
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(
@@ -274,6 +275,19 @@ class RemoteDataSource @Inject constructor(
     suspend fun sendVerificationCode(verificationCodeRequest: VerificationCodeRequest):
             VerificationCodeResponse {
         val response = api.sendVerificationCode(verificationCodeRequest)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("empty body response")
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun verifyAccount(verifyAccountRequest: VerifyAccountRequest): VerificationCodeResponse {
+        val response = api.verifyAccount(verifyAccountRequest)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("empty body response")
         } else {

@@ -189,4 +189,6 @@ interface ApiRepository {
      * @return validate account response
      */
     suspend fun sendVerificationCode(verificationCodeRequest: VerificationCodeRequest): NetworkResult<VerificationCodeResponse>
+
+    suspend fun verifyAccount(email: String, verificationCode: Int): NetworkResult<VerificationCodeResponse>
 }
