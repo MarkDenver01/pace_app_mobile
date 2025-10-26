@@ -12,9 +12,11 @@ import io.dev.pace_app_mobile.presentation.ui.compose.assessment.results.CourseR
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.start.StartExamScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.email_verification.EmailVerificationScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginScreen
+import io.dev.pace_app_mobile.presentation.ui.compose.profile.UserProfileScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.signup.SignUpScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.start.StartScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.title.TitleScreen
+import okhttp3.Route
 
 fun NavGraphBuilder.startGraph(
     navController: NavController,
@@ -81,5 +83,9 @@ fun NavGraphBuilder.assessmentGraph(navController: NavController) {
 
     composable(Routes.COURSE_RECOMMENDATION_ROUTE) {
         CourseRecommendedResultScreen(navController)
+    }
+
+    composable(Routes.USER_PROFILE_ROUTE) {
+        UserProfileScreen(navController)
     }
 }

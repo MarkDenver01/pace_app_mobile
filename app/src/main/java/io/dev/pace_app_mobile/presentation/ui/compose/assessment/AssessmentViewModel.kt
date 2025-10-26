@@ -127,6 +127,10 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.QUESTION_ROUTE // <- go to result later
     }
 
+    fun onProfileClick() {
+        _navigateTo.value = Routes.USER_PROFILE_ROUTE
+    }
+
     fun onCompletedClick() {
 //        viewModelScope.launch {
 //            val result = studentAssessmentUseCase(studentAssessmentRequest)

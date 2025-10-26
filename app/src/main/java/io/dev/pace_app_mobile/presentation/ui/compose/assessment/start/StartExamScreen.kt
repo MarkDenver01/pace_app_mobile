@@ -70,8 +70,12 @@ fun StartExamScreen(
             TopNavigationBar(
                 navController = navController,
                 title = "",
-                showLeftButton = false,
-                showRightButton = false
+                showLeftButton = true,
+                showRightButton = false,
+                leftIcon = R.drawable.ic_profile,
+                onLeftClick = {
+                    viewModel.onProfileClick()
+                }
             )
         },
         containerColor = Color.Transparent

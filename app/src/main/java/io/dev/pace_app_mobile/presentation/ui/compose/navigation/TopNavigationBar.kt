@@ -1,29 +1,8 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Divider
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,70 +23,72 @@ fun TopNavigationBar(
     showLeftButton: Boolean = true,
     showRightButton: Boolean = true,
     onLeftClick: () -> Unit = {},
-    onRightClick: () -> Unit = {}
+    onRightClick: () -> Unit = {},
+    leftIcon: Int? = R.drawable.ic_refresh,   // Optional override for left icon
+    rightIcon: Int? = R.drawable.ic_close     // Optional override for right icon
 ) {
-    val statusBarHeight = WindowInsets.statusBars
-        .asPaddingValues().calculateTopPadding()
-
+    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val colors = LocalAppColors.current
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.primary) // Color fills behind status bar
+            .background(colors.primary)
     ) {
         Spacer(modifier = Modifier.height(statusBarHeight))
 
         Divider(
-            color = Color.White.copy(alpha = 0.5f), // or Color.Gray, or any contrast color
+            color = Color.White.copy(alpha = 0.5f),
             thickness = 0.5.dp
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp) // Adjust as needed
-                .background(colors.primary),
+                .height(64.dp)
+                .background(colors.primary)
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Left Icon
-            if (showLeftButton) {
+            // LEFT ICON (optional)
+            if (showLeftButton && leftIcon != null) {
                 IconButton(onClick = onLeftClick) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_refresh), // your custom drawable
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp),
-                        tint = Color.White // Or Color.Unspecified if you want original colors
+                        painter = painterResource(id = leftIcon),
+                        contentDescription = "Left Icon",
+                        modifier = Modifier.size(responsiveDp(24f)),
+                        tint = Color.White
                     )
                 }
             } else {
-                Spacer(modifier = Modifier.width(48.dp))
+                Spacer(modifier = Modifier.width(responsiveDp(48f)))
             }
 
-            // Title
+            // TITLE
             Text(
                 text = title,
                 fontSize = responsiveSp(20f),
                 color = Color.White,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
                 maxLines = 1
             )
 
-            // Right Icon
-            if (showRightButton) {
+            // RIGHT ICON (optional)
+            if (showRightButton && rightIcon != null) {
                 IconButton(onClick = onRightClick) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_close), // your custom drawable
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp),
-                        tint = Color.White // Or Color.Unspecified if you want original colors
+                        painter = painterResource(id = rightIcon),
+                        contentDescription = "Right Icon",
+                        modifier = Modifier.size(responsiveDp(24f)),
+                        tint = Color.White
                     )
                 }
             } else {
-                Spacer(modifier = Modifier.width(48.dp))
+                Spacer(modifier = Modifier.width(responsiveDp(48f)))
             }
         }
     }
 }
-

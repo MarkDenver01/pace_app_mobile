@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -65,6 +67,7 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,6 +89,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -1475,6 +1479,118 @@ fun SweetAlertDialog(
         }
     }
 }
+
+@Composable
+fun SweetChangePasswordDialog(
+    show: Boolean,
+    onConfirm: (String, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val colors = LocalAppColors.current
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
+    if (show) {
+        SweetAlertDialog(
+            type = AlertType.QUESTION,
+            title = "Change Password",
+            message = "Enter your new password below.",
+            show = show,
+            onConfirm = {
+                onConfirm(newPassword, confirmPassword)
+            },
+            onDismiss = onDismiss,
+            confirmText = "Change Password",
+            dismissText = "Cancel",
+            isSingleButton = false
+        )
+
+        // Password Fields Overlay
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
+                modifier = Modifier
+                    .padding(24.dp)
+                    .wrapContentHeight()
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Text(
+                        text = "Change Password",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = colors.primary
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = newPassword,
+                        onValueChange = { newPassword = it },
+                        label = { Text("New Password") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = colors.primary,
+                            cursorColor = colors.primary
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { confirmPassword = it },
+                        label = { Text("Confirm Password") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = colors.primary,
+                            cursorColor = colors.primary
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, Color.Gray)
+                        ) { Text("Cancel") }
+
+                        Button(
+                            onClick = { onConfirm(newPassword, confirmPassword) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.primary
+                            )
+                        ) { Text("Change") }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 
