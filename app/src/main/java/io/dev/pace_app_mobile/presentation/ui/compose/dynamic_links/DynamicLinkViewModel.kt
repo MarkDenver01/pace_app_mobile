@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.dev.pace_app_mobile.domain.model.SharedDynamicLink
 import io.dev.pace_app_mobile.domain.usecase.GetDynamicLinkUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.SaveDynamicLinkUseCase
+import io.dev.pace_app_mobile.domain.usecase.SaveGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.UpdateVerificationUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -18,7 +20,8 @@ class DynamicLinkViewModel @Inject constructor(
     private val saveDynamicLinkUseCase: SaveDynamicLinkUseCase,
     private val getDynamicLinkUseCase: GetDynamicLinkUseCase,
     private val updateVerificationUseCase: UpdateVerificationUseCase,
-    private val getVerifiedAccountUseCase: GetVerifiedAccountUseCase
+    private val getVerifiedAccountUseCase: GetVerifiedAccountUseCase,
+    private val saveGuestKeyUseCase: SaveGuestKeyUseCase
 ) : ViewModel() {
 
     val dynamicLink = getDynamicLinkUseCase()
@@ -30,6 +33,12 @@ class DynamicLinkViewModel @Inject constructor(
     fun saveLink(link: SharedDynamicLink) {
         viewModelScope.launch {
             saveDynamicLinkUseCase(link)
+        }
+    }
+
+    fun saveGuestKey(message: String) {
+        viewModelScope.launch {
+            saveGuestKeyUseCase(message)
         }
     }
 

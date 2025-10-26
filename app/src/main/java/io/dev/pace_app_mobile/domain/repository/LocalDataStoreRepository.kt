@@ -6,7 +6,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocalDataStoreRepository {
     suspend fun saveDynamicLink(data: SharedDynamicLink)
+
+    suspend fun saveGuestKey(message: String)
     fun getDynamicLink(): Flow<SharedDynamicLink?>
+
+    fun getGuestKey(): Flow<String?>
     suspend fun updateVerification(isVerified: Boolean)
 
     suspend fun saveVerifiedAccount(data: SharedVerifiedAccount)

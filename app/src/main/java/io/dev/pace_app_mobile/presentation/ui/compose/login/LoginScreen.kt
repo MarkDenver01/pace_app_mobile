@@ -378,7 +378,9 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(spacing.sm))
 
                 CustomDynamicButton(
-                    onClick = { viewModel.onLoginClick(mailAddress, password) },
+                    onClick = {
+                        viewModel.onLoginClick(mailAddress, password)
+                    },
                     content = stringResource(id = R.string.button_login),
                     backgroundColor = colors.primary,
                     pressedBackgroundColor = colors.pressed
@@ -588,7 +590,8 @@ fun startTwitterLogin(
         Uri.parse(OAuthProviders.TW_REDIRECT_URI)
     )
         .setScopes(*OAuthProviders.TW_SCOPES.toTypedArray())
-        .setCodeVerifier(io.dev.pace_app_mobile.presentation.utils.CodeVerifierUtil.generateRandomCodeVerifier()).build()
+        .setCodeVerifier(io.dev.pace_app_mobile.presentation.utils.CodeVerifierUtil.generateRandomCodeVerifier())
+        .build()
 
 
     val intent = authService.getAuthorizationRequestIntent(authRequest)

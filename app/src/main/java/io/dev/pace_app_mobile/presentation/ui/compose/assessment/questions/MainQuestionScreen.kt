@@ -90,7 +90,7 @@ fun MainQuestionScreen(
         }
     }
 
-    // ✅ Dialogs are placed OUTSIDE Scaffold to ensure overlay layering
+    // Dialogs are placed OUTSIDE Scaffold to ensure overlay layering
     if (showRetryDialog) {
         SweetAssessmentAlertDialog(
             type = AlertType.QUESTION,
@@ -176,9 +176,9 @@ fun MainQuestionScreen(
                     modifier = Modifier.fillMaxWidth(),
                     text = buildAnnotatedString {
                         append("Kindly choose ")
-                        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("YES") }
+                        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("Yes") }
                         append(" or ")
-                        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("NO") }
+                        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("No") }
                         append(" for the following question.")
                     },
                     fontSize = 18.sp,

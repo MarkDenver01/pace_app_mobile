@@ -1,5 +1,6 @@
 package io.dev.pace_app_mobile.data.local.datastore
 
+import android.R
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -18,10 +19,19 @@ class LocalDataStore(private val context: Context) {
     private val DYNAMIC_LINK_KEY = stringPreferencesKey("dynamic_link")
     private val VERIFIED_ACCOUNT_KEY = stringPreferencesKey("verified_account")
 
+    private val GUEST_KEY = stringPreferencesKey("guest_key")
+
     suspend fun saveDynamicLink(data: SharedDynamicLink) {
         val json = gson.toJson(data)
         context.dataStore.edit { prefs ->
             prefs[DYNAMIC_LINK_KEY] = json
+        }
+    }
+
+    suspend fun saveGuestKey(message: String) {
+        val json = gson.toJson(message)
+        context.dataStore.edit { prefs ->
+            prefs[GUEST_KEY] = json
         }
     }
 
@@ -36,6 +46,14 @@ class LocalDataStore(private val context: Context) {
         return context.dataStore.data.map { prefs ->
             prefs[DYNAMIC_LINK_KEY]?.let { json ->
                 gson.fromJson(json, SharedDynamicLink::class.java)
+            }
+        }
+    }
+
+    fun getGuestKey(): Flow<String?> {
+        return context.dataStore.data.map { prefs ->
+            prefs[GUEST_KEY]?.let { json ->
+                gson.fromJson(json, String::class.java)
             }
         }
     }

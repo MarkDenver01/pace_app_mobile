@@ -28,7 +28,8 @@ data class CourseRecommendationResponse(
     val courseName: String,
     val courseDescription: String,
     val matchPercentage: Double,
-    val recommendationMessage: String
+    val recommendationMessage: String,
+    val possibleCareers: List<String>
 )
 
 /**
@@ -46,5 +47,6 @@ data class CourseRecommendation (
     val courseName: String,
     val courseDescription: String,
     val matchPercentage: Double,
-    val recommendationMessage: String
+    val recommendationMessage: String,
+    val possibleCareers: List<String>
 )

@@ -13,6 +13,7 @@ import io.dev.pace_app_mobile.domain.model.QuestionCategory
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.navigation.Routes
@@ -30,7 +31,8 @@ class AssessmentViewModel @Inject constructor(
     private val questionUseCase: QuestionUseCase,
     private val allQuestionsByUniversityUseCase: AllQuestionsByUniversityUseCase,
     private val recommendationUseCase: CourseRecommendationUseCase,
-    private val studentAssessmentUseCase: StudentAssessmentUseCase
+    private val studentAssessmentUseCase: StudentAssessmentUseCase,
+    private val getGuestKeyUseCase: GetGuestKeyUseCase,
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -54,6 +56,13 @@ class AssessmentViewModel @Inject constructor(
 
     val totalQuestions: Int
         get() = _questions.value.size
+
+    val guestKeyStatus: StateFlow<String?> = getGuestKeyUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
     val currentQuestion: StateFlow<Question> =
         combine(_questions, _currentQuestionIndex) { questions, index ->
@@ -221,7 +230,8 @@ class AssessmentViewModel @Inject constructor(
                             courseName = it.courseName,
                             courseDescription = it.courseDescription,
                             matchPercentage = it.matchPercentage,
-                            recommendationMessage = it.recommendationMessage
+                            recommendationMessage = it.recommendationMessage,
+                            possibleCareers = it.possibleCareers
                         )
                     }
                 },

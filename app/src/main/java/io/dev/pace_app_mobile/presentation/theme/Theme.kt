@@ -85,6 +85,21 @@ private val RedishColorScheme = AppColorScheme(
     error = Color(0xFFF44336)
 )
 
+private val BrownishColorScheme = AppColorScheme(
+    primary = Color(0xFF8D6E63),      // frontend brownishTheme.primary
+    background = Color(0xFFFEFAF5),   // frontend brownishTheme.background
+    onPrimary = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    border = Color(0xFFD7CCC8),
+    placeholder = Color(0xFF9E9E9E),
+    disabled = Color(0xFFBCAAA4),
+    pressed = Color(0xFF6D4C41),
+    success = Color(0xFF4CAF50),
+    error = Color(0xFFF44336)
+)
+
 private val PurplelishColorScheme = AppColorScheme(
     primary = Color(0xFF7E57C2),      // frontend purplelishTheme.primary
     background = Color(0xFFF7F3FC),   // frontend purplelishTheme.background
@@ -100,20 +115,51 @@ private val PurplelishColorScheme = AppColorScheme(
     error = Color(0xFFF44336)
 )
 
-private val BrownishColorScheme = AppColorScheme(
-    primary = Color(0xFF8D6E63),      // frontend brownishTheme.primary
-    background = Color(0xFFFEFAF5),   // frontend brownishTheme.background
-    onPrimary = Color.White,
-    onBackground = Color.Black,
-    surface = Color.White,
-    onSurface = Color.Black,
-    border = Color(0xFFD7CCC8),
-    placeholder = Color(0xFF9E9E9E),
-    disabled = Color(0xFFBCAAA4),
-    pressed = Color(0xFF6D4C41),
-    success = Color(0xFF4CAF50),
-    error = Color(0xFFF44336)
+private val GreenishColorScheme = AppColorScheme(
+    primary = Color(0xFF00703C),        // La Salle green
+    background = Color(0xFFF8FFF8),     // very light green / off-white
+    onPrimary = Color.White,             // text/icons on primary
+    onBackground = Color.Black,          // text/icons on background
+    surface = Color(0xFFE6F4EA),        // pale green surface
+    onSurface = Color.Black,             // text/icons on surface
+    border = Color(0xFF0B3D2E),         // dark green borders
+    placeholder = Color(0xFF4C7A61),    // medium green placeholder
+    disabled = Color(0xFF99BFAE),       // light muted green for disabled
+    pressed = Color(0xFF005B33),        // darker green for pressed state
+    success = Color(0xFF4CAF50),        // keep success green
+    error = Color(0xFFF44336)           // keep error red
 )
+
+private val BlueishColorScheme = AppColorScheme(
+    primary = Color(0xFF003DA5),        // NU blue
+    background = Color(0xFFF5F7FF),     // very light blue / off-white
+    onPrimary = Color.White,             // text/icons on primary
+    onBackground = Color.Black,          // text/icons on background
+    surface = Color(0xFFE3E9FF),        // pale blue surface
+    onSurface = Color.Black,             // text/icons on surface
+    border = Color(0xFF00297A),         // dark blue borders
+    placeholder = Color(0xFF3366CC),    // medium blue placeholder
+    disabled = Color(0xFF99B3E6),       // light muted blue for disabled
+    pressed = Color(0xFF002270),        // darker blue for pressed state
+    success = Color(0xFF4CAF50),        // keep success green
+    error = Color(0xFFF44336)           // keep error red
+)
+
+private val MaroonishColorScheme = AppColorScheme(
+    primary = Color(0xFFD50032),        // LPU red
+    background = Color(0xFFFFF5F5),     // very light red / off-white
+    onPrimary = Color.White,             // text/icons on primary
+    onBackground = Color.Black,          // text/icons on background
+    surface = Color(0xFFFFE5E9),        // pale red/pink surface
+    onSurface = Color.Black,             // text/icons on surface
+    border = Color(0xFF7A001F),         // dark red borders
+    placeholder = Color(0xFFB20027),    // medium red placeholder
+    disabled = Color(0xFFFF99A3),       // light muted red for disabled
+    pressed = Color(0xFF8C0026),        // darker red for pressed state
+    success = Color(0xFF4CAF50),        // keep success green
+    error = Color(0xFFF44336)           // keep error red
+)
+
 
 fun AppColorScheme.toMaterialColors(darkTheme: Boolean = false): ColorScheme {
     return if (darkTheme) {
@@ -223,6 +269,9 @@ fun Pace_app_mobileTheme(
         Customization.redishTheme -> RedishColorScheme
         Customization.purplelishTheme -> PurplelishColorScheme
         Customization.brownishTheme -> BrownishColorScheme
+        Customization.greenishTheme -> GreenishColorScheme
+        Customization.blueishTheme -> BlueishColorScheme
+        Customization.maroonishTheme -> MaroonishColorScheme
     }
 
     val responsiveSizes = ResponsiveSizes(

@@ -108,12 +108,14 @@ fun StartScreen(
             message = "Do you want to take the assessment as a Guest? You can continue without signing up.",
             show = showGuestDialog,
             onConfirm = {
+                dynamicLinkViewModel.saveGuestKey("guest")
                 showGuestDialog = false
                 navController.navigate(Routes.START_ASSESSMENT_ROUTE) {
                     popUpTo(Routes.START_ROUTE) { inclusive = false }
                 }
             },
             onDismiss = {
+                dynamicLinkViewModel.saveGuestKey("not_guest")
                 showGuestDialog = false
             }
         )

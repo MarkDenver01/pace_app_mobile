@@ -8,10 +8,12 @@ import io.dev.pace_app_mobile.domain.model.LoginResult
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.usecase.FacebookAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookLoginUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.InstagramLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
+import io.dev.pace_app_mobile.domain.usecase.SaveGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import io.dev.pace_app_mobile.navigation.Routes
@@ -21,8 +23,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -73,7 +77,8 @@ class LoginViewModel @Inject constructor(
     private val instagramLoginUseCase: InstagramLoginUseCase,
     private val googleAccountUseCase: GoogleAccountUseCase,
     private val facebookAccountUseCase: FacebookAccountUseCase,
-    private val universityUseCase: UniversityUseCase
+    private val universityUseCase: UniversityUseCase,
+    private val saveGuestKeyStatus: SaveGuestKeyUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
@@ -96,8 +101,10 @@ class LoginViewModel @Inject constructor(
             _uiState.value = LoginUiState.Idle
 
             when (result) {
-                is NetworkResult.Success ->
+                is NetworkResult.Success -> {
+                    saveGuestKeyStatus.invoke("not_guest")
                     _eventFlow.emit(LoginEvent.ShowSuccessDialog("Login successful!"))
+                }
 
                 is NetworkResult.Error ->
                     _eventFlow.emit(LoginEvent.ShowErrorDialog( "Login failed."))
@@ -442,5 +449,4 @@ class LoginViewModel @Inject constructor(
     fun isUserLoggedIn() : Boolean {
         return false // TODO
     }
-
 }

@@ -41,6 +41,7 @@ import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +54,10 @@ fun StartExamScreen(
     val sizes = LocalResponsiveSizes.current
     val colors = LocalAppColors.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    val guestKeyStatus by viewModel.guestKeyStatus.collectAsState()
+
+    val isGuest = guestKeyStatus == "guest"
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -70,13 +75,14 @@ fun StartExamScreen(
             TopNavigationBar(
                 navController = navController,
                 title = "",
-                showLeftButton = true,
+                showLeftButton = !isGuest, // hide if guest
                 showRightButton = false,
-                leftIcon = R.drawable.ic_profile,
+                leftIcon = if (!isGuest) R.drawable.ic_profile else null,
                 onLeftClick = {
-                    viewModel.onProfileClick()
-                }
-            )
+                    if (!isGuest) {
+                        viewModel.onProfileClick()
+                    }
+                })
         },
         containerColor = Color.Transparent
     ) { innerPadding ->

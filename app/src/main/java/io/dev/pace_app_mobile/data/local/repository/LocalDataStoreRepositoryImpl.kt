@@ -14,8 +14,16 @@ class LocalDataStoreRepositoryImpl(
         dataStore.saveDynamicLink(data)
     }
 
+    override suspend fun saveGuestKey(message: String) {
+       dataStore.saveGuestKey(message)
+    }
+
     override fun getDynamicLink(): Flow<SharedDynamicLink?> {
         return dataStore.getDynamicLink()
+    }
+
+    override fun getGuestKey(): Flow<String?> {
+        return dataStore.getGuestKey()
     }
 
     override suspend fun updateVerification(isVerified: Boolean) {

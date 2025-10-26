@@ -25,11 +25,13 @@ import io.dev.pace_app_mobile.domain.usecase.GetDynamicLinkUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleLoginUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.InstagramLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
 import io.dev.pace_app_mobile.domain.usecase.SaveDynamicLinkUseCase
+import io.dev.pace_app_mobile.domain.usecase.SaveGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.SavedVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
@@ -183,4 +185,14 @@ object AppModule {
     @Singleton
     fun provideVerifyAccountUseCase(repository: ApiRepository) =
         VerifyAccountUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGetGuestKeyUseCase(repository: LocalDataStoreRepository) =
+        GetGuestKeyUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideSaveGuestKeyUseCase(repository: LocalDataStoreRepository) =
+        SaveGuestKeyUseCase(repository)
 }
