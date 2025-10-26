@@ -1,5 +1,13 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.assessment.results
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,14 +21,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
@@ -142,15 +158,18 @@ fun CourseRecommendedResultScreen(
 
     // Step 1: Enrollment prompt
     if (showDialog && selectedCourse != null) {
-        EnrollmentDialog(
+        SweetEnrollmentDialog(
             course = selectedCourse!!,
             isChecked = isChecked,
+            show = showDialog, // <-- add this
             onCheckedChange = { isChecked = it },
             onSubmit = {
                 showDialog = false
                 showResultDialog = true
             },
-            onDismiss = { showDialog = false }
+            onDismiss = {
+                showDialog = false
+            }
         )
     }
 
@@ -224,31 +243,143 @@ fun CourseCard(course: CourseRecommendation, onClick: () -> Unit) {
 }
 
 @Composable
-fun EnrollmentDialog(
+fun SweetEnrollmentDialog(
     course: CourseRecommendation,
     isChecked: Boolean,
+    show: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    onSubmit: () -> Unit,
+    onSubmit: (String?) -> Unit, // Pass otherSchool text if applicable
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            Button(onClick = onSubmit) { Text("Submit") }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
-        },
-        title = { Text(text = "Interested in ${course.courseName}?") },
-        text = {
-            Column {
-                Text("Would you like to enroll in this school?")
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = isChecked, onCheckedChange = onCheckedChange)
-                    Text("Yes, I want to enroll.")
+    val colors = LocalAppColors.current
+    var otherSchool by remember { mutableStateOf("") } // State for the TextField
+
+    if (show) {
+        Dialog(onDismissRequest = onDismiss) {
+            AnimatedVisibility(
+                visible = show,
+                enter = fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.85f),
+                exit = fadeOut(animationSpec = tween(200)) + scaleOut(targetScale = 0.8f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray.copy(alpha = 0.5f))
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        tonalElevation = 6.dp,
+                        shadowElevation = 12.dp,
+                        color = Color.White,
+                        modifier = Modifier
+                            .animateContentSize(animationSpec = tween(300))
+                            .widthIn(min = 320.dp, max = 500.dp) // <-- Increased width
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            // --- Lottie Animation ---
+                            val composition by rememberLottieComposition(
+                                LottieCompositionSpec.RawRes(R.raw.question)
+                            )
+                            val progress by animateLottieCompositionAsState(
+                                composition = composition,
+                                iterations = LottieConstants.IterateForever
+                            )
+                            LottieAnimation(
+                                composition = composition,
+                                progress = { progress },
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .graphicsLayer {
+                                        alpha = 0.9f
+                                        scaleX = 1.1f
+                                        scaleY = 1.1f
+                                    }
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = "Interested in ${course.courseName}?",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.primary
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Would you like to enroll in this school?",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = onCheckedChange
+                                )
+                                Text(
+                                    "Yes, I want to enroll.",
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            // --- Conditionally show TextField ---
+                            if (!isChecked) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                OutlinedTextField(
+                                    value = otherSchool,
+                                    onValueChange = { otherSchool = it },
+                                    label = { Text("Other School") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedButton(
+                                    onClick = onDismiss,
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = BorderStroke(1.dp, Color.LightGray),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Gray),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Cancel")
+                                }
+
+                                Button(
+                                    onClick = { onSubmit(if (isChecked) null else otherSchool) },
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = colors.primary
+                                    ),
+                                    contentPadding = PaddingValues(vertical = 10.dp)
+                                ) {
+                                    Text("Submit", fontWeight = FontWeight.SemiBold, color = Color.White)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-    )
+    }
 }
+
+
+
