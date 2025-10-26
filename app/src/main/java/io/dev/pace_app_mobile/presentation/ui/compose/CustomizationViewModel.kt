@@ -45,6 +45,9 @@ class CustomizationViewModel @Inject constructor(
             "redish" -> Customization.redishTheme
             "purplelish" -> Customization.purplelishTheme
             "brownish" -> Customization.brownishTheme
+            "greenish" -> Customization.greenishTheme
+            "blueish" -> Customization.blueishTheme
+            "maroonish" -> Customization.maroonishTheme
             "light" -> Customization.lightTheme
             else -> Customization.lightTheme
         }
