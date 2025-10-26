@@ -313,7 +313,11 @@ class ApiRepositoryImpl @Inject constructor(
     override suspend fun getQuestions(): Result<List<QuestionResponse>> {
         return try {
             val result = remoteDataSource.getQuestions()
-            Result.success(result)
+
+            // Apply Fisher–Yates Shuffle (via Kotlin's built-in shuffled())
+            val randomizedResult = result.shuffled()
+
+            Result.success(randomizedResult)
         } catch (e: Exception) {
             Log.e("getQuestions", "Exception: ${e.message}", e)
             Result.failure(Exception("Failed to load questions: $e"))

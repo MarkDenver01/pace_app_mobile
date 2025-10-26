@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
@@ -35,6 +36,7 @@ import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBa
 import io.dev.pace_app_mobile.presentation.utils.AlertConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.ProgressHeader
+import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.YesNoButtonGroup
 
 
@@ -52,6 +54,8 @@ fun MainQuestionScreen(
     val colors = LocalAppColors.current
 
     val totalQuestions = viewModel.totalQuestions
+    val isLoadingQuestions by viewModel.isLoadingQuestions.collectAsState()
+    val questions by viewModel.questions.collectAsState()
 
     // Category progress is derived reactively from currentQuestion
     val categoryProgress = remember(currentQuestion) {
@@ -77,8 +81,14 @@ fun MainQuestionScreen(
         }
     }
 
-    LaunchedEffect(totalQuestions) {
-        if (totalQuestions == 0) {
+    LaunchedEffect(viewModel.isLoadingQuestions, viewModel.questions) {
+        val isLoading = viewModel.isLoadingQuestions.value
+        val questionList = viewModel.questions.value
+
+        // Navigate to NoQuestionScreen only when:
+        // - Not loading anymore
+        // - Questions have been fetched and are empty
+        if (!isLoading && questionList.isEmpty()) {
             navController.navigate(Routes.NO_QUESTION_ROUTE) {
                 popUpTo(Routes.START_ASSESSMENT_ROUTE) { inclusive = true }
             }
@@ -108,14 +118,17 @@ fun MainQuestionScreen(
     ) { innerPadding ->
         // Retry Dialog
         if (showRetryDialog) {
-            AlertConfirmationDialog(
+            SweetAlertDialog(
+                type = AlertType.QUESTION,
+                title = "Retry Assessment",
                 message = "Are you sure you want to retry?",
+                show = showRetryDialog,
                 onConfirm = {
                     showRetryDialog = false
                     // Handle retry logic
                     viewModel.resetAssessment()
                 },
-                onCancel = {
+                onDismiss = {
                     showRetryDialog = false
                 }
             )
@@ -123,13 +136,16 @@ fun MainQuestionScreen(
 
 
         if (showExitDialog) {
-            AlertConfirmationDialog(
+            SweetAlertDialog(
+                type = AlertType.QUESTION,
+                title = "Exit Assessment",
                 message = "Are you sure you want to exit?",
+                show = showExitDialog,
                 onConfirm = {
                     showExitDialog = false
                     // Handle exit logic
                 },
-                onCancel = {
+                onDismiss = {
                     showExitDialog = false
                 }
             )

@@ -49,6 +49,9 @@ class AssessmentViewModel @Inject constructor(
 
     val answeredQuestions = mutableListOf<AnsweredQuestionRequest>()
 
+    private val _isLoadingQuestions = MutableStateFlow(false)
+    val isLoadingQuestions: StateFlow<Boolean> = _isLoadingQuestions
+
     val totalQuestions: Int
         get() = _questions.value.size
 
@@ -75,6 +78,7 @@ class AssessmentViewModel @Inject constructor(
 
     fun fetchQuestions() {
         viewModelScope.launch {
+            _isLoadingQuestions.value = true
             val result = questionUseCase()
             result.fold(
                 onSuccess = { questionList ->
@@ -83,7 +87,7 @@ class AssessmentViewModel @Inject constructor(
                             id = it.questionId,
                             category = QuestionCategory.fromString(it.category),
                             text = it.question,
-                            imageResId = R.drawable.ic_figure_1, // Update if category-based image mapping needed,
+                            imageResId = R.drawable.ic_figure_1, // Update if category-based image mapping needed
                             courseName = it.courseName
                         )
                     }
@@ -93,6 +97,7 @@ class AssessmentViewModel @Inject constructor(
                     _questions.value = emptyList()
                 }
             )
+            _isLoadingQuestions.value = false
         }
     }
 
