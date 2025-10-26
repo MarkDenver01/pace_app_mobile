@@ -1591,6 +1591,151 @@ fun SweetChangePasswordDialog(
     }
 }
 
+@Composable
+fun SweetAssessmentAlertDialog(
+    type: AlertType,
+    title: String,
+    message: String,
+    show: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit = {},
+    confirmText: String = "Yes",
+
+    dismissText: String = "No",
+    isSingleButton: Boolean = false
+) {
+    val colors = LocalAppColors.current
+    val animationRes = when (type) {
+        AlertType.SUCCESS -> R.raw.success
+        AlertType.WARNING -> R.raw.warning
+        AlertType.ERROR -> R.raw.error
+        AlertType.QUESTION -> R.raw.question
+    }
+
+    if (show) {
+        Dialog(onDismissRequest = onDismiss) { // ensures overlay layer
+            AnimatedVisibility(
+                visible = show,
+                enter = fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.85f),
+                exit = fadeOut(animationSpec = tween(200)) + scaleOut(targetScale = 0.8f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray.copy(alpha = 0.5f))
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        tonalElevation = 6.dp,
+                        shadowElevation = 12.dp,
+                        color = Color.White,
+                        modifier = Modifier.animateContentSize(animationSpec = tween(300))
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animationRes))
+                            val progress by animateLottieCompositionAsState(
+                                composition = composition,
+                                iterations = LottieConstants.IterateForever
+                            )
+
+                            LottieAnimation(
+                                composition = composition,
+                                progress = { progress },
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .graphicsLayer {
+                                        alpha = 0.9f
+                                        scaleX = 1.1f
+                                        scaleY = 1.1f
+                                    }
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.primary
+                                ),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = message,
+                                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 20.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            if (isSingleButton) {
+                                Button(
+                                    onClick = onConfirm,
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = when (type) {
+                                            AlertType.SUCCESS -> Color(0xFF4CAF50)
+                                            AlertType.WARNING -> Color(0xFFFFA000)
+                                            AlertType.ERROR -> Color(0xFFD32F2F)
+                                            AlertType.QUESTION -> colors.primary
+                                        }
+                                    ),
+                                    contentPadding = PaddingValues(vertical = 10.dp)
+                                ) {
+                                    Text(confirmText, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                }
+                            } else {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    OutlinedButton(
+                                        onClick = onDismiss,
+                                        shape = RoundedCornerShape(12.dp),
+                                        border = BorderStroke(1.dp, Color.LightGray),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Gray),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(dismissText)
+                                    }
+
+                                    Button(
+                                        onClick = onConfirm,
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = when (type) {
+                                                AlertType.SUCCESS -> Color(0xFF4CAF50)
+                                                AlertType.WARNING -> Color(0xFFFFA000)
+                                                AlertType.ERROR -> Color(0xFFD32F2F)
+                                                AlertType.QUESTION -> colors.primary
+                                            }
+                                        ),
+                                        contentPadding = PaddingValues(vertical = 10.dp)
+                                    ) {
+                                        Text(confirmText, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 
 

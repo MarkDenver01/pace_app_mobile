@@ -37,8 +37,8 @@ import io.dev.pace_app_mobile.presentation.utils.AlertConfirmationDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.ProgressHeader
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
+import io.dev.pace_app_mobile.presentation.utils.SweetAssessmentAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.YesNoButtonGroup
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +57,7 @@ fun MainQuestionScreen(
     val isLoadingQuestions by viewModel.isLoadingQuestions.collectAsState()
     val questions by viewModel.questions.collectAsState()
 
-    // Category progress is derived reactively from currentQuestion
+    // Derived category progress
     val categoryProgress = remember(currentQuestion) {
         viewModel.getCurrentCategoryProgress()
     }
@@ -68,7 +68,6 @@ fun MainQuestionScreen(
 
     var showRetryDialog by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
-    var userAnswers: List<AnsweredQuestionRequest>
 
     LaunchedEffect(Unit) {
         viewModel.fetchQuestions()
@@ -84,10 +83,6 @@ fun MainQuestionScreen(
     LaunchedEffect(viewModel.isLoadingQuestions, viewModel.questions) {
         val isLoading = viewModel.isLoadingQuestions.value
         val questionList = viewModel.questions.value
-
-        // Navigate to NoQuestionScreen only when:
-        // - Not loading anymore
-        // - Questions have been fetched and are empty
         if (!isLoading && questionList.isEmpty()) {
             navController.navigate(Routes.NO_QUESTION_ROUTE) {
                 popUpTo(Routes.START_ASSESSMENT_ROUTE) { inclusive = true }
@@ -95,6 +90,37 @@ fun MainQuestionScreen(
         }
     }
 
+    // ✅ Dialogs are placed OUTSIDE Scaffold to ensure overlay layering
+    if (showRetryDialog) {
+        SweetAssessmentAlertDialog(
+            type = AlertType.QUESTION,
+            title = "Retry Assessment",
+            message = "Are you sure you want to retry?",
+            show = showRetryDialog,
+            onConfirm = {
+                showRetryDialog = false
+                viewModel.resetAssessment()
+            },
+            onDismiss = { showRetryDialog = false }
+        )
+    }
+
+    if (showExitDialog) {
+        SweetAssessmentAlertDialog(
+            type = AlertType.WARNING,
+            title = "Exit Assessment",
+            message = "Are you sure you want to exit?",
+            show = showExitDialog,
+            onConfirm = {
+                showExitDialog = false
+                // TODO: Handle exit logic (e.g., navigate back or to home)
+                navController.popBackStack()
+            },
+            onDismiss = { showExitDialog = false }
+        )
+    }
+
+    // ✅ Scaffold comes AFTER dialogs
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -106,52 +132,12 @@ fun MainQuestionScreen(
                 title = "",
                 showLeftButton = true,
                 showRightButton = true,
-                onLeftClick = {
-                    showRetryDialog = true
-                },
-                onRightClick = {
-                    showExitDialog = true
-                }
+                onLeftClick = { showRetryDialog = true },
+                onRightClick = { showExitDialog = true }
             )
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
-        // Retry Dialog
-        if (showRetryDialog) {
-            SweetAlertDialog(
-                type = AlertType.QUESTION,
-                title = "Retry Assessment",
-                message = "Are you sure you want to retry?",
-                show = showRetryDialog,
-                onConfirm = {
-                    showRetryDialog = false
-                    // Handle retry logic
-                    viewModel.resetAssessment()
-                },
-                onDismiss = {
-                    showRetryDialog = false
-                }
-            )
-        }
-
-
-        if (showExitDialog) {
-            SweetAlertDialog(
-                type = AlertType.QUESTION,
-                title = "Exit Assessment",
-                message = "Are you sure you want to exit?",
-                show = showExitDialog,
-                onConfirm = {
-                    showExitDialog = false
-                    // Handle exit logic
-                },
-                onDismiss = {
-                    showExitDialog = false
-                }
-            )
-        }
-
-
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -170,7 +156,6 @@ fun MainQuestionScreen(
             Spacer(modifier = Modifier.height(spacing.sm))
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Reactive category progress
                 Text(
                     text = "${currentQuestion.category.displayName} (${categoryProgress.first} of ${categoryProgress.second})",
                     fontSize = 18.sp,
@@ -191,9 +176,9 @@ fun MainQuestionScreen(
                     modifier = Modifier.fillMaxWidth(),
                     text = buildAnnotatedString {
                         append("Kindly choose ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) { append("YES") }
+                        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("YES") }
                         append(" or ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) { append("NO") }
+                        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("NO") }
                         append(" for the following question.")
                     },
                     fontSize = 18.sp,
@@ -204,10 +189,7 @@ fun MainQuestionScreen(
 
                 Spacer(modifier = Modifier.height(spacing.sm))
 
-                Divider(
-                    color = Color.DarkGray.copy(alpha = 0.5f),
-                    thickness = 0.5.dp
-                )
+                Divider(color = Color.DarkGray.copy(alpha = 0.5f), thickness = 0.5.dp)
 
                 Spacer(modifier = Modifier.height(spacing.md))
 
