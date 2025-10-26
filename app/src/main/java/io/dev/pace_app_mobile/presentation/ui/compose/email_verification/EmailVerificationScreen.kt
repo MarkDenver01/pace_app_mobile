@@ -24,10 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.domain.enums.AlertType
+import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
+import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
@@ -38,11 +40,15 @@ fun EmailVerificationScreen(
     navController: NavController,
     email: String,
     emailVerificationViewModel: EmailVerificationViewModel = hiltViewModel(),
-    ) {
+    assessmentViewModel: AssessmentViewModel = hiltViewModel()
+) {
     val uiState by emailVerificationViewModel.uiState.collectAsState()
     val colors = LocalAppColors.current
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
+    val guestKeyStatus by assessmentViewModel.guestKeyStatus.collectAsState()
+
+    val isGuest = guestKeyStatus == "guest"
 
     val digitCount = 4
     val digits = remember { List(digitCount) { mutableStateOf("") } }
@@ -165,7 +171,7 @@ fun EmailVerificationScreen(
             // Verify Button
             CustomDynamicButton(
                 onClick = { emailVerificationViewModel.verifyCode(email, combinedCode) },
-                 content = "VERIFY NOW",
+                content = "VERIFY NOW",
                 backgroundColor = colors.primary,
                 pressedBackgroundColor = colors.pressed,
                 enabled = uiState.isVerifyEnabled
@@ -187,13 +193,23 @@ fun EmailVerificationScreen(
         SweetAlertDialog(
             type = AlertType.SUCCESS,
             title = "Account Verification Success",
-            message = "Successfully verified. You may now proceed on logging in.",
+            message = "Successfully verified. " + if (isGuest) {
+                "You may now view the top recommended courses"
+            } else {
+                "You may now proceed on logging in"
+            },
             show = true,
             onConfirm = {
                 emailVerificationViewModel.reset()
                 emailVerificationViewModel.savedVerifiedAccount(email)
-                navController.navigate("login_route") {
-                    popUpTo("email_verification_route") { inclusive = true }
+                if (isGuest) {
+                    navController.navigate(Routes.COURSE_RECOMMENDATION_ROUTE) {
+                        popUpTo(Routes.QUESTION_COMPLETED_ROUTE) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(Routes.LOGIN_ROUTE) {
+                        popUpTo(Routes.EMAIL_VERIFICATION_ROUTE) { inclusive = true }
+                    }
                 }
             },
             confirmText = "Complete",

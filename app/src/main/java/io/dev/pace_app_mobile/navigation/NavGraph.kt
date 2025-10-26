@@ -9,6 +9,7 @@ import io.dev.pace_app_mobile.presentation.ui.compose.assessment.done.QuestionCo
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.questions.MainQuestionScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.questions.NoQuestionScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.results.CourseRecommendedResultScreen
+import io.dev.pace_app_mobile.presentation.ui.compose.assessment.results.FinishAssessmentScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.start.StartExamScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.email_verification.EmailVerificationScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginScreen
@@ -87,5 +88,9 @@ fun NavGraphBuilder.assessmentGraph(navController: NavController) {
 
     composable(Routes.USER_PROFILE_ROUTE) {
         UserProfileScreen(navController)
+    }
+
+    composable(Routes.FINISH_ASSESSMENT_ROUTE) {
+        FinishAssessmentScreen(navController)
     }
 }

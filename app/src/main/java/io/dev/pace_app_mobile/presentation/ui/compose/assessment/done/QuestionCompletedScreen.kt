@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.AlertType
+import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
@@ -44,6 +46,7 @@ import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewM
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.AssessmentResultDialog
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
+import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +59,11 @@ fun QuestionCompletedScreen(
     val colors = LocalAppColors.current
     val sizes = LocalResponsiveSizes.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val showOldNewStudentDialog by viewModel.showOldNewStudentDialog.collectAsState()
+    val guestKeyStatus by viewModel.guestKeyStatus.collectAsState()
+
+    val isGuest = guestKeyStatus == "guest"
+
 
     LaunchedEffect(navigateTo) {
         navigateTo?.let { route ->
@@ -126,12 +134,25 @@ fun QuestionCompletedScreen(
             // --- let's begin ---
             CustomDynamicButton(
                 onClick = {
-                    viewModel.onViewResultsClick()
+                    viewModel.onViewResultsClick(isGuest)
                 },
                 content = "See Results",
                 backgroundColor = colors.primary,
                 pressedBackgroundColor = colors.pressed
             )
         }
+    }
+
+    if (showOldNewStudentDialog) {
+        SweetAlertDialog(
+            type = AlertType.QUESTION,
+            title = "Student Registration",
+            message = "Are you an old student or new student?",
+            show = showOldNewStudentDialog,
+            onConfirm = { viewModel.confirmNewStudent() },   // "New Student"
+            onDismiss = { viewModel.confirmOldStudent() },   // "Old Student"
+            confirmText = "New Student",
+            dismissText = "Old Student"
+        )
     }
 }

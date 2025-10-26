@@ -888,29 +888,29 @@ fun YesNoButtonGroup(
         modifier = modifier
     ) {
         CustomDynamicButton(
-            onClick = { onSelect("YES") },
+            onClick = { onSelect("Yes") },
             modifier = Modifier
                 .height(48.dp)
                 .weight(1f),
             fontSize = 14.sp,
-            backgroundColor = if (selected == "YES") colors.primary else Color(0xFFCACACA),
-            pressedBackgroundColor = if (selected == "YES") colors.primary else Color(0xFFD9D9D9),
+            backgroundColor = if (selected == "Yes") colors.primary else Color(0xFFCACACA),
+            pressedBackgroundColor = if (selected == "Yes") colors.primary else Color(0xFFD9D9D9),
             cornerRadius = 80.dp, // pill shape (height = 48.dp, radius = height)
-            borderColor = if (selected == "YES") colors.primary else Color(0xFF999999),
-            content = "YES"
+            borderColor = if (selected == "Yes") colors.primary else Color(0xFF999999),
+            content = "Yes"
         )
 
         CustomDynamicButton(
-            onClick = { onSelect("NO") },
+            onClick = { onSelect("No") },
             modifier = Modifier
                 .height(48.dp)
                 .weight(1f),
             fontSize = 14.sp,
-            backgroundColor = if (selected == "NO") colors.primary else Color(0xFFCACACA),
-            pressedBackgroundColor = if (selected == "NO") colors.primary else Color(0xFFD9D9D9),
+            backgroundColor = if (selected == "No") colors.primary else Color(0xFFCACACA),
+            pressedBackgroundColor = if (selected == "No") colors.primary else Color(0xFFD9D9D9),
             cornerRadius = 80.dp,
-            borderColor = if (selected == "NO") colors.primary else Color(0xFF999999),
-            content = "NO"
+            borderColor = if (selected == "No") colors.primary else Color(0xFF999999),
+            content = "No"
         )
     }
 }

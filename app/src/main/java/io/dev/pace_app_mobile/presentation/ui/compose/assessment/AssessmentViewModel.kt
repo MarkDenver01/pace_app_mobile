@@ -14,6 +14,7 @@ import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetGuestKeyUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.navigation.Routes
@@ -33,6 +34,7 @@ class AssessmentViewModel @Inject constructor(
     private val recommendationUseCase: CourseRecommendationUseCase,
     private val studentAssessmentUseCase: StudentAssessmentUseCase,
     private val getGuestKeyUseCase: GetGuestKeyUseCase,
+    private val getVerifiedAccountUseCase: GetVerifiedAccountUseCase,
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -57,12 +59,18 @@ class AssessmentViewModel @Inject constructor(
     val totalQuestions: Int
         get() = _questions.value.size
 
+    private val _showOldNewStudentDialog = MutableStateFlow(false)
+    val showOldNewStudentDialog: StateFlow<Boolean> = _showOldNewStudentDialog
+
     val guestKeyStatus: StateFlow<String?> = getGuestKeyUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
+
+    val verifiedAccount = getVerifiedAccountUseCase()
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     val currentQuestion: StateFlow<Question> =
         combine(_questions, _currentQuestionIndex) { questions, index ->
@@ -161,8 +169,27 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
     }
 
-    fun onViewResultsClick() {
-        _navigateTo.value = Routes.COURSE_RECOMMENDATION_ROUTE
+    fun onViewResultsClick(isGuest: Boolean) {
+        if (isGuest) {
+            _showOldNewStudentDialog.value = true
+        } else {
+            _navigateTo.value = Routes.COURSE_RECOMMENDATION_ROUTE
+        }
+    }
+
+    fun onFinishResultClick() {
+        _navigateTo.value = Routes.FINISH_ASSESSMENT_ROUTE
+    }
+
+    // Refactored functions to update dialog state
+    fun confirmOldStudent() {
+        _showOldNewStudentDialog.value = false
+        _navigateTo.value = "${Routes.SIGN_UP_ROUTE}/true"
+    }
+
+    fun confirmNewStudent() {
+        _showOldNewStudentDialog.value = false
+        _navigateTo.value = "${Routes.SIGN_UP_ROUTE}/false"
     }
 
     fun onAnswerClick(answer: String) {
