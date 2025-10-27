@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import io.dev.pace_app_mobile.domain.model.SharedDynamicLink
+import io.dev.pace_app_mobile.domain.model.SharedUniversityLink
 import io.dev.pace_app_mobile.domain.model.SharedVerifiedAccount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -19,10 +20,19 @@ class LocalDataStore(private val context: Context) {
     private val DYNAMIC_LINK_KEY = stringPreferencesKey("dynamic_link")
     private val VERIFIED_ACCOUNT_KEY = stringPreferencesKey("verified_account")
 
+    private val UNIVERSITY_LINK_KEY = stringPreferencesKey("university_link")
+
     suspend fun saveDynamicLink(data: SharedDynamicLink) {
         val json = gson.toJson(data)
         context.dataStore.edit { prefs ->
             prefs[DYNAMIC_LINK_KEY] = json
+        }
+    }
+
+    suspend fun saveBaseUrl(data: SharedUniversityLink) {
+        val json = gson.toJson(data)
+        context.dataStore.edit { prefs ->
+            prefs[UNIVERSITY_LINK_KEY] = json
         }
     }
 
@@ -37,6 +47,14 @@ class LocalDataStore(private val context: Context) {
         return context.dataStore.data.map { prefs ->
             prefs[DYNAMIC_LINK_KEY]?.let { json ->
                 gson.fromJson(json, SharedDynamicLink::class.java)
+            }
+        }
+    }
+
+    fun getUniversityLink(): Flow<SharedUniversityLink?> {
+        return context.dataStore.data.map { prefs ->
+            prefs[UNIVERSITY_LINK_KEY]?.let { json ->
+                gson.fromJson(json, SharedUniversityLink::class.java)
             }
         }
     }

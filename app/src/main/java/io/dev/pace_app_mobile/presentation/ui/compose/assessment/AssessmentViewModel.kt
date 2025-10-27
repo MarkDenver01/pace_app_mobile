@@ -230,20 +230,8 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.START_ASSESSMENT_ROUTE
     }
 
-    fun onCompletedClick() {
-//        viewModelScope.launch {
-//            val result = studentAssessmentUseCase(studentAssessmentRequest)
-//            result.fold(
-//                onSuccess = { studentResponse ->
-//                    _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
-//                },
-//                onFailure = {
-//                    // You may trigger a dialog or snackbar via UI
-//                    Timber.e("xxx error detected.")
-//                }
-//            )
-//        }
-        _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
+    fun onDoneAssessmentClick() {
+        _navigateTo.value = Routes.START_ASSESSMENT_ROUTE
     }
 
     fun onViewResultsClick(userType: UserType) {

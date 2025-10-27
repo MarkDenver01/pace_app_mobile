@@ -55,6 +55,7 @@ import io.dev.pace_app_mobile.domain.model.RecommendedCourseResponse
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.presentation.theme.*
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
+import io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links.DynamicLinkViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.ui.compose.start.StartViewModel
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
@@ -69,6 +70,7 @@ fun CourseRecommendedResultScreen(
 ) {
     val assessmentViewModel: AssessmentViewModel = sharedViewModel(navController)
     val startViewModel: StartViewModel = sharedViewModel(navController)
+    val dynamicLinkViewModel: DynamicLinkViewModel = sharedViewModel(navController)
     val navigateTo by assessmentViewModel.navigateTo.collectAsState()
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
@@ -85,6 +87,8 @@ fun CourseRecommendedResultScreen(
     val studentAssessmentRequest by assessmentViewModel.studentAssessmentRequest.collectAsState()
     val studentResponse by assessmentViewModel.studentAssessResponse.collectAsState()
     val loginResponse by assessmentViewModel.loginResponse.collectAsState()
+
+    val universityLink by dynamicLinkViewModel.universityLink.collectAsState()
 
     // Fetch course recommendations from backend
     LaunchedEffect(Unit) {
@@ -125,6 +129,14 @@ fun CourseRecommendedResultScreen(
             assessmentViewModel.setExamResult(
                 StudentAssessmentRequest(recommendedCourseRequests = mappedCourses)
             )
+        }
+    }
+
+    LaunchedEffect(studentResponse) {
+        studentResponse?.let { response ->
+            if (response.assessmentStatus == "DONE") {
+                assessmentViewModel.onDoneAssessmentClick()
+            }
         }
     }
 
@@ -198,11 +210,11 @@ fun CourseRecommendedResultScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(80.dp)) // bottom space for safety
+            Spacer(modifier = Modifier.height(100.dp)) // bottom space for safety
         }
     }
 
-    // Step 1: Enrollment prompt
+    // Step 1: Enrollment Dialog
     if (showDialog && selectedCourse != null) {
         SweetEnrollmentDialog(
             course = selectedCourse!!,
@@ -221,7 +233,6 @@ fun CourseRecommendedResultScreen(
                     enrollmentStatus = "New school"
                 }
 
-                // Combine existing recommended courses + user info + enrollment data
                 val finalRequest = studentAssessmentRequest?.copy(
                     userName = loginResponse?.studentResponse?.userName,
                     email = loginResponse?.studentResponse?.email,
@@ -231,12 +242,10 @@ fun CourseRecommendedResultScreen(
                     assessmentStatus = "DONE"
                 )
 
-                if (finalRequest != null) {
-                    assessmentViewModel.saveStudentAssessment(finalRequest)
-                } else {
-                    Timber.e("studentAssessmentRequest is null — ensure topCourses loaded first")
-                }
+                finalRequest?.let { assessmentViewModel.saveStudentAssessment(it) }
+                    ?: Timber.e("studentAssessmentRequest is null — ensure topCourses loaded first")
 
+                // 🔹 Directly update state — no LaunchedEffect needed
                 showDialog = false
                 showResultDialog = true
             },
@@ -244,13 +253,43 @@ fun CourseRecommendedResultScreen(
         )
     }
 
+// Step 2: Result Dialog
+    if (showResultDialog) {
+        val sharedLink = universityLink?.baseUrl ?: "https://yourlinkhere.com/enrollment"
+        ResultDialogContent(
+            showResultDialog = showResultDialog,
+            isChecked = isChecked,
+            loginResponse = loginResponse,
+            assessmentViewModel = assessmentViewModel,
+            baseUrl = sharedLink,
+            onDismiss = { showResultDialog = false }
+        )
+    }
+
+
+// 🔹 Step 2: Result Dialog
+    if (showResultDialog) {
+        val sharedLink = universityLink?.baseUrl ?: "https://yourlinkhere.com/enrollment"
+        ResultDialogContent(
+            showResultDialog = showResultDialog,
+            isChecked = isChecked,
+            loginResponse = loginResponse,
+            assessmentViewModel = assessmentViewModel,
+            baseUrl = sharedLink,
+            onDismiss = { showResultDialog = false }
+        )
+    }
+
+
 
     // Step 2: Result dialog
+    val sharedLink = universityLink?.baseUrl ?: "https://yourlinkhere.com/enrollment"
     ResultDialogContent(
         showResultDialog = showResultDialog,
         isChecked = isChecked,
         loginResponse = loginResponse, // your actual loginResponse object
         assessmentViewModel = assessmentViewModel,
+        baseUrl = sharedLink,
         onDismiss = { showResultDialog = false }
     )
 }
@@ -454,18 +493,15 @@ fun SweetEnrollmentDialog(
 fun ResultDialogContent(
     showResultDialog: Boolean,
     isChecked: Boolean,
+    baseUrl: String,
     loginResponse: LoginResponse?,
     assessmentViewModel: AssessmentViewModel,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-
     if (!showResultDialog) return
 
-    // Define link
-    val universityUrl = "https://www.exampleuniversity.edu/enroll"
-
-    // Annotated clickable text
+    val universityUrl = baseUrl
     val annotatedText = buildAnnotatedString {
         if (isChecked) {
             append("You may visit your school’s official page:\n")
@@ -485,37 +521,25 @@ fun ResultDialogContent(
         }
     }
 
-    SweetAlertDialog(
-        type = if (isChecked) AlertType.SUCCESS else AlertType.WARNING,
-        title = if (isChecked) "Enrollment Information" else "Thank You!",
-        message = "", // Leave empty to handle custom Compose text below
-        show = showResultDialog,
-        isSingleButton = true,
-        confirmText = "Close",
-        onConfirm = {
-            onDismiss()
-            if (!isChecked) {
-                val selectedUniversityId = loginResponse?.studentResponse?.universityId ?: 0L
-                val selectedEmail = loginResponse?.studentResponse?.email.orEmpty()
-                assessmentViewModel.getStudentAssessment(selectedUniversityId, selectedEmail)
-            }
-        }
-    )
-
-    // Overlay the clickable message under the dialog
-    if (showResultDialog) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Transparent),
-            contentAlignment = Alignment.Center
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = 8.dp,
+            shadowElevation = 12.dp,
+            color = Color.White,
+            modifier = Modifier.padding(horizontal = 24.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 40.dp, vertical = 16.dp)
-                    .background(Color.White, shape = RoundedCornerShape(12.dp))
-                    .padding(20.dp)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(24.dp)
             ) {
+                Text(
+                    text = if (isChecked) "Enrollment Information" else "Thank You!",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 ClickableText(
                     text = annotatedText,
                     style = TextStyle(
@@ -525,25 +549,32 @@ fun ResultDialogContent(
                         lineHeight = 22.sp
                     ),
                     onClick = { offset ->
-                        annotatedText.getStringAnnotations(
-                            tag = "URL",
-                            start = offset,
-                            end = offset
-                        )
+                        annotatedText.getStringAnnotations("URL", offset, offset)
                             .firstOrNull()?.let { annotation ->
-                                val intent =
-                                    Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
                                 context.startActivity(intent)
                             }
                     }
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        onDismiss()
+                        if (!isChecked) {
+                            val selectedUniversityId =
+                                loginResponse?.studentResponse?.universityId ?: 0L
+                            val selectedEmail = loginResponse?.studentResponse?.email.orEmpty()
+                            assessmentViewModel.getStudentAssessment(selectedUniversityId, selectedEmail)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4D9DDA))
+                ) {
+                    Text("Close", color = Color.White, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
 }
-
-
-
-
-
-

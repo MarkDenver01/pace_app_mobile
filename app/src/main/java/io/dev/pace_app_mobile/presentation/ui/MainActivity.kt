@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.dev.pace_app_mobile.domain.enums.Customization
 import io.dev.pace_app_mobile.domain.model.SharedDynamicLink
+import io.dev.pace_app_mobile.domain.model.SharedUniversityLink
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.navigation.assessmentGraph
 import io.dev.pace_app_mobile.navigation.startGraph
@@ -130,9 +131,13 @@ class MainActivity : ComponentActivity() {
                 isVerified = false
             )
 
+            val base = uri.host
+            val universityLink = SharedUniversityLink(base.toString())
+
             // Save to DataStore via ViewModel (Hilt DI)
             lifecycleScope.launch {
                 dynamicLinkViewModel.saveLink(data)
+                dynamicLinkViewModel.saveUniversityLink(universityLink)
             }
 
             Timber.d("Stored dynamic link (DataStore via ViewModel): $data")

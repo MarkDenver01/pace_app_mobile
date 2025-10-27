@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CustomizationViewModel @Inject constructor(
-    private val customizationUseCase: CustomizationUseCase
+    private val customizationUseCase: CustomizationUseCase,
 ) : ViewModel() {
 
     private val _themeState = MutableStateFlow<Customization?>(null)

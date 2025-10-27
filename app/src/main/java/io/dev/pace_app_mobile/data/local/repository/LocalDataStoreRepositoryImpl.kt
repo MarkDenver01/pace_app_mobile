@@ -2,6 +2,7 @@ package io.dev.pace_app_mobile.data.local.repository
 
 import io.dev.pace_app_mobile.data.local.datastore.LocalDataStore
 import io.dev.pace_app_mobile.domain.model.SharedDynamicLink
+import io.dev.pace_app_mobile.domain.model.SharedUniversityLink
 import io.dev.pace_app_mobile.domain.model.SharedVerifiedAccount
 import io.dev.pace_app_mobile.domain.repository.LocalDataStoreRepository
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,14 @@ class LocalDataStoreRepositoryImpl(
 
     override fun getDynamicLink(): Flow<SharedDynamicLink?> {
         return dataStore.getDynamicLink()
+    }
+
+    override suspend fun saveUniversityLink(data: SharedUniversityLink) {
+        dataStore.saveBaseUrl(data)
+    }
+
+    override fun getUniversityLink(): Flow<SharedUniversityLink?> {
+        return dataStore.getUniversityLink()
     }
 
     override suspend fun updateVerification(isVerified: Boolean) {

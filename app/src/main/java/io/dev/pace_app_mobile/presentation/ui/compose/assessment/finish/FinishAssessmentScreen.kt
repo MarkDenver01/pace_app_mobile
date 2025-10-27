@@ -63,7 +63,7 @@ fun FinishAssessmentScreen(
         topBar = {
             TopNavigationBar(
                 navController = navController,
-                title = "Assessment Result",
+                title = "",
                 showLeftButton = true,
                 showRightButton = false,
                 leftIcon = R.drawable.ic_profile,
