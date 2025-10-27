@@ -6,12 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.UserType
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
-import io.dev.pace_app_mobile.domain.model.CareerRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.Question
 import io.dev.pace_app_mobile.domain.model.QuestionCategory
-import io.dev.pace_app_mobile.domain.model.RecommendedCourseRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
@@ -226,8 +224,8 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.FINISH_ASSESSMENT_ROUTE
     }
 
-    fun onHomeClick() {
-        _navigateTo.value = Routes.START_ASSESSMENT_ROUTE
+    fun onCourseRecommendedClick() {
+        _navigateTo.value = Routes.COURSE_RECOMMENDATION_ROUTE
     }
 
     fun onDoneAssessmentClick() {

@@ -90,7 +90,7 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState: StateFlow<LoginUiState> = _uiState
 
-    private val _eventFlow = MutableSharedFlow<LoginEvent>()
+    private val _eventFlow = MutableSharedFlow<LoginEvent>(replay = 1)
     val eventFlow: SharedFlow<LoginEvent> = _eventFlow
 
     private val _selectedUniversityId = MutableStateFlow<Long?>(null)
@@ -99,8 +99,22 @@ class LoginViewModel @Inject constructor(
     private val _loginRequest = MutableStateFlow<LoginRequest?>(null)
     val loginRequest = _loginRequest.asStateFlow()
 
+
     fun requestLogin(loginRequest: LoginRequest?) {
         _loginRequest.value = loginRequest
+    }
+
+    fun loginWithGuest(email: String, password: String) {
+        viewModelScope.launch {
+            val result = loginUseCase(email, password)
+            when (result) {
+                is NetworkResult.Success-> {}
+                is NetworkResult.Error -> {}
+                is NetworkResult.Loading -> {
+                    // do nothing
+                }
+            }
+        }
     }
 
     fun onLoginClick(email: String, password: String) {

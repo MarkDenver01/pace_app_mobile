@@ -21,13 +21,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.domain.enums.UserType
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.StudentResponse
 import io.dev.pace_app_mobile.navigation.Routes
+import io.dev.pace_app_mobile.navigation.Routes.START_ASSESSMENT_ROUTE
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
@@ -66,40 +66,40 @@ fun EmailVerificationScreen(
 
     val loginRequest by loginViewModel.loginRequest.collectAsState()
 
-    LaunchedEffect(Unit) {
-        when (userType) {
-            UserType.NEW_WITH_GUEST,
-            UserType.OLD_WITH_GUEST -> {
-                loginViewModel.eventFlow.collect { event ->
-                    when (event) {
-                        is LoginEvent.ShowSuccessDialog -> {
-                            val student = event.loginResponse?.studentResponse
-                            val login = LoginResponse(
-                                studentResponse = StudentResponse(
-                                    email = student?.email.orEmpty(),
-                                    userName = student?.userName.orEmpty(),
-                                    universityId = student?.universityId ?: 0L,
-                                    universityName = student?.universityName.orEmpty()
-                                )
+    // Collect login events unconditionally
+    LaunchedEffect(loginViewModel) {
+        loginViewModel.eventFlow.collect { event ->
+            when (event) {
+                is LoginEvent.ShowSuccessDialog -> {
+                    Timber.e("xxxxx user type $userType")
+                    if (userType == UserType.NEW_WITH_GUEST || userType == UserType.OLD_WITH_GUEST) {
+                        val student = event.loginResponse?.studentResponse
+                        val login = LoginResponse(
+                            studentResponse = StudentResponse(
+                                email = student?.email.orEmpty(),
+                                userName = student?.userName.orEmpty(),
+                                universityId = student?.universityId ?: 0L,
+                                universityName = student?.universityName.orEmpty()
                             )
-                            assessmentViewModel.setLoginResponse(login)
-                            assessmentViewModel.onHomeClick()
-                        }
-
-                        else -> {
-                            // do nothing
-                        }
+                        )
+                        assessmentViewModel.setLoginResponse(login)
+                    } else {
+                        // handle other types if needed
                     }
+                    navController.navigate(Routes.COURSE_RECOMMENDATION_ROUTE)
+                }
+
+                is LoginEvent.ShowErrorDialog -> {
+                    Timber.e("Login error: ${event.message}")
+                }
+
+                else -> {
+                    // handle other events if needed
                 }
             }
-
-            else -> {
-                Timber.d("do nothing...")
-                // do nothing
-            }
         }
-
     }
+
 
     // Start countdown when user completes 4 digits
     LaunchedEffect(combinedCode) {

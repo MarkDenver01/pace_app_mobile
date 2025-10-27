@@ -37,14 +37,14 @@ interface ApiService {
         @Body request: RegisterRequest
     ): Response<RegisterResponse>
 
-    @GET("user/api/questions/all")
+    @GET("user/public/questions/all")
     suspend fun getAllQuestions(): Response<List<QuestionResponse>>
 
     @GET("user/api/questions/all/{universityId}")
     suspend fun getAllQuestionsByUniversity(@Path("universityId") universityId: Long): Response<List<QuestionResponse>>
 
 
-    @POST("user/api/course_recommended/top3")
+    @POST("user/public/course_recommended/top3")
     suspend fun getCourseRecommendation(
         @Body request: List<AnsweredQuestionRequest>
     ): Response<List<CourseRecommendationResponse>>
