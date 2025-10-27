@@ -54,6 +54,12 @@ interface ApiService {
         @Body request: StudentAssessmentRequest
     ): Response<StudentAssessmentResponse>
 
+    @GET("user/api/student_assessment/get")
+    suspend fun getStudentAssessment(
+        @Query("universityId") universityId: Long,
+        @Query("email") email: String
+    ): Response<StudentAssessmentResponse>
+
     @GET("user/public/university/all")
     suspend fun getAllUniversity(): Response<List<UniversityResponse>>
 

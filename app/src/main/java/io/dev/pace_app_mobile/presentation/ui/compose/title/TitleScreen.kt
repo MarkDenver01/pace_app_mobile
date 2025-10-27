@@ -34,13 +34,14 @@ import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
+import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleScreen(
-    navController: NavController,
-    viewModel: TitleViewModel = hiltViewModel()
+    navController: NavController
 ) {
+    val viewModel: TitleViewModel = sharedViewModel(navController)
     val navigateTo by viewModel.navigateTo.collectAsState()
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

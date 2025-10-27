@@ -12,3 +12,7 @@ data class SharedVerifiedAccount(
     val email: String,
     val verified: Boolean,
 )
+
+data class SharedUniversityLink(
+    val baseUrl: String
+)

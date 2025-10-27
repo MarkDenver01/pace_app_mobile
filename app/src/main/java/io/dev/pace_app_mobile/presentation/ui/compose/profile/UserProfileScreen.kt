@@ -25,27 +25,30 @@ import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
+import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
+import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.SweetChangePasswordDialog
+import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
+import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
     navController: NavController,
-    userName: String = "John Doe",
-    email: String = "johndoe@email.com",
-    universityName: String = "Pace University",
     onUpdateProfile: (String, String) -> Unit = { _, _ -> },
     onChangePassword: (String, String) -> Unit = { _, _ -> }
 ) {
+    val assessmentViewModel: AssessmentViewModel = sharedViewModel(navController)
+    val loginResponse by assessmentViewModel.loginResponse.collectAsState()
     val colors = LocalAppColors.current
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
 
-    var name by remember { mutableStateOf(userName) }
-    var mail by remember { mutableStateOf(email) }
-    var university by remember { mutableStateOf(universityName) }
+    var name by remember { mutableStateOf( loginResponse?.studentResponse?.userName ?: "") }
+    var mail by remember { mutableStateOf(loginResponse?.studentResponse?.email ?: "") }
+    var university by remember { mutableStateOf(loginResponse?.studentResponse?.universityName ?: "") }
 
     var isEditing by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }

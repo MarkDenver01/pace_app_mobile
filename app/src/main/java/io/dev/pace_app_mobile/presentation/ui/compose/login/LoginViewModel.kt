@@ -4,16 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.dev.pace_app_mobile.domain.enums.HttpStatus
+import io.dev.pace_app_mobile.domain.model.LoginRequest
+import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.LoginResult
+import io.dev.pace_app_mobile.domain.model.RecommendedCourseRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.usecase.FacebookAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookLoginUseCase
-import io.dev.pace_app_mobile.domain.usecase.GetGuestKeyUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.GoogleLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.InstagramLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
-import io.dev.pace_app_mobile.domain.usecase.SaveGuestKeyUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
 import io.dev.pace_app_mobile.navigation.Routes
@@ -30,6 +34,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.math.log
 
 // UI state for the main login screen
 sealed class LoginUiState {
@@ -39,7 +44,9 @@ sealed class LoginUiState {
 
 // One-time events for dialogs and navigation
 sealed class LoginEvent {
-    data class ShowSuccessDialog(val message: String) : LoginEvent()
+    data class ShowSuccessDialog(val message: String, val loginResponse: LoginResponse? = null) :
+        LoginEvent()
+
     data class ShowErrorDialog(val message: String) : LoginEvent()
     data class ShowWarningDialog(val message: String) : LoginEvent()
     data class ShowProgressDialog(val isVisible: Boolean) : LoginEvent()
@@ -77,8 +84,7 @@ class LoginViewModel @Inject constructor(
     private val instagramLoginUseCase: InstagramLoginUseCase,
     private val googleAccountUseCase: GoogleAccountUseCase,
     private val facebookAccountUseCase: FacebookAccountUseCase,
-    private val universityUseCase: UniversityUseCase,
-    private val saveGuestKeyStatus: SaveGuestKeyUseCase,
+    private val universityUseCase: UniversityUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
@@ -89,6 +95,13 @@ class LoginViewModel @Inject constructor(
 
     private val _selectedUniversityId = MutableStateFlow<Long?>(null)
     val selectedUniversityId: StateFlow<Long?> = _selectedUniversityId.asStateFlow()
+
+    private val _loginRequest = MutableStateFlow<LoginRequest?>(null)
+    val loginRequest = _loginRequest.asStateFlow()
+
+    fun requestLogin(loginRequest: LoginRequest?) {
+        _loginRequest.value = loginRequest
+    }
 
     fun onLoginClick(email: String, password: String) {
         viewModelScope.launch {
@@ -102,12 +115,16 @@ class LoginViewModel @Inject constructor(
 
             when (result) {
                 is NetworkResult.Success -> {
-                    saveGuestKeyStatus.invoke("not_guest")
-                    _eventFlow.emit(LoginEvent.ShowSuccessDialog("Login successful!"))
+                    _eventFlow.emit(
+                        LoginEvent.ShowSuccessDialog(
+                            "Login successful!",
+                            result.data
+                        )
+                    )
                 }
 
                 is NetworkResult.Error ->
-                    _eventFlow.emit(LoginEvent.ShowErrorDialog( "Login failed."))
+                    _eventFlow.emit(LoginEvent.ShowErrorDialog("Login failed."))
 
                 else -> Unit
             }
@@ -274,12 +291,16 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
+
     fun onAuthInstagramClick(authorizationCode: String, exists: Boolean) {
         if (exists) {
             loginWithInstagramCode(authorizationCode, null)
         } else {
             val uniId = _selectedUniversityId.value
-            if (uniId != null) loginWithInstagramCode(authorizationCode, uniId) else viewModelScope.launch {
+            if (uniId != null) loginWithInstagramCode(
+                authorizationCode,
+                uniId
+            ) else viewModelScope.launch {
                 _eventFlow.emit(LoginEvent.ShowErrorDialog("Please select a university"))
             }
         }
@@ -314,10 +335,17 @@ class LoginViewModel @Inject constructor(
                         // caller should already have issued a fetchUniversities*() before calling login for new users
                         _eventFlow.emit(LoginEvent.ShowErrorDialog("University is required for new users."))
                     }
+
                     else -> _eventFlow.emit(LoginEvent.ShowErrorDialog("Unexpected status: ${loginResult?.statusCode}"))
                 }
             }
-            is NetworkResult.Error -> _eventFlow.emit(LoginEvent.ShowErrorDialog(result.message ?: "Login failed."))
+
+            is NetworkResult.Error -> _eventFlow.emit(
+                LoginEvent.ShowErrorDialog(
+                    result.message ?: "Login failed."
+                )
+            )
+
             else -> Unit
         }
     }
@@ -404,7 +432,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             universityUseCase().onSuccess { list ->
                 _eventFlow.emit(LoginEvent.ShowUniversityDialogTwitter(list, accessToken))
-            }.onFailure { _eventFlow.emit(LoginEvent.ShowErrorDialog("Failed to load universities.")) }
+            }
+                .onFailure { _eventFlow.emit(LoginEvent.ShowErrorDialog("Failed to load universities.")) }
         }
     }
 
@@ -413,7 +442,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             universityUseCase().onSuccess { list ->
                 _eventFlow.emit(LoginEvent.ShowUniversityDialogInstagram(list, authCode))
-            }.onFailure { _eventFlow.emit(LoginEvent.ShowErrorDialog("Failed to load universities.")) }
+            }
+                .onFailure { _eventFlow.emit(LoginEvent.ShowErrorDialog("Failed to load universities.")) }
         }
     }
 
@@ -446,7 +476,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun isUserLoggedIn() : Boolean {
+    fun isUserLoggedIn(): Boolean {
         return false // TODO
     }
 }

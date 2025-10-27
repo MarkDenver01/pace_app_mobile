@@ -10,7 +10,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,10 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -65,11 +61,15 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.enums.AlertType
+import io.dev.pace_app_mobile.domain.model.LoginResponse
+import io.dev.pace_app_mobile.domain.model.StudentResponse
+import io.dev.pace_app_mobile.navigation.Routes.FINISH_ASSESSMENT_ROUTE
 import io.dev.pace_app_mobile.navigation.Routes.START_ASSESSMENT_ROUTE
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
+import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDropDownPicker
@@ -77,17 +77,17 @@ import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomIconButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 import io.dev.pace_app_mobile.presentation.utils.OAuthProviders
-import io.dev.pace_app_mobile.presentation.utils.OAuthProviders.IG_AUTH_URI
 import io.dev.pace_app_mobile.presentation.utils.ProgressDialog
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
+import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
-import net.openid.appauth.CodeVerifierUtil
 import net.openid.appauth.ResponseTypeValues
 import timber.log.Timber
+import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,8 +95,9 @@ fun LoginScreen(
     navController: NavController,
     universityId: String? = null,
     dynamicToken: String,
-    viewModel: LoginViewModel = hiltViewModel()
 ) {
+    val loginViewModel: LoginViewModel = sharedViewModel(navController)
+    val assessmentViewModel: AssessmentViewModel = sharedViewModel(navController)
     val sizes = LocalResponsiveSizes.current
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -137,7 +138,7 @@ fun LoginScreen(
                 if (code != null) {
                     // New flow: send CODE to backend (backend should exchange for access_token securely)
                     // If the backend returns BAD_REQUEST for missing university, we will open the picker
-                    viewModel.onAuthInstagramClick(code, exists = true)
+                    loginViewModel.onAuthInstagramClick(code, exists = true)
                 } else {
                     Timber.e("No authorization code in redirect")
                 }
@@ -157,7 +158,7 @@ fun LoginScreen(
                             val accessToken = tokenResp.accessToken
                             if (accessToken != null) {
                                 // Try backend login immediately; if backend needs university, trigger viewModel.startTwitterNewUser()
-                                viewModel.onAuthTwitterClick(accessToken, exists = true)
+                                loginViewModel.onAuthTwitterClick(accessToken, exists = true)
                             }
                         } else {
                             Timber.e("Token exchange failed: ${tokenEx?.errorDescription}")
@@ -176,7 +177,7 @@ fun LoginScreen(
                 val token = result.accessToken.token
                 if (token != null) {
                     // Try login immediately; if backend needs university, VM will emit dialog event
-                    viewModel.checkFacebookAccount(token)
+                    loginViewModel.checkFacebookAccount(token)
                     // keep token for potential follow-up new-user flow
                     facebookAccessToken = token
                 } else {
@@ -218,7 +219,7 @@ fun LoginScreen(
                 val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
                 googleIdToken = credential.googleIdToken
                 if (googleIdToken != null) {
-                    viewModel.checkGoogleAccount(credential.id, googleIdToken!!)
+                    loginViewModel.checkGoogleAccount(credential.id, googleIdToken!!)
                 } else {
                     Log.e("GoogleLogin", "ID Token is null")
                     showDialog = true
@@ -240,11 +241,21 @@ fun LoginScreen(
 
     // Collect one-time events from the ViewModel
     LaunchedEffect(Unit) {
-        viewModel.eventFlow.collect { event ->
+        loginViewModel.eventFlow.collect { event ->
             when (event) {
                 is LoginEvent.ShowProgressDialog -> showProgressDialog = event.isVisible
 
                 is LoginEvent.ShowSuccessDialog -> {
+                    val student = event.loginResponse?.studentResponse
+                    val login = LoginResponse(
+                        studentResponse = StudentResponse(
+                            email = student?.email.orEmpty(),
+                            userName = student?.userName.orEmpty(),
+                            universityId = student?.universityId ?: 0L,
+                            universityName = student?.universityName.orEmpty()
+                        )
+                    )
+                    assessmentViewModel.setLoginResponse(login)
                     dialogTitle = "Success"
                     dialogMessage = event.message
                     isWarningDialog = false
@@ -379,7 +390,7 @@ fun LoginScreen(
 
                 CustomDynamicButton(
                     onClick = {
-                        viewModel.onLoginClick(mailAddress, password)
+                        loginViewModel.onLoginClick(mailAddress, password)
                     },
                     content = stringResource(id = R.string.button_login),
                     backgroundColor = colors.primary,
@@ -403,26 +414,26 @@ fun LoginScreen(
 
 //                Spacer(modifier = Modifier.height(spacing.md))
 
-                Text(
-                    text = "Or Sign in with ",
-                    fontSize = sizes.titleFontSize,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.primary,
-                    modifier = Modifier.padding(bottom = spacing.md)
-                )
+//                Text(
+//                    text = "Or Sign in with ",
+//                    fontSize = sizes.titleFontSize,
+//                    fontWeight = FontWeight.SemiBold,
+//                    color = colors.primary,
+//                    modifier = Modifier.padding(bottom = spacing.md)
+//                )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CustomIconButton(
-                        icon = R.drawable.ic_google,
-                        onClick = { startGoogleLogin(oneTapClient, launcher) },
-                        text = "Sign in with Google",
-                        fillMaxWidth = true,
-                        backgroundColor = colors.primary,
-                        pressedBackgroundColor = colors.pressed,
-                        contentColor = colors.primary,
-                        borderColor = colors.primary,
-                        cornerRadius = 24.dp
-                    )
+//                    CustomIconButton(
+//                        icon = R.drawable.ic_google,
+//                        onClick = { startGoogleLogin(oneTapClient, launcher) },
+//                        text = "Sign in with Google",
+//                        fillMaxWidth = true,
+//                        backgroundColor = colors.primary,
+//                        pressedBackgroundColor = colors.pressed,
+//                        contentColor = colors.primary,
+//                        borderColor = colors.primary,
+//                        cornerRadius = 24.dp
+//                    )
 //                    CustomIconButton(
 //                        icon = R.drawable.ic_facebook,
 //                        onClick = {
@@ -518,7 +529,7 @@ fun LoginScreen(
                         selectedUniversity = option
                         val uniId =
                             universityList.find { it.universityName == option }?.universityId
-                        uniId?.let { viewModel.setSelectedUniversity(it) }
+                        uniId?.let { loginViewModel.setSelectedUniversity(it) }
                     },
                     options = universityList.map { it.universityName },
                     placeholder = "Choose your university",
@@ -531,23 +542,32 @@ fun LoginScreen(
                         showUniversityDialog = false
                         when {
                             googleIdToken != null -> {
-                                viewModel.onAuthGoogleClick(googleIdToken!!, exists = false)
+                                loginViewModel.onAuthGoogleClick(googleIdToken!!, exists = false)
                             }
 
                             facebookAccessToken != null -> {
-                                viewModel.onAuthFacebookClick(facebookAccessToken!!, exists = false)
+                                loginViewModel.onAuthFacebookClick(
+                                    facebookAccessToken!!,
+                                    exists = false
+                                )
                             }
 
                             twitterAccessToken != null -> {
-                                viewModel.onAuthTwitterClick(twitterAccessToken!!, exists = false)
+                                loginViewModel.onAuthTwitterClick(
+                                    twitterAccessToken!!,
+                                    exists = false
+                                )
                             }
 
                             instagramAuthCode != null -> {
-                                viewModel.onAuthInstagramClick(instagramAuthCode!!, exists = false)
+                                loginViewModel.onAuthInstagramClick(
+                                    instagramAuthCode!!,
+                                    exists = false
+                                )
                             }
                         }
                     },
-                    enabled = viewModel.selectedUniversityId.collectAsState().value != null
+                    enabled = loginViewModel.selectedUniversityId.collectAsState().value != null
                 ) { Text("OK") }
             },
             dismissButton = {

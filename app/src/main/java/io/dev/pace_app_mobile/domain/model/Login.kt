@@ -9,9 +9,9 @@ package io.dev.pace_app_mobile.domain.model
  * @constructor Create empty Login request
  */
 data class LoginRequest(
-    val email: String,
-    val password: String
-    
+    val email: String? = "",
+    val password: String? = ""
+
 )
 
 /**
@@ -24,10 +24,10 @@ data class LoginRequest(
  * @constructor Create empty Login response
  */
 data class LoginResponse(
-    val username: String,
-    val role: String,
-    val jwtToken: String,
-    val studentResponse: StudentResponse
+    val username: String? = "",
+    val role: String? = "",
+    val jwtToken: String? = "",
+    val studentResponse: StudentResponse? = null
 )
 
 /**

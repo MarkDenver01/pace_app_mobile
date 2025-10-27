@@ -9,12 +9,16 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import io.dev.pace_app_mobile.domain.enums.HttpStatus
 import timber.log.Timber
@@ -89,5 +93,17 @@ fun UniversityLogo(path: String?) {
         model = logoUrl,
         contentDescription = "University Logo",
         modifier = Modifier.size(300.dp)
+    )
+}
+
+@Composable
+inline fun <reified VM : ViewModel> sharedViewModel(
+    navController: NavController,
+    parentRoute: String = "root_graph"
+): VM {
+    // Use remember with the *backStackEntry.key* itself
+    val parentEntry = navController.getBackStackEntry(parentRoute)
+    return hiltViewModel(
+        remember(parentEntry) { parentEntry }
     )
 }

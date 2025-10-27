@@ -1,23 +1,26 @@
 package io.dev.pace_app_mobile.presentation.ui.compose.assessment
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.UserType
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
+import io.dev.pace_app_mobile.domain.model.CareerRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
+import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.Question
 import io.dev.pace_app_mobile.domain.model.QuestionCategory
+import io.dev.pace_app_mobile.domain.model.RecommendedCourseRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
-import io.dev.pace_app_mobile.domain.usecase.GetGuestKeyUseCase
-import io.dev.pace_app_mobile.domain.usecase.GetVerifiedAccountUseCase
+import io.dev.pace_app_mobile.domain.usecase.GetStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.navigation.Routes
+import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -33,8 +36,7 @@ class AssessmentViewModel @Inject constructor(
     private val allQuestionsByUniversityUseCase: AllQuestionsByUniversityUseCase,
     private val recommendationUseCase: CourseRecommendationUseCase,
     private val studentAssessmentUseCase: StudentAssessmentUseCase,
-    private val getGuestKeyUseCase: GetGuestKeyUseCase,
-    private val getVerifiedAccountUseCase: GetVerifiedAccountUseCase,
+    private val getStudentAssessmentUseCase: GetStudentAssessmentUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -61,16 +63,83 @@ class AssessmentViewModel @Inject constructor(
 
     private val _showOldNewStudentDialog = MutableStateFlow(false)
     val showOldNewStudentDialog: StateFlow<Boolean> = _showOldNewStudentDialog
+    private val _studentAssessmentRequest = MutableStateFlow<StudentAssessmentRequest?>(null)
+    val studentAssessmentRequest = _studentAssessmentRequest.asStateFlow()
 
-    val guestKeyStatus: StateFlow<String?> = getGuestKeyUseCase()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    private val _studentAssessmentResponse = MutableStateFlow<StudentAssessmentResponse?>(null)
+    val studentAssessResponse: StateFlow<StudentAssessmentResponse?> = _studentAssessmentResponse
 
-    val verifiedAccount = getVerifiedAccountUseCase()
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+    private val _loginResponse = MutableStateFlow<LoginResponse?>(null)
+    val loginResponse = _loginResponse.asStateFlow()
+
+    private val _university = MutableStateFlow<String?>(null)
+    val university: StateFlow<String?> = _university
+
+    fun setLoginResponse(loginResponse: LoginResponse?) {
+        _loginResponse.value = loginResponse
+    }
+
+    fun setStudentAssessment(studentAssessmentRequest: StudentAssessmentRequest?) {
+        _studentAssessmentRequest.value = studentAssessmentRequest
+    }
+
+    fun setExamResult(studentAssessmentRequest: StudentAssessmentRequest?) {
+        _studentAssessmentRequest.value = studentAssessmentRequest
+    }
+
+    fun getStudentAssessment(universityId: Long, email: String) {
+        viewModelScope.launch {
+            val result = getStudentAssessmentUseCase(
+                universityId, email
+            )
+
+            when (result) {
+                is NetworkResult.Success -> {
+                    _studentAssessmentResponse.value = result.data
+                }
+
+                is NetworkResult.Error -> {
+                    Timber.e("error logs: ${result.message}")
+                }
+
+                is NetworkResult.Loading -> {
+                    // do nothing
+                }
+            }
+        }
+    }
+
+    fun setSchoolStatus(studentAssessmentRequest: StudentAssessmentRequest?) {
+        _studentAssessmentRequest.value = studentAssessmentRequest
+    }
+
+    fun saveStudentAssessment(studentAssessmentRequest: StudentAssessmentRequest?) {
+        viewModelScope.launch {
+            val request = StudentAssessmentRequest(
+                email = studentAssessmentRequest?.email,
+                userName = studentAssessmentRequest?.userName,
+                enrollmentStatus = studentAssessmentRequest?.enrollmentStatus,
+                enrolledUniversity = studentAssessmentRequest?.enrolledUniversity,
+                assessmentStatus = studentAssessmentRequest?.assessmentStatus,
+                universityId = studentAssessmentRequest?.universityId,
+                recommendedCourseRequests = studentAssessmentRequest?.recommendedCourseRequests
+            )
+            val result = studentAssessmentUseCase.invoke(request)
+            when (result) {
+                is NetworkResult.Success -> {
+                    Timber.e("xxxx success")
+                }
+
+                is NetworkResult.Error -> {
+                    Timber.e("xxxx error: ${result.message}")
+                }
+
+                is NetworkResult.Loading -> {
+                    // do nothing
+                }
+            }
+        }
+    }
 
     val currentQuestion: StateFlow<Question> =
         combine(_questions, _currentQuestionIndex) { questions, index ->
@@ -153,6 +222,14 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.USER_PROFILE_ROUTE
     }
 
+    fun onDoneClick() {
+        _navigateTo.value = Routes.FINISH_ASSESSMENT_ROUTE
+    }
+
+    fun onHomeClick() {
+        _navigateTo.value = Routes.START_ASSESSMENT_ROUTE
+    }
+
     fun onCompletedClick() {
 //        viewModelScope.launch {
 //            val result = studentAssessmentUseCase(studentAssessmentRequest)
@@ -169,16 +246,24 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
     }
 
-    fun onViewResultsClick(isGuest: Boolean) {
-        if (isGuest) {
-            _showOldNewStudentDialog.value = true
-        } else {
-            _navigateTo.value = Routes.COURSE_RECOMMENDATION_ROUTE
-        }
-    }
+    fun onViewResultsClick(userType: UserType) {
+        Timber.e("user type: $userType")
+        when (userType) {
+            UserType.GUEST -> {
+                _showOldNewStudentDialog.value = true
+            }
 
-    fun onFinishResultClick() {
-        _navigateTo.value = Routes.FINISH_ASSESSMENT_ROUTE
+            UserType.DEFAULT,
+            UserType.OLD,
+            UserType.NEW -> {
+                _navigateTo.value = Routes.COURSE_RECOMMENDATION_ROUTE
+            }
+
+            UserType.NEW_WITH_GUEST,
+            UserType.OLD_WITH_GUEST -> {
+                // no nothing
+            }
+        }
     }
 
     // Refactored functions to update dialog state
@@ -243,7 +328,7 @@ class AssessmentViewModel @Inject constructor(
     }
 
     fun onCompletedAssessment() {
-        onCompletedClick()
+        _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
     }
 
     fun fetchCourseRecommendation() {

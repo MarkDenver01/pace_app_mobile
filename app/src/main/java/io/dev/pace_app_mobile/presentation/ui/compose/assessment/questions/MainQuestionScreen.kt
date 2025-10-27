@@ -39,13 +39,14 @@ import io.dev.pace_app_mobile.presentation.utils.ProgressHeader
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.SweetAssessmentAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.YesNoButtonGroup
+import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainQuestionScreen(
-    navController: NavController,
-    viewModel: AssessmentViewModel = hiltViewModel()
+    navController: NavController
 ) {
+    val viewModel: AssessmentViewModel = sharedViewModel(navController)
     val navigateTo by viewModel.navigateTo.collectAsState()
     val currentIndex by viewModel.currentQuestionIndex.collectAsState()
     val currentQuestion by viewModel.currentQuestion.collectAsState()

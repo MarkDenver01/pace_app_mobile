@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.AlertType
+import io.dev.pace_app_mobile.domain.enums.UserType
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
@@ -24,22 +25,24 @@ import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBa
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.UniversityLogo
+import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartScreen(
     navController: NavController,
-    startViewModel: StartViewModel = hiltViewModel(),
-    dynamicLinkViewModel: DynamicLinkViewModel = hiltViewModel(),
     universityId: String? = null,
     dynamicToken: String? = null
 ) {
+    val startViewModel: StartViewModel = sharedViewModel(navController)
+    val dynamicLinkViewModel: DynamicLinkViewModel = sharedViewModel(navController)
     val colors = LocalAppColors.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var showGuestDialog by remember { mutableStateOf(false) }
     var showOldNewStudentDialog by remember { mutableStateOf(false) }
     val logoPath by startViewModel.logoPath.collectAsState()
     val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
+
 
     // 🔹 Automatically show the dialog if opened from a dynamic link
     LaunchedEffect(Unit) {
@@ -108,14 +111,13 @@ fun StartScreen(
             message = "Do you want to take the assessment as a Guest? You can continue without signing up.",
             show = showGuestDialog,
             onConfirm = {
-                dynamicLinkViewModel.saveGuestKey("guest")
+                startViewModel.setUserType(UserType.GUEST)
                 showGuestDialog = false
                 navController.navigate(Routes.START_ASSESSMENT_ROUTE) {
                     popUpTo(Routes.START_ROUTE) { inclusive = false }
                 }
             },
             onDismiss = {
-                dynamicLinkViewModel.saveGuestKey("not_guest")
                 showGuestDialog = false
             }
         )
@@ -129,10 +131,12 @@ fun StartScreen(
             show = showOldNewStudentDialog,
             onConfirm = {
                 showOldNewStudentDialog = false
+                startViewModel.setUserType(UserType.OLD)
                 navController.navigate("${Routes.SIGN_UP_ROUTE}/false")
             },
             onDismiss = {
                 showOldNewStudentDialog = false
+                startViewModel.setUserType(UserType.NEW)
                 navController.navigate("${Routes.SIGN_UP_ROUTE}/true")
             },
             "New Student",

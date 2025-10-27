@@ -72,7 +72,8 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = startDestination
+                    startDestination = startDestination,
+                    route = "root_graph"
                 ) {
                     startGraph(navController, universityId, dynamicToken)
                     titleGraph(navController, universityId, dynamicToken)

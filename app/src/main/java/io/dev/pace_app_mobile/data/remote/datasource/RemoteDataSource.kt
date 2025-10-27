@@ -42,9 +42,22 @@ class RemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun saveStudentAssesment(studentAssessmentRequest: StudentAssessmentRequest):
+    suspend fun saveStudentAssessment(studentAssessmentRequest: StudentAssessmentRequest):
             StudentAssessmentResponse {
         val response = api.savedStudentAssessment(studentAssessmentRequest)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("empty body response")
+        } else {
+            throw Exception(
+                "error: " +
+                        "${response.code()} : " +
+                        "${response.message()}"
+            )
+        }
+    }
+
+    suspend fun getStudentAssessment(universityId: Long, email: String): StudentAssessmentResponse {
+        val response = api.getStudentAssessment(universityId, email)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("empty body response")
         } else {

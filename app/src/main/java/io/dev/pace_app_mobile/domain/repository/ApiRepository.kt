@@ -152,7 +152,11 @@ interface ApiRepository {
 
     suspend fun saveStudentAssessment(
         studentAssessmentRequest: StudentAssessmentRequest
-    ): Result<StudentAssessmentResponse>
+    ): NetworkResult<StudentAssessmentResponse>
+
+    suspend fun getStudentAssessment(
+        universityId: Long, email: String
+    ): NetworkResult<StudentAssessmentResponse>
 
 
     /**
@@ -190,5 +194,8 @@ interface ApiRepository {
      */
     suspend fun sendVerificationCode(verificationCodeRequest: VerificationCodeRequest): NetworkResult<VerificationCodeResponse>
 
-    suspend fun verifyAccount(email: String, verificationCode: Int): NetworkResult<VerificationCodeResponse>
+    suspend fun verifyAccount(
+        email: String,
+        verificationCode: Int
+    ): NetworkResult<VerificationCodeResponse>
 }

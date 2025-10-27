@@ -35,13 +35,14 @@ import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
+import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FinishAssessmentScreen(
-    navController: NavController,
-    viewModel: AssessmentViewModel = hiltViewModel()
+    navController: NavController
 ) {
+    val viewModel: AssessmentViewModel = sharedViewModel(navController)
     val navigateTo by viewModel.navigateTo.collectAsState()
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current

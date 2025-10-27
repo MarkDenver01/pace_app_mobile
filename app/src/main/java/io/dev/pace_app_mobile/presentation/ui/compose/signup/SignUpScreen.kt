@@ -40,25 +40,36 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
 import io.dev.pace_app_mobile.domain.enums.AlertType
+import io.dev.pace_app_mobile.domain.enums.UserType
+import io.dev.pace_app_mobile.domain.model.LoginRequest
+import io.dev.pace_app_mobile.domain.model.LoginResponse
+import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
+import io.dev.pace_app_mobile.domain.model.StudentResponse
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
+import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links.DynamicLinkViewModel
+import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
+import io.dev.pace_app_mobile.presentation.ui.compose.start.StartViewModel
 import io.dev.pace_app_mobile.presentation.utils.CustomCheckBox
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
 import io.dev.pace_app_mobile.presentation.utils.CustomTextField
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
+import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     navController: NavController,
     isOldStudent: Boolean = false,
-    signUpViewModel: SignUpViewModel = hiltViewModel(),
-    dynamicLinkViewModel: DynamicLinkViewModel = hiltViewModel()
 ) {
+    val signUpViewModel: SignUpViewModel = sharedViewModel(navController)
+    val dynamicLinkViewModel: DynamicLinkViewModel = sharedViewModel(navController)
+    val loginViewModel: LoginViewModel = sharedViewModel(navController)
+    val startViewModel: StartViewModel = sharedViewModel(navController)
     val sizes = LocalResponsiveSizes.current
     val spacing = LocalAppSpacing.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -74,12 +85,14 @@ fun SignUpScreen(
     val showAgreeDialog by signUpViewModel.showAgreeWarningDialog.collectAsState()
     val showSuccessDialog by signUpViewModel.showSuccessDialog.collectAsState()
     val showErrorDialog by signUpViewModel.showErrorDialog.collectAsState()
+
     val errorMessage by signUpViewModel.errorMessage.collectAsState()
     val university by signUpViewModel.university.collectAsState()
     val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
     val universityDomainEmail by signUpViewModel.universityDomainEmail.collectAsState()
-
     var agree by remember { mutableStateOf(false) }
+
+    val userType by startViewModel.userTypeFlow.collectAsState()
 
 
     // Fetch the specific university once when universityId is provided
@@ -223,6 +236,20 @@ fun SignUpScreen(
                                 universityId = selectedUniversityId,
                                 token = storedLink!!.dynamicToken,
                                 onSuccess = {
+
+                                    when (userType) {
+                                        UserType.NEW_WITH_GUEST,
+                                        UserType.OLD_WITH_GUEST -> {
+                                            val loginRequest = LoginRequest(
+                                                email = if (isOldStudent) mailAddress + domain else mailAddress,
+                                                password = password
+                                            )
+                                            loginViewModel.requestLogin(loginRequest)
+                                        }
+
+                                        else -> {}// do nothing
+                                    }
+
                                     signUpViewModel.onSendVerificationCodeClick(
                                         if (isOldStudent) mailAddress + domain else mailAddress,
                                         onSuccess = {

@@ -3,6 +3,7 @@ package io.dev.pace_app_mobile.presentation.ui.compose.start
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.dev.pace_app_mobile.domain.enums.UserType
 import io.dev.pace_app_mobile.domain.usecase.CustomizationUseCase
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import io.dev.pace_app_mobile.presentation.utils.resolveLogoUrl
@@ -23,6 +24,13 @@ class StartViewModel @Inject constructor(
 
     private val _logoPath = MutableStateFlow<String?>(null)
     val logoPath: StateFlow<String?> = _logoPath
+
+    private val _userTypeFlow = MutableStateFlow(UserType.DEFAULT)
+    val userTypeFlow: StateFlow<UserType> = _userTypeFlow
+
+    fun setUserType(userType: UserType? = UserType.DEFAULT) {
+        _userTypeFlow.value = userType ?: UserType.DEFAULT
+    }
 
     fun onStartClick() {
         viewModelScope.launch { _navigateTo.emit(Unit) }

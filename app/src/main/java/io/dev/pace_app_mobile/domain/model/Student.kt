@@ -16,22 +16,11 @@ import java.time.LocalDateTime
  * @constructor Create empty Student response
  */
 data class StudentResponse(
-    val studentId: Long,
-    val userName: String,
-    val email: String,
-    val requestedDate: String,
-    val userAccountStatus: String,
-    val universityId: Long,
-    val universityName: String
-)
-
-data class StudentAssessmentRequest(
-    val email: String,
-    val userName: String,
-    val courseId: Long,
-    val universityId: Long
-)
-
-data class StudentAssessmentResponse(
-    val message: String
+    val studentId: Long? = 0L,
+    val userName: String? = "",
+    val email: String? = "",
+    val requestedDate: String? = "",
+    val userAccountStatus: String? = "",
+    val universityId: Long? = 0L,
+    val universityName: String? = ""
 )

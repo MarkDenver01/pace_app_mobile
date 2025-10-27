@@ -10,7 +10,7 @@ import javax.inject.Inject
 class StudentAssessmentUseCase @Inject constructor(
     private val repository: ApiRepository
 ) {
-    suspend operator fun invoke(studentAssessmentRequest: StudentAssessmentRequest): Result<StudentAssessmentResponse> {
+    suspend operator fun invoke(studentAssessmentRequest: StudentAssessmentRequest): NetworkResult<StudentAssessmentResponse> {
         return repository.saveStudentAssessment(studentAssessmentRequest)
     }
 }

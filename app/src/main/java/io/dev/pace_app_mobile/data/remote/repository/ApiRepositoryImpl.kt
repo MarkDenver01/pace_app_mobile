@@ -23,7 +23,6 @@ import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
 import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
 import io.dev.pace_app_mobile.domain.model.VerifyAccountRequest
 import io.dev.pace_app_mobile.domain.repository.ApiRepository
-import io.dev.pace_app_mobile.domain.usecase.VerifyAccountUseCase
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import io.dev.pace_app_mobile.presentation.utils.getHttpStatus
 import timber.log.Timber
@@ -53,23 +52,23 @@ class ApiRepositoryImpl @Inject constructor(
 
             if (loginDao.isAccountExist(email)) {
                 // save jwt token for API access
-                tokenManager.saveToken(loginResponse.jwtToken)
-                tokenManager.saveUniversityId(loginResponse.studentResponse.universityId)
+                tokenManager.saveToken(loginResponse.jwtToken ?: "")
+                tokenManager.saveUniversityId(loginResponse.studentResponse?.universityId ?: 0L)
                 loginDao.updateLoginByEmail(
                     email = email,
-                    userName = loginResponse.username,
-                    jwtToken = loginResponse.jwtToken,
-                    role = loginResponse.role
+                    userName = loginResponse.username ?: "",
+                    jwtToken = loginResponse.jwtToken ?: "",
+                    role = loginResponse.role ?: ""
                 )
 
 
             } else {
                 // gather data
                 val loginEntity = LoginEntity(
-                    userName = loginResponse.username,
-                    jwtToken = loginResponse.jwtToken,
-                    role = loginResponse.role,
-                    universityId = loginResponse.studentResponse.universityId,
+                    userName = loginResponse.username ?: "",
+                    jwtToken = loginResponse.jwtToken ?: "",
+                    role = loginResponse.role ?: "",
+                    universityId = loginResponse.studentResponse?.universityId ?: 0L,
                     email = email
                 )
 
@@ -364,13 +363,27 @@ class ApiRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveStudentAssessment(studentAssessmentRequest: StudentAssessmentRequest): Result<StudentAssessmentResponse> {
+    override suspend fun saveStudentAssessment(studentAssessmentRequest: StudentAssessmentRequest): NetworkResult<StudentAssessmentResponse> {
         return try {
-            val result = remoteDataSource.saveStudentAssesment(studentAssessmentRequest)
-            Result.success(result)
+            val result = remoteDataSource.saveStudentAssessment(studentAssessmentRequest)
+            NetworkResult.Success(HttpStatus.OK, result)
         } catch (e: Exception) {
             Timber.e("getQuestions - exception: ${e.message}")
-            Result.failure(Exception("Failed to get recommendation: $e"))
+            NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
+        }
+    }
+
+    override suspend fun getStudentAssessment(
+        universityId: Long,
+        email: String
+    ): NetworkResult<StudentAssessmentResponse> {
+        return try {
+            val studentAssessmentResponse = remoteDataSource.getStudentAssessment(
+                universityId,
+                email)
+            NetworkResult.Success(HttpStatus.OK, studentAssessmentResponse)
+        } catch (e: Exception) {
+            NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
         }
     }
 
