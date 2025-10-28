@@ -15,4 +15,6 @@ object Routes {
     const val EMAIL_VERIFICATION_WITH_ARG = "email_verification_route/{email}"
     const val USER_PROFILE_ROUTE = "user_profile_route"
     const val FINISH_ASSESSMENT_ROUTE = "finish_assessment_route"
+
+    const val VIEW_RECOMMENDED_COURSE = "view_recommended_course"
 }

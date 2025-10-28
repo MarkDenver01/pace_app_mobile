@@ -141,7 +141,7 @@ fun FinishAssessmentScreen(
 
             // --- View Recommended Course Button ---
             CustomDynamicButton(
-                onClick = {  },
+                onClick = { viewModel.onViewRecommendedCourse() },
                 content = "View Recommended Course",
                 backgroundColor = colors.primary,
                 pressedBackgroundColor = colors.pressed

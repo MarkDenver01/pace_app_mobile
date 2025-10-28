@@ -221,6 +221,10 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.QUESTION_ROUTE // <- go to result later
     }
 
+    fun onViewRecommendedCourse() {
+        _navigateTo.value = Routes.VIEW_RECOMMENDED_COURSE
+    }
+
     fun onProfileClick() {
         _navigateTo.value = Routes.USER_PROFILE_ROUTE
     }
