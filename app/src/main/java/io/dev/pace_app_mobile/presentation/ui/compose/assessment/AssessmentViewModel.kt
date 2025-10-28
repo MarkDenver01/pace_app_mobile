@@ -69,8 +69,8 @@ class AssessmentViewModel @Inject constructor(
     private val _showOldNewStudentDialog = MutableStateFlow(false)
     val showOldNewStudentDialog: StateFlow<Boolean> = _showOldNewStudentDialog
 
-        private val _deleteStudentAssessment = MutableStateFlow(false)
-        val deleteStudentAssessment: StateFlow<Boolean> = _deleteStudentAssessment
+    private val _deleteStudentAssessment = MutableStateFlow(false)
+    val deleteStudentAssessment: StateFlow<Boolean> = _deleteStudentAssessment
     private val _studentAssessmentRequest = MutableStateFlow<StudentAssessmentRequest?>(null)
     val studentAssessmentRequest = _studentAssessmentRequest.asStateFlow()
 
@@ -152,8 +152,10 @@ class AssessmentViewModel @Inject constructor(
         }
     }
 
-    fun setSchoolStatus(studentAssessmentRequest: StudentAssessmentRequest?) {
-        _studentAssessmentRequest.value = studentAssessmentRequest
+    fun resetAssessmentStatus() {
+        _studentAssessmentResponse.value = _studentAssessmentResponse.value?.copy(
+            assessmentStatus = ""
+        )
     }
 
     fun saveStudentAssessment(studentAssessmentRequest: StudentAssessmentRequest?) {
@@ -282,7 +284,6 @@ class AssessmentViewModel @Inject constructor(
     }
 
 
-
     fun onViewResultsClick(userType: UserType) {
         Timber.e("user type: $userType")
         when (userType) {
@@ -378,6 +379,8 @@ class AssessmentViewModel @Inject constructor(
     fun resetDeleteState() {
         _deleteStudentAssessment.value = false
     }
+
+
 
     fun fetchCourseRecommendation() {
         viewModelScope.launch {

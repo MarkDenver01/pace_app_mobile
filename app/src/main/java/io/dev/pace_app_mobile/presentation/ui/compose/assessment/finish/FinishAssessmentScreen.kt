@@ -70,31 +70,13 @@ fun FinishAssessmentScreen(
         }
     }
 
-
-    // SweetAlertDialog
-    RetakeAssessmentDialog(
-        showDialog = showRetakeDialog,
-        onConfirmRetake = {
-            showRetakeDialog = false
-            val email = loginResponse?.studentResponse?.email.orEmpty()
-            viewModel.deleteStudentAssessment(email)
-        },
-        onDismissRetake = {
-            showRetakeDialog = false
-        }
-    )
-
     // Observe deletion result
     LaunchedEffect(deleteSuccess) {
         if (deleteSuccess) {
-            startViewModel.setUserType(UserType.DEFAULT)
-            // Reset ViewModel state if needed
+            viewModel.resetAssessmentStatus()
             viewModel.resetDeleteState() // optional, see below
-
-            // Navigate to assessment start
-            navController.navigate(Routes.START_ASSESSMENT_ROUTE) {
-                popUpTo(Routes.FINISH_ASSESSMENT_ROUTE) { inclusive = true }
-            }
+            startViewModel.setUserType(UserType.DEFAULT)
+            viewModel.onDoneAssessmentClick()
         }
     }
 
@@ -161,17 +143,19 @@ fun FinishAssessmentScreen(
     }
 
 
-    RetakeAssessmentDialog(
-        showDialog = showRetakeDialog,
-        onConfirmRetake = {
-            showRetakeDialog = false
-            val email = loginResponse?.studentResponse?.email ?: ""
-            viewModel.deleteStudentAssessment(email)
-        },
-        onDismissRetake = {
-            showRetakeDialog = false
-        }
-    )
+    if (showRetakeDialog) {
+        RetakeAssessmentDialog(
+            showDialog = showRetakeDialog,
+            onConfirmRetake = {
+                showRetakeDialog = false
+                val email = loginResponse?.studentResponse?.email ?: ""
+                viewModel.deleteStudentAssessment(email)
+            },
+            onDismissRetake = {
+                showRetakeDialog = false
+            }
+        )
+    }
 }
 
 
