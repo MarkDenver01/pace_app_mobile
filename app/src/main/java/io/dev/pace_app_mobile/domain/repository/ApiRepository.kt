@@ -202,4 +202,6 @@ interface ApiRepository {
     suspend fun deleteStudentAssessment(email: String): Boolean
 
     suspend fun updateUserName(userName: String, email: String): NetworkResult<Map<String, String>>
+
+    suspend fun updateStudentPassword(email: String, password: String): NetworkResult<Map<String, String>>
 }

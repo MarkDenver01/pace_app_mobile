@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.HttpStatus
 import io.dev.pace_app_mobile.domain.enums.UserType
 import io.dev.pace_app_mobile.domain.model.AnsweredQuestionRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
@@ -18,6 +19,7 @@ import io.dev.pace_app_mobile.domain.usecase.DeleteStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
+import io.dev.pace_app_mobile.domain.usecase.UpdateStudentPasswordUseCase
 import io.dev.pace_app_mobile.domain.usecase.UpdateUserNameUseCase
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
@@ -38,7 +40,8 @@ class AssessmentViewModel @Inject constructor(
     private val studentAssessmentUseCase: StudentAssessmentUseCase,
     private val getStudentAssessmentUseCase: GetStudentAssessmentUseCase,
     private val deleteStudentAssessmentUseCase: DeleteStudentAssessmentUseCase,
-    private val updateUserNameUseCase: UpdateUserNameUseCase
+    private val updateUserNameUseCase: UpdateUserNameUseCase,
+    private val updateStudentPasswordUseCase: UpdateStudentPasswordUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -82,6 +85,8 @@ class AssessmentViewModel @Inject constructor(
 
     private val _updateResult = MutableStateFlow<NetworkResult<Map<String, String>>?>(null)
     val updateResult: StateFlow<NetworkResult<Map<String, String>>?> = _updateResult
+    private val _updatePasswordResult = MutableStateFlow<NetworkResult<Map<String, String>>?>(null)
+    val updatePasswordResult: StateFlow<NetworkResult<Map<String, String>>?> = _updatePasswordResult
 
 
     fun setLoginResponse(loginResponse: LoginResponse?) {
@@ -107,6 +112,15 @@ class AssessmentViewModel @Inject constructor(
         }
     }
 
+    fun updateStudentPassword(email: String, newPassword: String) {
+        viewModelScope.launch {
+            viewModelScope.launch {
+                _updatePasswordResult.value = NetworkResult.Loading()
+                val result = updateStudentPasswordUseCase(email, newPassword)
+                _updatePasswordResult.value = result
+            }
+        }
+    }
 
     fun updateUserName(userName: String, email: String) {
         viewModelScope.launch {

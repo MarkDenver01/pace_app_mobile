@@ -57,6 +57,7 @@ fun UserProfileScreen(
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     val updateState by assessmentViewModel.updateResult.collectAsState()
     val navigateTo by assessmentViewModel.navigateTo.collectAsState()
+    val updatePasswordState by assessmentViewModel.updatePasswordResult.collectAsState()
 
     // Dialog states
     var showDialog by remember { mutableStateOf(false) }
@@ -66,6 +67,7 @@ fun UserProfileScreen(
 
     // 🔹 Added flag to detect manual update trigger
     var hasTriggeredUpdate by remember { mutableStateOf(false) }
+    var hasTriggeredUpdatePassword by remember { mutableStateOf(false) }
 
     // Handle navigation
     LaunchedEffect(navigateTo) {
@@ -81,6 +83,32 @@ fun UserProfileScreen(
             name = student.userName ?: ""
             mail = student.email ?: ""
             university = student.universityName ?: ""
+        }
+    }
+
+    LaunchedEffect(updatePasswordState, hasTriggeredUpdatePassword) {
+        if (!hasTriggeredUpdatePassword) return@LaunchedEffect
+
+        when (updatePasswordState) {
+            is NetworkResult.Success -> {
+                isSuccessDialog = true
+                isWarningDialog = false
+                dialogMessage = "Your password has been changed!"
+                showDialog = true
+                isEditing = false
+                hasTriggeredUpdatePassword = false // Reset flag
+            }
+
+            is NetworkResult.Error -> {
+                isSuccessDialog = false
+                isWarningDialog = false
+                dialogMessage =
+                    (updateState as NetworkResult.Error).message ?: "Failed to update password."
+                showDialog = true
+                hasTriggeredUpdatePassword = false // Reset flag
+            }
+
+            else -> Unit
         }
     }
 
@@ -275,7 +303,8 @@ fun UserProfileScreen(
         show = showChangePasswordDialog,
         onConfirm = { newPass, confirmPass ->
             if (newPass == confirmPass) {
-                onChangePassword("", newPass)
+                hasTriggeredUpdatePassword = true
+                assessmentViewModel.updateStudentPassword(mail, newPass)
             }
             showChangePasswordDialog = false
         },

@@ -471,4 +471,19 @@ class ApiRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateStudentPassword(
+        email: String,
+        password: String
+    ): NetworkResult<Map<String, String>> {
+        return try {
+            val result = remoteDataSource.updateStudentPassword(email, password)
+            NetworkResult.Success(HttpStatus.OK, result)
+        } catch (e: Exception) {
+            NetworkResult.Error(
+                HttpStatus.BAD_REQUEST,
+                e.localizedMessage ?: "Unknown error occurred"
+            )
+        }
+    }
+
 }

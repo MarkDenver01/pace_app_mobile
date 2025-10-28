@@ -136,4 +136,10 @@ interface ApiService {
         @Query("userName") userName: String,
         @Query("email") email: String
     ): Response<Map<String, String>>
+
+    @PUT("user/api/student/update-password")
+    suspend fun updateStudentPassword(
+        @Query("email") email: String,
+        @Query("password") password: String
+    ): Response<Map<String, String>>
 }

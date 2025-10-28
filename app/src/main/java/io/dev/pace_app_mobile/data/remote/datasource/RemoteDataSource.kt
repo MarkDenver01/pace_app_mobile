@@ -18,6 +18,7 @@ import io.dev.pace_app_mobile.domain.model.UniversityResponse
 import io.dev.pace_app_mobile.domain.model.VerificationCodeRequest
 import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
 import io.dev.pace_app_mobile.domain.model.VerifyAccountRequest
+import retrofit2.Response
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(
@@ -320,6 +321,21 @@ class RemoteDataSource @Inject constructor(
 
     suspend fun updateUserName(userName: String, email: String): Map<String, String> {
         val response = api.updateUserName(userName, email)
+
+        return if (response.isSuccessful) {
+
+            response.body() ?: mapOf("message" to "success")
+        } else {
+            // If API returns error (like 400), capture message
+            mapOf(
+                "success" to "false",
+                "message" to (response.errorBody()?.string() ?: "Failed to update username")
+            )
+        }
+    }
+
+    suspend fun updateStudentPassword(email: String, password: String): Map<String, String> {
+        val response = api.updateStudentPassword(email, password)
 
         return if (response.isSuccessful) {
 
