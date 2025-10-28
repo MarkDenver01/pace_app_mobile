@@ -56,6 +56,7 @@ fun UserProfileScreen(
     var isEditing by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     val updateState by assessmentViewModel.updateResult.collectAsState()
+    val navigateTo by assessmentViewModel.navigateTo.collectAsState()
 
     // Dialog states
     var showDialog by remember { mutableStateOf(false) }
@@ -65,6 +66,14 @@ fun UserProfileScreen(
 
     // 🔹 Added flag to detect manual update trigger
     var hasTriggeredUpdate by remember { mutableStateOf(false) }
+
+    // Handle navigation
+    LaunchedEffect(navigateTo) {
+        navigateTo?.let { route ->
+            navController.navigate(route)
+            assessmentViewModel.resetNavigation()
+        }
+    }
 
     // Keep UI in sync with the latest ViewModel data
     LaunchedEffect(loginResponse) {
