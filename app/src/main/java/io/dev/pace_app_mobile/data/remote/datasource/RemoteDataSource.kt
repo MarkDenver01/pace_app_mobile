@@ -316,4 +316,22 @@ class RemoteDataSource @Inject constructor(
         val response = api.deleteStudentAssessmentByEmail(email)
         return response.isSuccessful
     }
+
+
+    suspend fun updateUserName(userName: String, email: String): Map<String, String> {
+        val response = api.updateUserName(userName, email)
+
+        return if (response.isSuccessful) {
+
+            response.body() ?: mapOf("message" to "success")
+        } else {
+            // If API returns error (like 400), capture message
+            mapOf(
+                "success" to "false",
+                "message" to (response.errorBody()?.string() ?: "Failed to update username")
+            )
+        }
+    }
+
+
 }

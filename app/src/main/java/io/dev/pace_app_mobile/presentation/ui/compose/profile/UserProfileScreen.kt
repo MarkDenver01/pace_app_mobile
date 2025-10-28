@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import io.dev.pace_app_mobile.R
+import io.dev.pace_app_mobile.domain.enums.AlertType
 import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
@@ -29,15 +30,17 @@ import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewM
 import io.dev.pace_app_mobile.presentation.ui.compose.login.LoginViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.utils.CustomDynamicButton
+import io.dev.pace_app_mobile.presentation.utils.NetworkResult
+import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.SweetChangePasswordDialog
 import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
+import timber.log.Timber
 import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
     navController: NavController,
-    onUpdateProfile: (String, String) -> Unit = { _, _ -> },
     onChangePassword: (String, String) -> Unit = { _, _ -> }
 ) {
     val assessmentViewModel: AssessmentViewModel = sharedViewModel(navController)
@@ -46,12 +49,59 @@ fun UserProfileScreen(
     val spacing = LocalAppSpacing.current
     val sizes = LocalResponsiveSizes.current
 
-    var name by remember { mutableStateOf( loginResponse?.studentResponse?.userName ?: "") }
-    var mail by remember { mutableStateOf(loginResponse?.studentResponse?.email ?: "") }
-    var university by remember { mutableStateOf(loginResponse?.studentResponse?.universityName ?: "") }
+    var name by remember { mutableStateOf("") }
+    var mail by remember { mutableStateOf("") }
+    var university by remember { mutableStateOf("") }
 
     var isEditing by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
+    val updateState by assessmentViewModel.updateResult.collectAsState()
+
+    // Dialog states
+    var showDialog by remember { mutableStateOf(false) }
+    var isSuccessDialog by remember { mutableStateOf(false) }
+    var isWarningDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
+
+    // 🔹 Added flag to detect manual update trigger
+    var hasTriggeredUpdate by remember { mutableStateOf(false) }
+
+    // Keep UI in sync with the latest ViewModel data
+    LaunchedEffect(loginResponse) {
+        loginResponse?.studentResponse?.let { student ->
+            name = student.userName ?: ""
+            mail = student.email ?: ""
+            university = student.universityName ?: ""
+        }
+    }
+
+    // 🔹 Effect only runs when updateState changes *and* update was manually triggered
+    LaunchedEffect(updateState, hasTriggeredUpdate) {
+        if (!hasTriggeredUpdate) return@LaunchedEffect
+
+        when (updateState) {
+            is NetworkResult.Success -> {
+                assessmentViewModel.updateStudentUsername(name)
+                isSuccessDialog = true
+                isWarningDialog = false
+                dialogMessage = "Your username was successfully updated!"
+                showDialog = true
+                isEditing = false
+                hasTriggeredUpdate = false // Reset flag
+            }
+
+            is NetworkResult.Error -> {
+                isSuccessDialog = false
+                isWarningDialog = false
+                dialogMessage =
+                    (updateState as NetworkResult.Error).message ?: "Failed to update username."
+                showDialog = true
+                hasTriggeredUpdate = false // Reset flag
+            }
+
+            else -> Unit
+        }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -65,7 +115,7 @@ fun UserProfileScreen(
                 leftIcon = R.drawable.ic_back,
                 showRightButton = false,
                 onLeftClick = {
-                    // TODO BACK
+                    assessmentViewModel.onDoneAssessmentClick()
                 }
             )
         },
@@ -155,11 +205,16 @@ fun UserProfileScreen(
 
             Spacer(modifier = Modifier.height(spacing.lg))
 
-            // Edit or Update Profile Button
             CustomDynamicButton(
                 onClick = {
                     if (isEditing) {
-                        onUpdateProfile(name, mail)
+                        if (name.isNotEmpty() && mail.isNotEmpty()) {
+                            // 🔹 Mark update triggered
+                            hasTriggeredUpdate = true
+                            assessmentViewModel.updateUserName(name, mail)
+                        } else {
+                            Timber.e("Name or email cannot be empty.")
+                        }
                     }
                     isEditing = !isEditing
                 },
@@ -185,7 +240,28 @@ fun UserProfileScreen(
         }
     }
 
-    // 🔹 New Sweet Dialog for Password Change
+    // 🔹 Success / Error Alert Dialog
+    if (showDialog) {
+        SweetAlertDialog(
+            type = when {
+                isWarningDialog -> AlertType.WARNING
+                isSuccessDialog -> AlertType.SUCCESS
+                else -> AlertType.ERROR
+            },
+            title = when {
+                isWarningDialog -> "Warning"
+                isSuccessDialog -> "Success"
+                else -> "Error"
+            },
+            message = dialogMessage,
+            show = true,
+            onConfirm = { showDialog = false },
+            confirmText = "Close",
+            isSingleButton = true
+        )
+    }
+
+    // 🔹 Change Password Dialog
     SweetChangePasswordDialog(
         show = showChangePasswordDialog,
         onConfirm = { newPass, confirmPass ->

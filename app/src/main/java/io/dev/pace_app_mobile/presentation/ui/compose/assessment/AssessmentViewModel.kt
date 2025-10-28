@@ -18,6 +18,7 @@ import io.dev.pace_app_mobile.domain.usecase.DeleteStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
+import io.dev.pace_app_mobile.domain.usecase.UpdateUserNameUseCase
 import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +37,8 @@ class AssessmentViewModel @Inject constructor(
     private val recommendationUseCase: CourseRecommendationUseCase,
     private val studentAssessmentUseCase: StudentAssessmentUseCase,
     private val getStudentAssessmentUseCase: GetStudentAssessmentUseCase,
-    private val deleteStudentAssessmentUseCase: DeleteStudentAssessmentUseCase
+    private val deleteStudentAssessmentUseCase: DeleteStudentAssessmentUseCase,
+    private val updateUserNameUseCase: UpdateUserNameUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -78,6 +80,10 @@ class AssessmentViewModel @Inject constructor(
     private val _university = MutableStateFlow<String?>(null)
     val university: StateFlow<String?> = _university
 
+    private val _updateResult = MutableStateFlow<NetworkResult<Map<String, String>>?>(null)
+    val updateResult: StateFlow<NetworkResult<Map<String, String>>?> = _updateResult
+
+
     fun setLoginResponse(loginResponse: LoginResponse?) {
         _loginResponse.value = loginResponse
     }
@@ -88,6 +94,26 @@ class AssessmentViewModel @Inject constructor(
 
     fun setExamResult(studentAssessmentRequest: StudentAssessmentRequest?) {
         _studentAssessmentRequest.value = studentAssessmentRequest
+    }
+
+    fun updateStudentUsername(userName: String) {
+        _loginResponse.value = _loginResponse.value?.let { current ->
+            current.copy(
+                username = userName,
+                studentResponse = current.studentResponse?.copy(
+                    userName = userName
+                )
+            )
+        }
+    }
+
+
+    fun updateUserName(userName: String, email: String) {
+        viewModelScope.launch {
+            _updateResult.value = NetworkResult.Loading()
+            val result = updateUserNameUseCase(userName, email)
+            _updateResult.value = result
+        }
     }
 
     fun getStudentAssessment(universityId: Long, email: String) {

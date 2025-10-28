@@ -37,6 +37,7 @@ import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityDomainEmailUseCase
 import io.dev.pace_app_mobile.domain.usecase.UniversityUseCase
+import io.dev.pace_app_mobile.domain.usecase.UpdateUserNameUseCase
 import io.dev.pace_app_mobile.domain.usecase.UpdateVerificationUseCase
 import io.dev.pace_app_mobile.domain.usecase.VerificationCodeUseCase
 import io.dev.pace_app_mobile.domain.usecase.VerifyAccountUseCase
@@ -195,4 +196,9 @@ object AppModule {
     @Singleton
     fun provideDeleteStudentAssessment(repository: ApiRepository) =
         DeleteStudentAssessmentUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideUpdateUserNameUseCase(repository: ApiRepository) =
+        UpdateUserNameUseCase(repository)
 }

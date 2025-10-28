@@ -130,4 +130,10 @@ interface ApiService {
     suspend fun deleteStudentAssessmentByEmail(
         @Query("email") email: String
     ): Response<Unit>
+
+    @PUT("user/api/username/update")
+    suspend fun updateUserName(
+        @Query("userName") userName: String,
+        @Query("email") email: String
+    ): Response<Map<String, String>>
 }

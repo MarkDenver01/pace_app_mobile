@@ -380,7 +380,8 @@ class ApiRepositoryImpl @Inject constructor(
         return try {
             val studentAssessmentResponse = remoteDataSource.getStudentAssessment(
                 universityId,
-                email)
+                email
+            )
             NetworkResult.Success(HttpStatus.OK, studentAssessmentResponse)
         } catch (e: Exception) {
             NetworkResult.Error(HttpStatus.BAD_REQUEST, e.message.toString())
@@ -438,7 +439,8 @@ class ApiRepositoryImpl @Inject constructor(
     ): NetworkResult<VerificationCodeResponse> {
         return try {
             val verifyAccountRequest = VerifyAccountRequest(email, verificationCode)
-            val result = remoteDataSource.verifyAccount(verifyAccountRequest
+            val result = remoteDataSource.verifyAccount(
+                verifyAccountRequest
             )
             NetworkResult.Success(
                 HttpStatus.OK,
@@ -452,6 +454,21 @@ class ApiRepositoryImpl @Inject constructor(
 
     override suspend fun deleteStudentAssessment(email: String): Boolean {
         return remoteDataSource.deleteByEmail(email)
+    }
+
+    override suspend fun updateUserName(
+        userName: String,
+        email: String
+    ): NetworkResult<Map<String, String>> {
+        return try {
+            val result = remoteDataSource.updateUserName(userName, email)
+            NetworkResult.Success(HttpStatus.OK, result)
+        } catch (e: Exception) {
+            NetworkResult.Error(
+                HttpStatus.BAD_REQUEST,
+                e.localizedMessage ?: "Unknown error occurred"
+            )
+        }
     }
 
 }
