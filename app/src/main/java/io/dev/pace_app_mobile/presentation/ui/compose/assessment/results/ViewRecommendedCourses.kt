@@ -57,8 +57,8 @@ fun ViewRecommendedCoursesScreen(
         topBar = {
             TopNavigationBar(
                 navController = navController,
-                title = "Assessment Result",
-                showLeftButton = true,
+                title = "",
+                showLeftButton = false,
                 showRightButton = false
             )
         },
