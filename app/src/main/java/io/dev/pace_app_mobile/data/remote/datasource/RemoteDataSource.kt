@@ -311,4 +311,9 @@ class RemoteDataSource @Inject constructor(
             )
         }
     }
+
+    suspend fun deleteByEmail(email: String): Boolean {
+        val response = api.deleteStudentAssessmentByEmail(email)
+        return response.isSuccessful
+    }
 }

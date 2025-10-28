@@ -198,4 +198,6 @@ interface ApiRepository {
         email: String,
         verificationCode: Int
     ): NetworkResult<VerificationCodeResponse>
+
+    suspend fun deleteStudentAssessment(email: String): Boolean
 }

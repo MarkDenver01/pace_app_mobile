@@ -18,6 +18,7 @@ import io.dev.pace_app_mobile.domain.repository.LocalDataStoreRepository
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
 import io.dev.pace_app_mobile.domain.usecase.CustomizationUseCase
+import io.dev.pace_app_mobile.domain.usecase.DeleteStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.DynamicLinkValidationUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.FacebookLoginUseCase
@@ -189,4 +190,9 @@ object AppModule {
     @Singleton
     fun provideVerifyAccountUseCase(repository: ApiRepository) =
         VerifyAccountUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideDeleteStudentAssessment(repository: ApiRepository) =
+        DeleteStudentAssessmentUseCase(repository)
 }

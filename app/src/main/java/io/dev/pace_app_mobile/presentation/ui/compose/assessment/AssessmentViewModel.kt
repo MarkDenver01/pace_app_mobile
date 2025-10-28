@@ -14,6 +14,7 @@ import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentResponse
 import io.dev.pace_app_mobile.domain.usecase.AllQuestionsByUniversityUseCase
 import io.dev.pace_app_mobile.domain.usecase.CourseRecommendationUseCase
+import io.dev.pace_app_mobile.domain.usecase.DeleteStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetStudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
@@ -34,7 +35,8 @@ class AssessmentViewModel @Inject constructor(
     private val allQuestionsByUniversityUseCase: AllQuestionsByUniversityUseCase,
     private val recommendationUseCase: CourseRecommendationUseCase,
     private val studentAssessmentUseCase: StudentAssessmentUseCase,
-    private val getStudentAssessmentUseCase: GetStudentAssessmentUseCase
+    private val getStudentAssessmentUseCase: GetStudentAssessmentUseCase,
+    private val deleteStudentAssessmentUseCase: DeleteStudentAssessmentUseCase
 ) : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo = _navigateTo.asStateFlow()
@@ -61,6 +63,9 @@ class AssessmentViewModel @Inject constructor(
 
     private val _showOldNewStudentDialog = MutableStateFlow(false)
     val showOldNewStudentDialog: StateFlow<Boolean> = _showOldNewStudentDialog
+
+        private val _deleteStudentAssessment = MutableStateFlow(false)
+        val deleteStudentAssessment: StateFlow<Boolean> = _deleteStudentAssessment
     private val _studentAssessmentRequest = MutableStateFlow<StudentAssessmentRequest?>(null)
     val studentAssessmentRequest = _studentAssessmentRequest.asStateFlow()
 
@@ -232,6 +237,8 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.START_ASSESSMENT_ROUTE
     }
 
+
+
     fun onViewResultsClick(userType: UserType) {
         Timber.e("user type: $userType")
         when (userType) {
@@ -315,6 +322,17 @@ class AssessmentViewModel @Inject constructor(
 
     fun onCompletedAssessment() {
         _navigateTo.value = Routes.QUESTION_COMPLETED_ROUTE
+    }
+
+    fun deleteStudentAssessment(email: String) {
+        viewModelScope.launch {
+            val success = deleteStudentAssessmentUseCase.invoke(email)
+            _deleteStudentAssessment.value = success
+        }
+    }
+
+    fun resetDeleteState() {
+        _deleteStudentAssessment.value = false
     }
 
     fun fetchCourseRecommendation() {

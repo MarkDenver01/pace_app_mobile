@@ -18,6 +18,7 @@ import io.dev.pace_app_mobile.domain.model.VerificationCodeResponse
 import io.dev.pace_app_mobile.domain.model.VerifyAccountRequest
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -125,4 +126,8 @@ interface ApiService {
     suspend fun verifyAccount(@Body verifyAccountRequest: VerifyAccountRequest):
             Response<VerificationCodeResponse>
 
+    @DELETE("user/api/student_assessment/delete")
+    suspend fun deleteStudentAssessmentByEmail(
+        @Query("email") email: String
+    ): Response<Unit>
 }

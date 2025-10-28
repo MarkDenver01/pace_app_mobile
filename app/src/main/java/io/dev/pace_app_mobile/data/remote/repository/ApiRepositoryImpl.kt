@@ -450,4 +450,8 @@ class ApiRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteStudentAssessment(email: String): Boolean {
+        return remoteDataSource.deleteByEmail(email)
+    }
+
 }
