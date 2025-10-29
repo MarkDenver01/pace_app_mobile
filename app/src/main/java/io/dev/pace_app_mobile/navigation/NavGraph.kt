@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import io.dev.pace_app_mobile.presentation.ui.compose.about.AboutUsScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.done.QuestionCompletedScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.questions.MainQuestionScreen
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.questions.NoQuestionScreen
@@ -97,5 +98,9 @@ fun NavGraphBuilder.assessmentGraph(navController: NavController) {
 
     composable(Routes.VIEW_RECOMMENDED_COURSE) {
         ViewRecommendedCoursesScreen(navController)
+    }
+
+    composable(Routes.ABOUT_US_ROUTE) {
+        AboutUsScreen(navController)
     }
 }

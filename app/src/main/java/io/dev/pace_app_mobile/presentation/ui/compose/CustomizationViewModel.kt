@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.dev.pace_app_mobile.domain.enums.Customization
+import io.dev.pace_app_mobile.domain.model.CustomizationResponse
 import io.dev.pace_app_mobile.domain.usecase.CustomizationUseCase
 import io.dev.pace_app_mobile.presentation.utils.NetworkResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +22,16 @@ class CustomizationViewModel @Inject constructor(
     private val _themeState = MutableStateFlow<Customization?>(null)
     val themeState: StateFlow<Customization?> = _themeState.asStateFlow()
 
+    private val _aboutResponse = MutableStateFlow<CustomizationResponse?>(null)
+    val aboutResponse = _aboutResponse.asStateFlow()
+
     fun loadTheme(universityId: Long) {
         viewModelScope.launch {
             when (val result = customizationUseCase(universityId)) {
                 is NetworkResult.Success -> {
                     val themeName = result.data?.themeName ?: "light"
                     _themeState.value = mapTheme(themeName)
+                    _aboutResponse.value = result.data
                 }
                 is NetworkResult.Error -> {
                     // fallback if error

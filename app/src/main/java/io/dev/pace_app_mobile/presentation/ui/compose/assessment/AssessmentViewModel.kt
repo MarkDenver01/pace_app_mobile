@@ -271,6 +271,10 @@ class AssessmentViewModel @Inject constructor(
         _navigateTo.value = Routes.USER_PROFILE_ROUTE
     }
 
+    fun onAboutClick() {
+        _navigateTo.value = Routes.ABOUT_US_ROUTE
+    }
+
     fun onDoneClick() {
         _navigateTo.value = Routes.FINISH_ASSESSMENT_ROUTE
     }

@@ -34,6 +34,7 @@ import io.dev.pace_app_mobile.presentation.theme.BgApp
 import io.dev.pace_app_mobile.presentation.theme.LocalAppColors
 import io.dev.pace_app_mobile.presentation.theme.LocalAppSpacing
 import io.dev.pace_app_mobile.presentation.theme.LocalResponsiveSizes
+import io.dev.pace_app_mobile.presentation.ui.compose.CustomizationViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.ui.compose.start.StartViewModel
@@ -106,12 +107,16 @@ fun StartExamScreen(
                 navController = navController,
                 title = "",
                 showLeftButton = (userType != UserType.GUEST),
-                showRightButton = false,
+                showRightButton = true,
                 leftIcon = if (userType != UserType.GUEST) R.drawable.ic_profile else null,
+                rightIcon = R.drawable.ic_about_us,
                 onLeftClick = {
                     if (userType != UserType.GUEST) {
                         assessmentViewModel.onProfileClick()
                     }
+                },
+                onRightClick = {
+                    assessmentViewModel.onAboutClick()
                 }
             )
         },

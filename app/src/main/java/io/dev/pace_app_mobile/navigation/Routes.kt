@@ -17,4 +17,5 @@ object Routes {
     const val FINISH_ASSESSMENT_ROUTE = "finish_assessment_route"
 
     const val VIEW_RECOMMENDED_COURSE = "view_recommended_course"
+    const val ABOUT_US_ROUTE = "about_us_route"
 }
