@@ -255,41 +255,21 @@ fun CourseRecommendedResultScreen(
 
 // Step 2: Result Dialog
     if (showResultDialog) {
-        val sharedLink = universityLink?.baseUrl ?: "https://yourlinkhere.com/enrollment"
+        //al sharedLink = universityLink?.baseUrl ?: "https://yourlinkhere.com/enrollment"
         ResultDialogContent(
             showResultDialog = showResultDialog,
-            isChecked = isChecked,
             loginResponse = loginResponse,
             assessmentViewModel = assessmentViewModel,
-            baseUrl = sharedLink,
             onDismiss = { showResultDialog = false }
         )
     }
-
-
-// 🔹 Step 2: Result Dialog
-    if (showResultDialog) {
-        val sharedLink = universityLink?.baseUrl ?: "https://yourlinkhere.com/enrollment"
-        ResultDialogContent(
-            showResultDialog = showResultDialog,
-            isChecked = isChecked,
-            loginResponse = loginResponse,
-            assessmentViewModel = assessmentViewModel,
-            baseUrl = sharedLink,
-            onDismiss = { showResultDialog = false }
-        )
-    }
-
 
 
     // Step 2: Result dialog
-    val sharedLink = universityLink?.baseUrl ?: "https://yourlinkhere.com/enrollment"
     ResultDialogContent(
         showResultDialog = showResultDialog,
-        isChecked = isChecked,
         loginResponse = loginResponse, // your actual loginResponse object
         assessmentViewModel = assessmentViewModel,
-        baseUrl = sharedLink,
         onDismiss = { showResultDialog = false }
     )
 }
@@ -492,8 +472,6 @@ fun SweetEnrollmentDialog(
 @Composable
 fun ResultDialogContent(
     showResultDialog: Boolean,
-    isChecked: Boolean,
-    baseUrl: String,
     loginResponse: LoginResponse?,
     assessmentViewModel: AssessmentViewModel,
     onDismiss: () -> Unit
@@ -501,24 +479,9 @@ fun ResultDialogContent(
     val context = LocalContext.current
     if (!showResultDialog) return
 
-    val universityUrl = baseUrl
+    //val universityUrl = baseUrl
     val annotatedText = buildAnnotatedString {
-        if (isChecked) {
-            append("You may visit your school’s official page:\n")
-            pushStringAnnotation(tag = "URL", annotation = universityUrl)
-            withStyle(
-                style = SpanStyle(
-                    color = Color(0xFF4D9DDA),
-                    textDecoration = TextDecoration.Underline,
-                    fontWeight = FontWeight.SemiBold
-                )
-            ) {
-                append(universityUrl)
-            }
-            pop()
-        } else {
-            append("Thank you for taking the assessment!")
-        }
+        append("Thank you for taking the assessment!")
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -534,7 +497,7 @@ fun ResultDialogContent(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Text(
-                    text = if (isChecked) "Enrollment Information" else "Thank You!",
+                    text = "Thank You!",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
 
@@ -562,12 +525,13 @@ fun ResultDialogContent(
                 Button(
                     onClick = {
                         onDismiss()
-                        if (!isChecked) {
-                            val selectedUniversityId =
-                                loginResponse?.studentResponse?.universityId ?: 0L
-                            val selectedEmail = loginResponse?.studentResponse?.email.orEmpty()
-                            assessmentViewModel.getStudentAssessment(selectedUniversityId, selectedEmail)
-                        }
+                        val selectedUniversityId =
+                            loginResponse?.studentResponse?.universityId ?: 0L
+                        val selectedEmail = loginResponse?.studentResponse?.email.orEmpty()
+                        assessmentViewModel.getStudentAssessment(
+                            selectedUniversityId,
+                            selectedEmail
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4D9DDA))

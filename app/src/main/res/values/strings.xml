@@ -5,8 +5,8 @@
     <string name="button_sign_up">Sign up</string>
     <string name="login_title">LOG IN</string>
     <string name="signup_title">SIGN UP</string>
-    <string name="general_interest">General Interest</string>
-    <string name="personal_qualities">Personal Qualities</string>
+    <string name="interest">Interest</string>
+    <string name="personal_traits">Personal Traits</string>
     <string name="button_yes">YES</string>
     <string name="button_no">NO</string>
     <string name="server_client_id">13172730276-pfjqu8ne6uid79brp15nrklqt8p58lbc.apps.googleusercontent.com</string>

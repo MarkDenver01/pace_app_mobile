@@ -27,33 +27,25 @@ data class Question(
  */
 enum class QuestionCategory(val displayName: String) {
     /**
-     * General
-     *
-     * @constructor Create empty General
-     */
-    GENERAL("General Interest"),
-
-    /**
      * Career
      *
      * @constructor Create empty Career
      */
-    CAREER("Career Interest"),
+    CAREER("Interest"),
 
     /**
      * Personal
      *
      * @constructor Create empty Personal
      */
-    PERSONAL("Personal Qualities");
+    PERSONAL("Personal Traits");
 
     companion object {
         fun fromString(value: String): QuestionCategory {
             return when (value.uppercase()) {
-                "GENERAL_INTEREST" -> GENERAL
-                "CAREER_INTEREST" -> CAREER
-                "PERSONAL_QUALITIES" -> PERSONAL
-                else -> GENERAL
+                "INTEREST" -> CAREER
+                "PERSONAL_TRAITS" -> PERSONAL
+                else -> CAREER
             }
         }
     }

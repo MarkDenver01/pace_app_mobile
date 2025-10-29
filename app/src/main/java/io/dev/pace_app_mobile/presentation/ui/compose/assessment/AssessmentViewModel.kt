@@ -190,7 +190,7 @@ class AssessmentViewModel @Inject constructor(
         combine(_questions, _currentQuestionIndex) { questions, index ->
             questions.getOrNull(index) ?: Question(
                 0,
-                QuestionCategory.GENERAL,
+                QuestionCategory.CAREER,
                 "Loading...",
                 R.drawable.ic_placeholder,
                 ""
@@ -198,7 +198,7 @@ class AssessmentViewModel @Inject constructor(
         }.stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
-            Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder, "")
+            Question(0, QuestionCategory.CAREER, "Loading...", R.drawable.ic_placeholder, "")
         )
 
     val selectedAnswer: StateFlow<String?> =
@@ -346,7 +346,7 @@ class AssessmentViewModel @Inject constructor(
 
     fun getCurrentQuestion(): Question {
         return _questions.value.getOrNull(_currentQuestionIndex.value)
-            ?: Question(0, QuestionCategory.GENERAL, "Loading...", R.drawable.ic_placeholder, "")
+            ?: Question(0, QuestionCategory.CAREER, "Loading...", R.drawable.ic_placeholder, "")
     }
 
     fun getCurrentCategoryProgress(): Pair<Int, Int> {

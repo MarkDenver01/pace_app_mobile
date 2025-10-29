@@ -90,9 +90,13 @@ fun FinishAssessmentScreen(
                 navController = navController,
                 title = "",
                 showLeftButton = true,
-                showRightButton = false,
+                showRightButton = true,
                 leftIcon = R.drawable.ic_profile,
-                onLeftClick = { viewModel.onProfileClick() }
+                rightIcon = R.drawable.ic_about_us,
+                onLeftClick = { viewModel.onProfileClick() },
+                onRightClick = {
+                    viewModel.onAboutClick()
+                }
             )
         },
         containerColor = Color.Transparent
