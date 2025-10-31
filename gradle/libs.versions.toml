@@ -29,6 +29,7 @@ appauth = "0.11.1"
 
 lottie = "6.1.0"
 coil = "2.7.0"
+playCore = "2.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -75,6 +76,8 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", versi
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+play-core-update = { module = "com.google.android.play:app-update", version.ref = "playCore" }
+play-core-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "playCore" }
 
 [bundles]
 oauth = [

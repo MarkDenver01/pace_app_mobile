@@ -1,5 +1,5 @@
-import org.gradle.internal.impldep.com.amazonaws.PredefinedClientConfigurations.defaultConfig
-import org.gradle.internal.impldep.com.jcraft.jsch.ConfigRepository.defaultConfig
+import com.android.build.gradle.internal.tasks.AarMetadataReader.Companion.load
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -17,8 +17,14 @@ android {
         applicationId = "io.dev.pace_app_mobile"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+
+        // Build version name and code
+        val major = (project.findProperty("VERSION_MAJOR") ?: "1") as String
+        val minor = (project.findProperty("VERSION_MINOR") ?: "0") as String
+        val patch = (project.findProperty("VERSION_PATCH") ?: "0") as String
+
+        versionName = "$major.$minor.$patch"
+        versionCode = major.toInt() * 10000 + minor.toInt() * 100 + patch.toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -45,6 +51,26 @@ android {
         compose = true
     }
 }
+
+tasks.register("bumpVersion") {
+    group = "versioning"
+    description = "Bumps the patch version"
+
+    doLast {
+        val propsFile = rootProject.file("gradle.properties")
+        val props = Properties().apply { load(propsFile.inputStream()) }
+
+        val major = props["VERSION_MAJOR"].toString().toInt()
+        val minor = props["VERSION_MINOR"].toString().toInt()
+        val patch = props["VERSION_PATCH"].toString().toInt() + 1
+
+        props["VERSION_PATCH"] = patch.toString()
+        props.store(propsFile.outputStream(), null)
+
+        println("Pace app version to $major.$minor.$patch")
+    }
+}
+
 
 dependencies {
 
@@ -93,4 +119,6 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.coil.compose)
+    implementation(libs.play.core.update)
+    implementation(libs.play.core.update.ktx)
 }
