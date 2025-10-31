@@ -1060,6 +1060,7 @@ fun AlertDynamicConfirmationDialog(
         AlertType.WARNING -> Pair(Color(0xFFFFA000), Color(0xFFF57C00)) // Orange
         AlertType.ERROR -> Pair(Color(0xFFD32F2F), Color(0xFFC62828))   // Red
         AlertType.QUESTION -> Pair(Color(0xFFFFA000), Color(0xFFF57C00))
+        AlertType.INFO -> Pair(Color(0xFF2196F3), Color(0xFF1976D2))
     }
 
     Dialog(
@@ -1341,6 +1342,7 @@ fun SweetAlertDialog(
         AlertType.WARNING -> R.raw.warning
         AlertType.ERROR -> R.raw.error
         AlertType.QUESTION -> R.raw.question
+        AlertType.INFO -> R.raw.info
     }
 
     if (show) {
@@ -1423,6 +1425,7 @@ fun SweetAlertDialog(
                                         AlertType.WARNING -> Color(0xFFFFA000)
                                         AlertType.ERROR -> Color(0xFFD32F2F)
                                         AlertType.QUESTION -> colors.primary
+                                        AlertType.INFO -> Color(0xFF2196F3)
                                     }
                                 ),
                                 contentPadding = PaddingValues(vertical = 10.dp)
@@ -1461,6 +1464,7 @@ fun SweetAlertDialog(
                                             AlertType.WARNING -> Color(0xFFFFA000)
                                             AlertType.ERROR -> Color(0xFFD32F2F)
                                             AlertType.QUESTION -> colors.primary
+                                            AlertType.INFO -> Color(0xFF2196F3)
                                         }
                                     ),
                                     contentPadding = PaddingValues(vertical = 10.dp)
@@ -1610,6 +1614,7 @@ fun SweetAssessmentAlertDialog(
         AlertType.WARNING -> R.raw.warning
         AlertType.ERROR -> R.raw.error
         AlertType.QUESTION -> R.raw.question
+        AlertType.INFO -> R.raw.info
     }
 
     if (show) {
@@ -1688,6 +1693,7 @@ fun SweetAssessmentAlertDialog(
                                             AlertType.WARNING -> Color(0xFFFFA000)
                                             AlertType.ERROR -> Color(0xFFD32F2F)
                                             AlertType.QUESTION -> colors.primary
+                                            AlertType.INFO -> Color(0xFF2196F3)
                                         }
                                     ),
                                     contentPadding = PaddingValues(vertical = 10.dp)
@@ -1719,6 +1725,7 @@ fun SweetAssessmentAlertDialog(
                                                 AlertType.WARNING -> Color(0xFFFFA000)
                                                 AlertType.ERROR -> Color(0xFFD32F2F)
                                                 AlertType.QUESTION -> colors.primary
+                                                AlertType.INFO -> Color(0xFF2196F3)
                                             }
                                         ),
                                         contentPadding = PaddingValues(vertical = 10.dp)

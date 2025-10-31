@@ -4,5 +4,6 @@ enum class AlertType {
     SUCCESS,
     WARNING,
     ERROR,
-    QUESTION
+    QUESTION,
+    INFO
 }
