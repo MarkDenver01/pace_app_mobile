@@ -119,7 +119,7 @@ fun CourseRecommendedResultScreen(
                 RecommendedCourseRequest(
                     courseDescription = course.courseDescription,
                     assessmentResult = course.matchPercentage,
-                    resultDescription = course.recommendationMessage,
+                    resultDescription = course.courseName,
                     careers = course.possibleCareers.map { careerName ->
                         CareerRequest(careerName = careerName)
                     }
