@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val theme by customizationViewModel.themeState.collectAsState()
-            val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
+           // val storedLink by dynamicLinkViewModel.dynamicLink.collectAsState(initial = null)
             val verifiedAccount by dynamicLinkViewModel.verifiedAccount.collectAsState(initial = null)
 
             var showUpdateDialog by remember { mutableStateOf(false) }
