@@ -48,7 +48,6 @@ fun StartScreen(
     LaunchedEffect(Unit) {
         if (!universityId.isNullOrEmpty() && !dynamicToken.isNullOrEmpty()) {
             startViewModel.fetchLogoPathWithDynamicUrl(universityId.toLong())
-            showGuestDialog = true
         } else {
             startViewModel.fetchLogoPathWithDynamicUrl(
                 storedLink?.universityId ?: 0L
@@ -95,7 +94,7 @@ fun StartScreen(
 
             // --- Get Started Button ---
             CustomDynamicButton(
-                onClick = { showOldNewStudentDialog = true },
+                onClick = { showGuestDialog = true },
                 content = stringResource(id = R.string.button_get_started),
                 backgroundColor = colors.primary,
                 pressedBackgroundColor = colors.pressed
@@ -119,6 +118,7 @@ fun StartScreen(
             },
             onDismiss = {
                 showGuestDialog = false
+                showOldNewStudentDialog = true
             }
         )
     }
