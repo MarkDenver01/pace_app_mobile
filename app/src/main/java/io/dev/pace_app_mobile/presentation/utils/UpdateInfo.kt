@@ -18,7 +18,7 @@ class UpdateInfo(
 @RequiresApi(Build.VERSION_CODES.P)
 suspend fun checkForUpdate(context: Context): UpdateInfo? = withContext(Dispatchers.IO) {
     try {
-        val url = URL("https://pace-app-frontend.onrender.com/apk-uploads/version.json")
+        val url = URL("https://pace-app-frontend.onrender.com/version.json")
         val json = url.readText()
         val obj = JSONObject(json)
 
