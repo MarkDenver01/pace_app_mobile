@@ -32,12 +32,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -45,23 +43,18 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import io.dev.pace_app_mobile.R
-import io.dev.pace_app_mobile.domain.enums.AlertType
-import io.dev.pace_app_mobile.domain.enums.UserType
 import io.dev.pace_app_mobile.domain.model.CareerRequest
 import io.dev.pace_app_mobile.domain.model.CourseRecommendation
 import io.dev.pace_app_mobile.domain.model.LoginResponse
 import io.dev.pace_app_mobile.domain.model.RecommendedCourseRequest
-import io.dev.pace_app_mobile.domain.model.RecommendedCourseResponse
 import io.dev.pace_app_mobile.domain.model.StudentAssessmentRequest
 import io.dev.pace_app_mobile.presentation.theme.*
 import io.dev.pace_app_mobile.presentation.ui.compose.assessment.AssessmentViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.dynamic_links.DynamicLinkViewModel
 import io.dev.pace_app_mobile.presentation.ui.compose.navigation.TopNavigationBar
 import io.dev.pace_app_mobile.presentation.ui.compose.start.StartViewModel
-import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 import timber.log.Timber
-import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
