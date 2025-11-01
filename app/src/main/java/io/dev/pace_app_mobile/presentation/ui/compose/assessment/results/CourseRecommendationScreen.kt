@@ -117,9 +117,9 @@ fun CourseRecommendedResultScreen(
 
             val mappedCourses = top3Courses.map { course ->
                 RecommendedCourseRequest(
-                    courseDescription = course.courseDescription,
+                    courseDescription = course.courseName,
                     assessmentResult = course.matchPercentage,
-                    resultDescription = course.courseName,
+                    resultDescription = course.recommendationMessage,
                     careers = course.possibleCareers.map { careerName ->
                         CareerRequest(careerName = careerName)
                     }
