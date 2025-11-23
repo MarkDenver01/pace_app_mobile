@@ -67,7 +67,7 @@ fun MainQuestionScreen(
     val sizes = LocalResponsiveSizes.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    var showRetryDialog by remember { mutableStateOf(false) }
+    //var showRetryDialog by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -92,19 +92,19 @@ fun MainQuestionScreen(
     }
 
     // Dialogs are placed OUTSIDE Scaffold to ensure overlay layering
-    if (showRetryDialog) {
-        SweetAssessmentAlertDialog(
-            type = AlertType.QUESTION,
-            title = "Retry Assessment",
-            message = "Are you sure you want to retry?",
-            show = showRetryDialog,
-            onConfirm = {
-                showRetryDialog = false
-                viewModel.resetAssessment()
-            },
-            onDismiss = { showRetryDialog = false }
-        )
-    }
+//    if (showRetryDialog) {
+//        SweetAssessmentAlertDialog(
+//            type = AlertType.QUESTION,
+//            title = "Retry Assessment",
+//            message = "Are you sure you want to retry?",
+//            show = showRetryDialog,
+//            onConfirm = {
+//                showRetryDialog = false
+//                viewModel.resetAssessment()
+//            },
+//            onDismiss = { showRetryDialog = false }
+//        )
+//    }
 
     if (showExitDialog) {
         SweetAssessmentAlertDialog(
@@ -133,7 +133,8 @@ fun MainQuestionScreen(
                 title = "",
                 showLeftButton = true,
                 showRightButton = true,
-                onLeftClick = { showRetryDialog = true },
+                leftIcon = R.drawable.ic_back,
+                onLeftClick = { viewModel.goToPreviousQuestion() },
                 onRightClick = { showExitDialog = true }
             )
         },
@@ -157,14 +158,6 @@ fun MainQuestionScreen(
             Spacer(modifier = Modifier.height(spacing.sm))
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "${currentQuestion.category.displayName} (${categoryProgress.first} of ${categoryProgress.second})",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = colors.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
                 Text(
                     text = "Question ${currentIndex + 1}",
                     fontSize = sizes.titleFontSize,

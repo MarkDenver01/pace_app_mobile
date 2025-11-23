@@ -344,6 +344,14 @@ class AssessmentViewModel @Inject constructor(
         }
     }
 
+    fun goToPreviousQuestion() {
+        if (_currentQuestionIndex.value > 0) {
+            _currentQuestionIndex.value--
+        } else {
+            onBeginClick()
+        }
+    }
+
     fun getCurrentQuestion(): Question {
         return _questions.value.getOrNull(_currentQuestionIndex.value)
             ?: Question(0, QuestionCategory.CAREER, "Loading...", R.drawable.ic_placeholder, "")
