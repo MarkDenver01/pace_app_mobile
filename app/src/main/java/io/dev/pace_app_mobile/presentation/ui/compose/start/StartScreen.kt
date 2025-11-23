@@ -26,75 +26,25 @@ import io.dev.pace_app_mobile.navigation.Routes
 import io.dev.pace_app_mobile.presentation.utils.SweetAlertDialog
 import io.dev.pace_app_mobile.presentation.utils.sharedViewModel
 
-
-/* ============================================================
-    ULTRA-PREMIUM BACKGROUND (Animated + Breathing Gradient)
-============================================================ */
 @Composable
-fun UltraPremiumGradientBackground(content: @Composable () -> Unit) {
-
-    val infinite = rememberInfiniteTransition()
-
-    val shift by infinite.animateFloat(
-        initialValue = 0f,
-        targetValue = 900f,
-        animationSpec = infiniteRepeatable(
-            tween(9000, easing = LinearEasing),
-            RepeatMode.Reverse
-        )
-    )
-
-    val gradient = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFFFF8A00),   // premium orange
-            Color(0xFFFFB45E),   // soft pastel orange
-            Color(0xFFFFD8A8)    // luxury cream highlight
-        ),
-        start = Offset(0f, shift),
-        end = Offset(shift, 0f)
-    )
-
+fun GlassEffectOverlay(
+    modifier: Modifier = Modifier,
+    blur: Float = 20f,     // mas mataas = mas frosted
+    transparency: Float = 0.25f,
+    cornerRadius: Float = 28f
+) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(gradient)
-    ) {
-        content()
-    }
-}
-
-
-/* ============================================================
-    APPLE-LIKE GLOW OVERLAY
-============================================================ */
-@Composable
-fun UltraHighlightOverlay() {
-
-    val infinite = rememberInfiniteTransition()
-
-    val glowX by infinite.animateFloat(
-        initialValue = -500f,
-        targetValue = 1500f,
-        animationSpec = infiniteRepeatable(
-            tween(8500, easing = LinearEasing),
-            RepeatMode.Restart
-        )
-    )
-
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawRect(
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.18f),
-                    Color.Transparent
-                ),
-                center = Offset(glowX, size.height * 0.3f),
-                radius = size.minDimension * 0.9f
+        modifier = modifier
+            .clip(RoundedCornerShape(cornerRadius.dp))
+            .blur(blur.dp) // 🔥 main blur effect
+            .background(Color.White.copy(alpha = transparency)) // frosted glass tint
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.45f),
+                shape = RoundedCornerShape(cornerRadius.dp)
             )
-        )
-    }
+    )
 }
-
 
 /* ============================================================
     MAIN START SCREEN (PREMIUM)
@@ -112,221 +62,235 @@ fun StartScreen(
     var showGuestDialog by remember { mutableStateOf(false) }
     var showOldNewDialog by remember { mutableStateOf(false) }
 
-    val parallaxOffset = scroll.value * 0.22f
+    /* ============================================================
+       ELEGANT STATIC PREMIUM GRADIENT BACKGROUND
+    ============================================================ */
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFCC6A00), // darker premium orange
+                        Color(0xFFFF8A00), // your current mid-tone
+                        Color(0xFFFFC67A)  // highlight
+                    )
+                )
+            )
+            .verticalScroll(scroll)
+    ) {
 
-    UltraPremiumGradientBackground {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scroll)
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-            UltraHighlightOverlay()   // Apple-style glow
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-
-                /* ============================================================
-                    HEADER (PARALLAX + PREMIUM)
-                ============================================================ */
-                Box(
+            /* ============================================================
+               HEADER (SIMPLE, CLEAN, PREMIUM)
+            ============================================================ */
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                        spotColor = Color.Black.copy(alpha = 0.25f)
+                    )
+                    .paint(
+                        painterResource(id = R.drawable.hero_bg),
+                        contentScale = ContentScale.Crop
+                    )
+                    .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+                    .padding(bottom = 24.dp)
+            ) {
+                GlassEffectOverlay(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .graphicsLayer { translationY = -parallaxOffset / 2 }
-                        .shadow(
-                            elevation = 18.dp,
-                            spotColor = Color.Black.copy(alpha = 0.25f),
-                            shape = RoundedCornerShape(30.dp)
-                        )
-                        .clip(
-                            RoundedCornerShape(
-                                bottomStart = 30.dp,
-                                bottomEnd = 30.dp
-                            )
-                        )
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color(0xFFFFC784),
-                                    Color(0xFFFF9B27)
-                                )
-                            )
-                        )
-                        .padding(bottom = 22.dp)
-                ) {
+                        .padding(10.dp)
+                        .height(580.dp)
+                )
 
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(Modifier.height(30.dp))
 
-                        Image(
-                            painter = painterResource(id = R.drawable.pace_header_pattern),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp)
-                                .alpha(0.4f),
-                            contentScale = ContentScale.FillWidth
-                        )
+                    Image(
+                        painter = painterResource(id = R.drawable.pace_logo_full),
+                        contentDescription = null,
+                        modifier = Modifier.size(150.dp)
+                    )
 
-                        AnimatedVisibility(
-                            visible = true,
-                            enter = fadeIn(tween(600)) + scaleIn(
-                                initialScale = 0.85f,
-                                animationSpec = tween(600)
-                            )
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.pace_logo_full),
-                                contentDescription = "PACE Logo",
-                                modifier = Modifier.size(155.dp)
-                            )
-                        }
+                    Spacer(Modifier.height(12.dp))
 
-
-                        Spacer(Modifier.height(8.dp))
-
-                        Text(
-                            "Discover Your Future",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF4E2604),
-                            textAlign = TextAlign.Center
-                        )
-
-                        Text(
-                            "One Click at a Time",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF4E2604)
-                        )
-
-                        Spacer(Modifier.height(14.dp))
-
-                        Text(
-                            "Personalized course and career exploration designed to guide students toward the right academic path.",
-                            textAlign = TextAlign.Center,
-                            fontSize = 15.sp,
-                            color = Color(0xFF4E2604),
-                            modifier = Modifier.padding(horizontal = 30.dp)
-                        )
-
-                        Spacer(Modifier.height(18.dp))
-
-                        Image(
-                            painter = painterResource(id = R.drawable.pace_hero_student),
-                            contentDescription = "",
-                            modifier = Modifier
-                                .size(190.dp)
-                                .graphicsLayer {
-                                    shadowElevation = 20.dp.toPx()
-                                    shape = RoundedCornerShape(26.dp)
-                                    clip = true
-                                }
-                        )
-
-                        Spacer(Modifier.height(14.dp))
-
-                        Button(
-                            onClick = { showGuestDialog = true },
-                            modifier = Modifier
-                                .height(52.dp)
-                                .width(215.dp),
-                            shape = RoundedCornerShape(45.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFD62828)
-                            )
-                        ) {
-                            Text("Get Started", color = Color.White, fontSize = 17.sp)
-                        }
-                    }
-                }
-
-
-                Spacer(Modifier.height(24.dp))
-
-
-                /* ============================================================
-                    PLATFORM FEATURES
-                ============================================================ */
-                AnimatedSection {
                     Text(
-                        "Platform Features",
-                        textAlign = TextAlign.Center,
-                        fontSize = 24.sp,
+                        "Discover Your Future",
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = Color(0xFF4E2604)
                     )
 
                     Text(
-                        "Everything a student needs to identify strengths, match courses and plan a career path.",
+                        "One Click at a Time",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF4E2604)
+                    )
+
+                    Spacer(Modifier.height(14.dp))
+
+                    Text(
+                        "Personalized course and career exploration designed\n" +
+                                "to guide students toward the right academic path.",
                         textAlign = TextAlign.Center,
                         fontSize = 14.sp,
-                        color = Color.DarkGray,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                        color = Color(0xFF4E2604),
+                        modifier = Modifier.padding(horizontal = 28.dp)
                     )
 
-                    FeatureCard(
-                        icon = R.drawable.ic_feature_assessment,
-                        title = "Smart Career Assessment",
-                        desc = "Personality & Interest matching"
+                    Spacer(Modifier.height(20.dp))
+
+                    Image(
+                        painter = painterResource(id = R.drawable.pace_hero_student),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(175.dp)
+                            .clip(RoundedCornerShape(18.dp))
+                            .shadow(10.dp, RoundedCornerShape(18.dp))
                     )
 
-                    FeatureCard(
-                        icon = R.drawable.ic_feature_recommendations,
-                        title = "Course Recommendations",
-                        desc = "Top 3 personalized college course suggestions"
-                    )
+                    Spacer(Modifier.height(18.dp))
 
-                    FeatureCard(
-                        icon = R.drawable.ic_feature_links,
-                        title = "Institution Portal Links",
-                        desc = "Connect directly to partnered schools"
-                    )
+                    Button(
+                        onClick = { showGuestDialog = true },
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(210.dp),
+                        shape = RoundedCornerShape(40.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFD62828)
+                        )
+                    ) {
+                        Text("Get Started", color = Color.White, fontSize = 17.sp)
+                    }
                 }
-
-
-                /* ============================================================
-                    ABOUT + MISSION
-                ============================================================ */
-                AnimatedSection {
-                    SectionBlock(
-                        title = "About Pace",
-                        content =
-                            "PACE (Personal Academic & Career Evaluation) is an innovative platform designed to help students discover " +
-                                    "their ideal academic paths and future careers — while giving institutions the tools to evaluate, guide, " +
-                                    "and track learner progress.\n\nIt combines career assessment, data analytics, and institutional insights " +
-                                    "to build a bridge between students’ potential and academic opportunities."
-                    )
-
-                    SectionBlock(
-                        title = "Our Mission",
-                        content =
-                            "Our mission is to empower every learner to discover their path and every institution to guide them with purpose. " +
-                                    "PACE aims to make academic and career exploration accessible, meaningful, and data-driven.\n\n" +
-                                    "We strive to bridge the gap between potential and opportunity, helping students make confident choices " +
-                                    "while enabling schools to provide impactful guidance for a smarter future."
-                    )
-                }
-
-                Spacer(Modifier.height(30.dp))
-
-
-                Text(
-                    "Your Choice, Your Future",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF7A3A00)
-                )
-
-                Spacer(Modifier.height(5.dp))
-
-                Text(
-                    "© 2025 PACE System. All rights reserved.",
-                    fontSize = 12.sp,
-                    color = Color.DarkGray,
-                    modifier = Modifier.padding(bottom = 40.dp)
-                )
             }
+
+            Spacer(Modifier.height(28.dp))
+
+
+            /* ============================================================
+               PLATFORM FEATURES — CLEAN, ELEGANT
+            ============================================================ */
+            Text(
+                "Platform Features",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+
+            Text(
+                "Everything a student needs to identify strengths\n" +
+                        "and plan a career path.",
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                color = Color.DarkGray,
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+            )
+
+            FeatureCard(
+                icon = R.drawable.ic_feature_assessment,
+                title = "Smart Career Assessment",
+                desc = "Personality & Interest matching"
+            )
+
+            FeatureCard(
+                icon = R.drawable.ic_feature_recommendations,
+                title = "Course Recommendations",
+                desc = "Top 3 personalized course suggestions"
+            )
+
+            FeatureCard(
+                icon = R.drawable.ic_feature_links,
+                title = "Institution Portal Links",
+                desc = "Connect directly to partnered schools"
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+
+            /* ============================================================
+               ABOUT + MISSION — CLEAN + SIMPLE
+            ============================================================ */
+            SectionBlock(
+                title = "About Pace",
+                content =
+                    "PACE helps students discover their ideal academic paths while giving institutions tools to evaluate, guide, and track progress. " +
+                            "It uses data insights to connect potential to opportunity."
+            )
+
+            SectionBlock(
+                title = "Our Mission",
+                content =
+                    "To empower every learner to discover their path and every institution to guide them with purpose. We make academic and career exploration meaningful and data-driven."
+            )
+
+            Spacer(Modifier.height(28.dp))
+
+            Text(
+                "Your Choice, Your Future",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF7A3A00)
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            Text(
+                "© 2025 PACE System. All rights reserved.",
+                fontSize = 12.sp,
+                color = Color.DarkGray,
+                modifier = Modifier.padding(bottom = 30.dp)
+            )
         }
+    }
+
+    /* ============================================================
+       DIALOGS (UNCHANGED)
+    ============================================================ */
+
+    if (showGuestDialog) {
+        SweetAlertDialog(
+            type = AlertType.QUESTION,
+            title = "Take Assessment",
+            message = "Do you want to continue as Guest?",
+            show = showGuestDialog,
+            onConfirm = {
+                showGuestDialog = false
+                startViewModel.setUserType(UserType.GUEST)
+                navController.navigate(Routes.START_ASSESSMENT_ROUTE)
+            },
+            onDismiss = {
+                showGuestDialog = false
+                showOldNewDialog = true
+            }
+        )
+    }
+
+    if (showOldNewDialog) {
+        SweetAlertDialog(
+            type = AlertType.QUESTION,
+            title = "Student Registration",
+            message = "Are you an old student or new student?",
+            confirmText = "Old Student",
+            dismissText = "New Student",
+            show = showOldNewDialog,
+            onConfirm = {
+                showOldNewDialog = false
+                startViewModel.setUserType(UserType.NEW)
+                navController.navigate("${Routes.SIGN_UP_ROUTE}/true")
+            },
+            onDismiss = {
+                showOldNewDialog = false
+                startViewModel.setUserType(UserType.OLD)
+                navController.navigate("${Routes.SIGN_UP_ROUTE}/false")
+            }
+        )
     }
 
 
