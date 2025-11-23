@@ -47,12 +47,12 @@ class CustomizationViewModel @Inject constructor(
     private fun mapTheme(themeName: String): Customization {
         return when (themeName.lowercase()) {
             "dark" -> Customization.darkTheme
-            "redish" -> Customization.redishTheme
-            "purplelish" -> Customization.purplelishTheme
-            "brownish" -> Customization.brownishTheme
-            "greenish" -> Customization.greenishTheme
-            "blueish" -> Customization.blueishTheme
-            "maroonish" -> Customization.maroonishTheme
+            "red-velvet" -> Customization.redishTheme
+            "violet-dream" -> Customization.purplelishTheme
+            "wood-brown" -> Customization.brownishTheme
+            "olive-green" -> Customization.greenishTheme
+            "ocean-pulse" -> Customization.blueishTheme
+            "burgundy" -> Customization.maroonishTheme
             "light" -> Customization.lightTheme
             else -> Customization.lightTheme
         }
