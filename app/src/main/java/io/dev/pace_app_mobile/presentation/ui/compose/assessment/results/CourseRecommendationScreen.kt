@@ -156,10 +156,24 @@ fun CourseRecommendedResultScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_result),
-                contentDescription = "Assessment Result",
-                modifier = Modifier.size(180.dp)
+            // --- Lottie Animation ---
+            val composition by rememberLottieComposition(
+                LottieCompositionSpec.RawRes(R.raw.congratulation)
+            )
+            val progress by animateLottieCompositionAsState(
+                composition = composition,
+                iterations = LottieConstants.IterateForever
+            )
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
+                modifier = Modifier
+                    .size(120.dp)
+                    .graphicsLayer {
+                        alpha = 0.9f
+                        scaleX = 1.1f
+                        scaleY = 1.1f
+                    }
             )
 
             Text(
