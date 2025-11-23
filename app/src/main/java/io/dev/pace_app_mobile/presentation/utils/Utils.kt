@@ -1,5 +1,11 @@
 package io.dev.pace_app_mobile.presentation.utils
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,9 +15,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -107,3 +116,39 @@ inline fun <reified VM : ViewModel> sharedViewModel(
         remember(parentEntry) { parentEntry }
     )
 }
+
+@Composable
+fun UltraPremiumGradientBackground(content: @Composable () -> Unit) {
+
+    // Infinite animation for smooth "breathing" gradient motion
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(8000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    // Dynamic color stops (rotating between 3 curated premium orange tones)
+    val gradient = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFFFF8C00),   // bright orange
+            Color(0xFFFFB347),   // soft pastel orange
+            Color(0xFFFFD79B)    // warm cream-light orange
+        ),
+        start = Offset(0f, offset),
+        end = Offset(offset, 0f)
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradient)
+    ) {
+        content()
+    }
+}
+
