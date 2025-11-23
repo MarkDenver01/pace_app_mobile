@@ -71,7 +71,7 @@ fun MainQuestionScreen(
     var showExitDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchQuestions()
+        viewModel.fetchAllQuestionsByUniversity()
     }
 
     LaunchedEffect(navigateTo) {

@@ -232,8 +232,9 @@ class AssessmentViewModel @Inject constructor(
         }
     }
 
-    private fun fetchAllQuestionsByUniversity() {
+    fun fetchAllQuestionsByUniversity() {
         viewModelScope.launch {
+            _isLoadingQuestions.value = true
             val result = allQuestionsByUniversityUseCase()
             result.fold(
                 onSuccess = { questionList ->
@@ -252,6 +253,7 @@ class AssessmentViewModel @Inject constructor(
                     _questions.value = emptyList()
                 }
             )
+            _isLoadingQuestions.value = false
         }
     }
 
@@ -332,7 +334,7 @@ class AssessmentViewModel @Inject constructor(
         _currentQuestionIndex.value = 0
         _answers.value = emptyMap()
         _navigateTo.value = null
-        fetchQuestions()
+        fetchAllQuestionsByUniversity()
     }
 
 
@@ -391,7 +393,6 @@ class AssessmentViewModel @Inject constructor(
     fun resetDeleteState() {
         _deleteStudentAssessment.value = false
     }
-
 
 
     fun fetchCourseRecommendation() {

@@ -41,7 +41,7 @@ interface ApiService {
     @GET("user/public/questions/all")
     suspend fun getAllQuestions(): Response<List<QuestionResponse>>
 
-    @GET("user/api/questions/all/{universityId}")
+    @GET("user/public/questions/{universityId}")
     suspend fun getAllQuestionsByUniversity(@Path("universityId") universityId: Long): Response<List<QuestionResponse>>
 
 
