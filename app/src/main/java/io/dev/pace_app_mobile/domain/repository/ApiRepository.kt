@@ -171,6 +171,11 @@ interface ApiRepository {
     ): NetworkResult<UniversityLinkResponse>
 
     /**
+     * Save university id via dynamic link.
+     */
+    suspend fun saveUniversityIdViaDynamicLink(universityId: Long)
+
+    /**
      * Get customization theme.
      *
      * @param universityId university id
@@ -203,5 +208,8 @@ interface ApiRepository {
 
     suspend fun updateUserName(userName: String, email: String): NetworkResult<Map<String, String>>
 
-    suspend fun updateStudentPassword(email: String, password: String): NetworkResult<Map<String, String>>
+    suspend fun updateStudentPassword(
+        email: String,
+        password: String
+    ): NetworkResult<Map<String, String>>
 }

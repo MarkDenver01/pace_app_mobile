@@ -178,6 +178,7 @@ class MainActivity : ComponentActivity() {
 
             // Save to DataStore via ViewModel (Hilt DI)
             lifecycleScope.launch {
+                dynamicLinkViewModel.saveUniversityIdViaDynamicLink(uniId)
                 dynamicLinkViewModel.saveLink(data)
                 dynamicLinkViewModel.saveUniversityLink(universityLink)
             }

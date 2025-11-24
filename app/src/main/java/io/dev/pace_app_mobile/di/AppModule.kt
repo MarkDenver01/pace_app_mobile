@@ -32,6 +32,7 @@ import io.dev.pace_app_mobile.domain.usecase.LoginUseCase
 import io.dev.pace_app_mobile.domain.usecase.QuestionUseCase
 import io.dev.pace_app_mobile.domain.usecase.RegisterUseCase
 import io.dev.pace_app_mobile.domain.usecase.SaveDynamicLinkUseCase
+import io.dev.pace_app_mobile.domain.usecase.SaveUniversityIdUseCase
 import io.dev.pace_app_mobile.domain.usecase.SavedVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.StudentAssessmentUseCase
 import io.dev.pace_app_mobile.domain.usecase.TwitterLoginUseCase
@@ -207,4 +208,10 @@ object AppModule {
     @Singleton
     fun provideUpdateStudentPasswordUseCase(repository: ApiRepository) =
         UpdateStudentPasswordUseCase(repository)
+
+
+    @Provides
+    @Singleton
+    fun provideUniversityIdUseCase(apiRepository: ApiRepository) =
+        SaveUniversityIdUseCase(apiRepository)
 }

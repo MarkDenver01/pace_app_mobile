@@ -9,6 +9,7 @@ import io.dev.pace_app_mobile.domain.usecase.GetDynamicLinkUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetUniversityLinkUseCase
 import io.dev.pace_app_mobile.domain.usecase.GetVerifiedAccountUseCase
 import io.dev.pace_app_mobile.domain.usecase.SaveDynamicLinkUseCase
+import io.dev.pace_app_mobile.domain.usecase.SaveUniversityIdUseCase
 import io.dev.pace_app_mobile.domain.usecase.SaveUniversityLinkUseCase
 import io.dev.pace_app_mobile.domain.usecase.UpdateVerificationUseCase
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +24,8 @@ class DynamicLinkViewModel @Inject constructor(
     private val updateVerificationUseCase: UpdateVerificationUseCase,
     private val getVerifiedAccountUseCase: GetVerifiedAccountUseCase,
     private val saveUniversityLinkUseCase: SaveUniversityLinkUseCase,
-    private val getUniversityLinkUseCase: GetUniversityLinkUseCase
+    private val getUniversityLinkUseCase: GetUniversityLinkUseCase,
+    private val saveUniversityIdUseCase: SaveUniversityIdUseCase
 ) : ViewModel() {
 
     val dynamicLink = getDynamicLinkUseCase()
@@ -34,6 +36,12 @@ class DynamicLinkViewModel @Inject constructor(
 
     val universityLink = getUniversityLinkUseCase()
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    fun saveUniversityIdViaDynamicLink(universityId: Long) {
+        viewModelScope.launch {
+            saveUniversityIdUseCase.invoke(universityId)
+        }
+    }
 
     fun saveLink(link: SharedDynamicLink) {
         viewModelScope.launch {

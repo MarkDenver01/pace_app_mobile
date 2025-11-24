@@ -410,6 +410,10 @@ class ApiRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun saveUniversityIdViaDynamicLink(universityId: Long) {
+        tokenManager.saveUniversityId(universityId = universityId)
+    }
+
     override suspend fun getCustomizationTheme(universityId: Long): NetworkResult<CustomizationResponse> {
         return try {
             val result = remoteDataSource.getCustomizationTheme(universityId)
