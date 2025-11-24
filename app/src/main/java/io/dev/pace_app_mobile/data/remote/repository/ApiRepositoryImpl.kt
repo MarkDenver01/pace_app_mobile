@@ -332,7 +332,6 @@ class ApiRepositoryImpl @Inject constructor(
             // Apply Fisher–Yates Shuffle (via Kotlin's built-in shuffled())
             val randomizedResult = result
                 .shuffled()
-                .take(5)
             Result.success(randomizedResult)
         } catch (e: Exception) {
             Timber.e("getAllQuestionsByUniversity error: ${e.message}")
