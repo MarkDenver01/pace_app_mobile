@@ -329,15 +329,21 @@ class ApiRepositoryImpl @Inject constructor(
                 tokenManager.getUniversityId()!!
             )
 
-            // Apply Fisher–Yates Shuffle (via Kotlin's built-in shuffled())
-            val randomizedResult = result
-                .shuffled()
-            Result.success(randomizedResult)
+            // 🔥 Group by Course, shuffle each group, limit to 5
+            val limitedPerCourse = result
+                .groupBy { it.courseName }     // or courseId if available
+                .flatMap { (_, questions) ->
+                    questions.shuffled().take(5)
+                }
+
+            Result.success(limitedPerCourse)
+
         } catch (e: Exception) {
             Timber.e("getAllQuestionsByUniversity error: ${e.message}")
             Result.failure(Exception("Failed to load questions: $e"))
         }
     }
+
 
     override suspend fun getUniversities(): Result<List<UniversityResponse>> {
         return try {
